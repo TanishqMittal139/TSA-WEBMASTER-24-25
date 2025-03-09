@@ -6,6 +6,7 @@ import Footer from '../components/ui/footer';
 import { Coffee, Sandwich, Soup, Filter } from 'lucide-react';
 import BlurImage from '../components/ui/blur-image';
 import { cn } from '@/lib/utils';
+import { toast } from '@/components/ui/use-toast';
 
 const categories = [
   { id: 'all', name: 'All Items', icon: null },
@@ -172,6 +173,14 @@ const Menu: React.FC = () => {
       observer.disconnect();
     };
   }, [filteredItems]);
+
+  const handleAddToOrder = (item: typeof menuItems[0]) => {
+    toast({
+      title: "Added to Order",
+      description: `${item.name} has been added to your order.`,
+      duration: 3000,
+    });
+  };
   
   return (
     <div className="min-h-screen">
@@ -189,7 +198,7 @@ const Menu: React.FC = () => {
             <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/10"></div>
           </div>
           
-          <div className="relative container-custom flex flex-col justify-center h-full pt-24">
+          <div className="relative container mx-auto px-4 flex flex-col justify-center h-full pt-24">
             <div className={cn(
               "transition-all duration-1000 transform",
               isVisible ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"
@@ -207,7 +216,7 @@ const Menu: React.FC = () => {
         
         {/* Menu Section */}
         <section className="py-12">
-          <div className="container-custom">
+          <div className="container mx-auto px-4">
             {/* Category Filter */}
             <div className="mb-10 overflow-x-auto">
               <div className="flex space-x-2 min-w-max">
@@ -218,11 +227,11 @@ const Menu: React.FC = () => {
                     className={cn(
                       "px-4 py-2 rounded-full flex items-center space-x-2 transition-all",
                       activeCategory === category.id
-                        ? "bg-primary text-white shadow-md"
-                        : "bg-secondary hover:bg-secondary/70 text-muted-foreground"
+                        ? "bg-primary text-primary-foreground shadow-md"
+                        : "bg-secondary hover:bg-secondary/70 text-secondary-foreground"
                     )}
                   >
-                    {category.icon}
+                    {category.icon && <span>{category.icon}</span>}
                     <span>{category.name}</span>
                   </button>
                 ))}
@@ -234,7 +243,7 @@ const Menu: React.FC = () => {
               {filteredItems.map((item, index) => (
                 <div 
                   key={item.id}
-                  className="stagger-item bg-white rounded-xl overflow-hidden shadow-md hover-lift"
+                  className="stagger-item bg-card rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
                 >
                   <div className="relative h-48">
                     <BlurImage 
@@ -244,7 +253,7 @@ const Menu: React.FC = () => {
                     />
                     {/* Category tag */}
                     <div className="absolute top-4 right-4">
-                      <div className="px-3 py-1 bg-primary text-white text-xs font-medium rounded-full">
+                      <div className="px-3 py-1 bg-primary text-primary-foreground text-xs font-medium rounded-full">
                         {categories.find(c => c.id === item.category)?.name}
                       </div>
                     </div>
@@ -256,7 +265,10 @@ const Menu: React.FC = () => {
                       <span className="font-semibold text-primary">{item.price}</span>
                     </div>
                     <p className="text-sm text-muted-foreground mb-4">{item.description}</p>
-                    <button className="w-full button-outline py-2 text-sm">
+                    <button 
+                      onClick={() => handleAddToOrder(item)}
+                      className="w-full px-4 py-2 border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-colors duration-200 rounded-md text-sm font-medium"
+                    >
                       Add to Order
                     </button>
                   </div>

@@ -1,114 +1,129 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import Navbar from '../components/ui/navbar';
 import Footer from '../components/ui/footer';
 import BlurImage from '../components/ui/blur-image';
-import { Heart, Leaf, Recycle, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-const values = [
-  {
-    icon: <Leaf className="w-6 h-6" />,
-    title: 'Farm-to-Table Freshness',
-    description: 'Every dish begins with the freshest produce sourced from local farms and trusted growers who share our dedication to sustainable agriculture.'
-  },
-  {
-    icon: <Recycle className="w-6 h-6" />,
-    title: 'Sustainability at Our Core',
-    description: 'From eco-friendly packaging to energy-efficient kitchen practices, we're committed to minimizing our environmental impact.'
-  },
-  {
-    icon: <Heart className="w-6 h-6" />,
-    title: 'Mindful Preparation',
-    description: 'Our kitchen is a place of creativity and care. We avoid artificial additives and processed foods, focusing on wholesome, plant-based recipes.'
-  },
-  {
-    icon: <Users className="w-6 h-6" />,
-    title: 'Community Support',
-    description: 'Extra produce at the end of the day gets made into food to donate to homeless shelters and soup kitchens, supporting those in need.'
-  }
-];
+import { Leaf, Coffee, ShoppingBag, Heart, Award } from 'lucide-react';
 
 const About: React.FC = () => {
-  const sectionsRef = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
   
+  // Animation on mount
   useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('is-visible');
-        }
-      });
-    }, { threshold: 0.1 });
+    const timer = setTimeout(() => {
+      setIsVisible(true);
+    }, 100);
     
-    const staggerObserver = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting) {
-        const items = entries[0].target.querySelectorAll('.stagger-item');
-        items.forEach((item, i) => {
-          setTimeout(() => {
-            item.classList.add('is-visible');
-          }, i * 100);
-        });
-      }
-    }, { threshold: 0.1 });
-    
-    const fadeElements = document.querySelectorAll('.fade-up');
-    fadeElements.forEach(el => observer.observe(el));
-    
-    const staggerContainers = document.querySelectorAll('.stagger-container');
-    staggerContainers.forEach(el => staggerObserver.observe(el));
-    
-    return () => {
-      observer.disconnect();
-      staggerObserver.disconnect();
-    };
+    return () => clearTimeout(timer);
   }, []);
+  
+  // Values section data
+  const values = [
+    { 
+      icon: <Leaf className="h-8 w-8 text-primary" />,
+      title: "Sustainability",
+      description: "We're committed to reducing our environmental impact through eco-friendly practices."
+    },
+    { 
+      icon: <Coffee className="h-8 w-8 text-primary" />,
+      title: "Quality",
+      description: "We source only the freshest, organic ingredients for our menu items."
+    },
+    { 
+      icon: <ShoppingBag className="h-8 w-8 text-primary" />,
+      title: "Community",
+      description: "We support local farmers and contribute to our neighborhood's growth."
+    },
+    { 
+      icon: <Heart className="h-8 w-8 text-primary" />,
+      title: "Compassion",
+      description: "We donate excess food to local shelters and support those in need."
+    }
+  ];
   
   return (
     <div className="min-h-screen">
       <Navbar />
       
-      <main ref={sectionsRef}>
-        {/* Hero Section */}
-        <section className="pt-32 pb-20 relative overflow-hidden">
-          <div className="absolute inset-0 bg-accent -z-10"></div>
+      <main>
+        {/* Hero Banner */}
+        <section className="relative h-80">
+          <div className="absolute inset-0">
+            <BlurImage
+              src="https://images.unsplash.com/photo-1579113800032-c38bd7635818?q=80&w=2670&auto=format&fit=crop"
+              alt="About Us banner"
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/10"></div>
+          </div>
           
-          <div className="container-custom">
-            <div className="max-w-3xl mx-auto text-center">
-              <div className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4 fade-up">
+          <div className="relative container mx-auto px-4 flex flex-col justify-center h-full pt-24">
+            <div className={cn(
+              "transition-all duration-1000 transform",
+              isVisible ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"
+            )}>
+              <div className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4">
                 Our Story
               </div>
-              <h1 className="text-4xl md:text-5xl font-bold mb-6 fade-up">
-                Welcome to Tasty Hub
-              </h1>
-              <p className="text-lg text-muted-foreground mb-8 fade-up">
-                Where passion for plant-based dining meets a commitment to sustainability and freshness. 
-                At our core, we believe that great food starts with great ingredients, and that's why 
-                we've built our restaurant around the principles of farm-to-table dining, mindful 
-                preparation, and environmental responsibility.
+              <h1 className="text-4xl md:text-5xl font-bold mb-4">About Tasty Hub</h1>
+              <p className="text-muted-foreground max-w-xl">
+                Where passion for plant-based dining meets a commitment to sustainability and freshness.
               </p>
             </div>
           </div>
         </section>
         
-        {/* Values Section */}
-        <section className="py-20">
-          <div className="container-custom">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold mb-4 fade-up">Our Core Values</h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto fade-up">
-                Our philosophy is built on a foundation of mindful practices and a deep commitment to quality, 
-                sustainability, and community impact.
+        {/* About Section */}
+        <section className="py-16">
+          <div className="container mx-auto px-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+              <div className="fade-up">
+                <h2 className="text-3xl font-bold mb-6">Our Approach</h2>
+                <p className="text-muted-foreground mb-4">
+                  At Tasty Hub, we believe that great food starts with great ingredients. That's why we've built our restaurant around the principles of farm-to-table dining, mindful preparation, and environmental responsibility.
+                </p>
+                <p className="text-muted-foreground mb-4">
+                  Every dish we serve begins with the freshest produce sourced from local farms and trusted growers who share our dedication to sustainable agriculture. By partnering with local farmers, we not only ensure the highest quality ingredients but also support our community and reduce our carbon footprint.
+                </p>
+                <p className="text-muted-foreground">
+                  From crisp, organic greens to ripe, seasonal vegetables, our ingredients are handpicked to bring you the best flavors nature has to offer.
+                </p>
+                
+                <div className="mt-8 flex items-center">
+                  <Award className="h-12 w-12 text-primary mr-4" />
+                  <div>
+                    <h3 className="font-bold text-lg">Award-Winning Cuisine</h3>
+                    <p className="text-sm text-muted-foreground">Recognized for excellence in sustainable dining</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="relative h-80 md:h-96 rounded-2xl overflow-hidden shadow-xl fade-up">
+                <BlurImage
+                  src="https://images.unsplash.com/photo-1556911220-bff31c812dba?q=80&w=2568&auto=format&fit=crop"
+                  alt="Our kitchen"
+                  className="object-cover"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        {/* Values */}
+        <section className="py-16 bg-secondary/20">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12 fade-up">
+              <h2 className="text-3xl font-bold mb-4">Our Values</h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Our commitment to these core principles guides everything we do at Tasty Hub, from how we prepare our food to how we engage with our community.
               </p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 stagger-container">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               {values.map((value, index) => (
-                <div 
-                  key={index}
-                  className="stagger-item bg-white rounded-xl p-6 shadow-md hover-lift"
-                >
-                  <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center mb-4">
+                <div key={index} className="bg-card p-6 rounded-xl shadow-md fade-up">
+                  <div className="bg-primary/10 p-3 rounded-full w-fit mb-4">
                     {value.icon}
                   </div>
                   <h3 className="text-xl font-bold mb-2">{value.title}</h3>
@@ -119,132 +134,30 @@ const About: React.FC = () => {
           </div>
         </section>
         
-        {/* Mission Section */}
-        <section className="py-20 bg-accent">
-          <div className="container-custom">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-              <div className="order-2 lg:order-1">
-                <div className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4 fade-up">
-                  Our Mission
-                </div>
-                <h2 className="text-3xl md:text-4xl font-bold mb-6 fade-up">
-                  Sustainable Food, <br />Sustainable Future
-                </h2>
-                <div className="prose text-muted-foreground max-w-none fade-up">
-                  <p>
-                    At Tasty Hub, we're more than just a restaurant—we're a community of food lovers, 
-                    environmental stewards, and advocates for healthy living. Whether you're joining us for a 
-                    dine-in experience or grabbing a quick carry-out meal, you can trust that your food is made 
-                    with integrity, care, and a deep respect for the planet.
-                  </p>
-                  <p>
-                    We believe that food waste is a solvable problem. That's why at the end of each day, our 
-                    extra produce is transformed into nutritious meals donated to local homeless shelters and 
-                    soup kitchens. This practice not only reduces waste but also helps nourish those in need 
-                    within our community.
-                  </p>
-                  <p>
-                    Our commitment to sustainability extends to every aspect of our operation—from the farms 
-                    we partner with to the packaging we use and the energy choices we make. We're constantly 
-                    seeking ways to reduce our environmental footprint while delivering exceptional food and 
-                    experiences.
-                  </p>
-                </div>
+        {/* Sustainability Commitment */}
+        <section className="py-16">
+          <div className="container mx-auto px-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+              <div className="order-2 md:order-1 relative h-80 md:h-96 rounded-2xl overflow-hidden shadow-xl fade-up">
+                <BlurImage
+                  src="https://images.unsplash.com/photo-1470072508653-4fda72575ef8?q=80&w=2670&auto=format&fit=crop"
+                  alt="Sustainability"
+                  className="object-cover"
+                />
               </div>
               
-              <div className="order-1 lg:order-2 fade-up">
-                <div className="relative rounded-2xl overflow-hidden shadow-xl h-[500px]">
-                  <BlurImage
-                    src="https://images.unsplash.com/photo-1445282768818-728615cc910a?q=80&w=2670&auto=format&fit=crop"
-                    alt="Team members preparing food in sustainable kitchen"
-                    className="object-cover"
-                  />
-                </div>
+              <div className="order-1 md:order-2 fade-up">
+                <h2 className="text-3xl font-bold mb-6">Sustainability at Our Core</h2>
+                <p className="text-muted-foreground mb-4">
+                  Sustainability isn't just a buzzword for us—it's a way of life. From our eco-friendly packaging for carry-out orders to our energy-efficient kitchen practices, we're committed to minimizing our environmental impact.
+                </p>
+                <p className="text-muted-foreground mb-4">
+                  We compost food waste, recycle diligently, and prioritize reusable materials wherever possible. Even our coffee is ethically sourced, ensuring that every sip supports fair trade and responsible farming practices.
+                </p>
+                <p className="text-muted-foreground">
+                  At the end of each day, extra produce gets transformed into nutritious meals that we donate to local homeless shelters and soup kitchens, ensuring nothing goes to waste while helping those in need.
+                </p>
               </div>
-            </div>
-          </div>
-        </section>
-        
-        {/* ECO Materials Section */}
-        <section className="py-20">
-          <div className="container-custom">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold mb-4 fade-up">Pure Eco-Friendly Material Usage</h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto fade-up">
-                We take pride in our commitment to using sustainable, eco-friendly materials throughout our operations.
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 stagger-container">
-              <div className="stagger-item bg-white rounded-xl overflow-hidden shadow-md hover-lift">
-                <div className="h-48 relative">
-                  <BlurImage
-                    src="https://images.unsplash.com/photo-1605367177286-f035fa99aac9?q=80&w=2670&auto=format&fit=crop"
-                    alt="Biodegradable takeout containers"
-                    className="object-cover"
-                  />
-                </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-bold mb-2">Biodegradable Packaging</h3>
-                  <p className="text-muted-foreground">
-                    All our takeout containers, utensils, and bags are made from plant-based, 
-                    biodegradable materials that decompose naturally without harming the environment.
-                  </p>
-                </div>
-              </div>
-              
-              <div className="stagger-item bg-white rounded-xl overflow-hidden shadow-md hover-lift">
-                <div className="h-48 relative">
-                  <BlurImage
-                    src="https://images.unsplash.com/photo-1558642891-54be180ea339?q=80&w=2434&auto=format&fit=crop"
-                    alt="Recycled paper products"
-                    className="object-cover"
-                  />
-                </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-bold mb-2">Recycled Materials</h3>
-                  <p className="text-muted-foreground">
-                    Our menus, napkins, and other paper products are made from 100% recycled materials, 
-                    reducing the demand for new paper production and saving trees.
-                  </p>
-                </div>
-              </div>
-              
-              <div className="stagger-item bg-white rounded-xl overflow-hidden shadow-md hover-lift">
-                <div className="h-48 relative">
-                  <BlurImage
-                    src="https://images.unsplash.com/photo-1603395785100-24e8134c66dc?q=80&w=2662&auto=format&fit=crop"
-                    alt="Energy efficient kitchen"
-                    className="object-cover"
-                  />
-                </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-bold mb-2">Energy Efficiency</h3>
-                  <p className="text-muted-foreground">
-                    Our kitchens are equipped with energy-efficient appliances, LED lighting, and 
-                    water-saving fixtures to minimize our resource consumption.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-        
-        {/* CTA Section */}
-        <section className="py-20 bg-primary text-white">
-          <div className="container-custom text-center fade-up">
-            <h2 className="text-3xl font-bold mb-6">Join Us in Making a Difference</h2>
-            <p className="max-w-2xl mx-auto mb-8">
-              When you choose Tasty Hub, you're not just enjoying delicious plant-based food—you're 
-              supporting a mission to create a more sustainable food system and community.
-            </p>
-            <div className="flex flex-wrap justify-center gap-4">
-              <a href="/menu" className="button-outline !border-white !text-white hover:!bg-white/20">
-                See Our Menu
-              </a>
-              <a href="/find-location" className="button-outline !border-white !text-white hover:!bg-white/20">
-                Find a Location
-              </a>
             </div>
           </div>
         </section>
