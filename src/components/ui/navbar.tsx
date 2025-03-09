@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -34,16 +35,26 @@ const Navbar: React.FC = () => {
     { name: 'Reservations', path: '/reservations', icon: <CalendarRange size={18} /> }
   ];
   
+  // Determine if we're on a dark page where we need lighter text
+  const isDarkPage = location.pathname === '/menu' || location.pathname === '/deals' || location.pathname === '/find-location';
+  
   return (
     <header className={cn(
       "fixed w-full z-50 transition-all duration-300",
-      isScrolled ? "bg-background/80 backdrop-blur-lg shadow-sm py-2" : "bg-transparent py-4"
+      isScrolled 
+        ? "bg-background/80 backdrop-blur-lg shadow-sm py-2" 
+        : isDarkPage 
+          ? "bg-transparent py-4 text-white" 
+          : "bg-transparent py-4"
     )}>
       <div className="container-custom flex items-center justify-between">
         {/* Logo */}
         <Link 
           to="/" 
-          className="flex items-center space-x-2 text-primary font-bold text-2xl transition-all hover-scale"
+          className={cn(
+            "flex items-center space-x-2 font-bold text-2xl transition-all hover-scale",
+            isScrolled ? "text-primary" : isDarkPage ? "text-white" : "text-primary"
+          )}
         >
           <Coffee size={28} strokeWidth={2.5} />
           <span>Tasty Hub</span>
@@ -57,9 +68,17 @@ const Navbar: React.FC = () => {
               to={link.path}
               className={cn(
                 "flex items-center space-x-1 text-sm font-medium transition-colors duration-200",
-                location.pathname === link.path
-                  ? "text-primary"
-                  : "text-muted-foreground hover:text-primary"
+                isScrolled
+                  ? location.pathname === link.path
+                    ? "text-primary"
+                    : "text-muted-foreground hover:text-primary"
+                  : isDarkPage
+                    ? location.pathname === link.path
+                      ? "text-white"
+                      : "text-white/80 hover:text-white"
+                    : location.pathname === link.path
+                      ? "text-primary"
+                      : "text-muted-foreground hover:text-primary"
               )}
             >
               {link.icon}
@@ -70,20 +89,38 @@ const Navbar: React.FC = () => {
         
         {/* Action Buttons */}
         <div className="hidden md:flex items-center space-x-4">
-          <Link to="/cart" className="relative p-2 text-foreground hover:text-primary transition-colors">
+          <Link 
+            to="/cart" 
+            className={cn(
+              "relative p-2 transition-colors",
+              isScrolled ? "text-foreground hover:text-primary" : isDarkPage ? "text-white hover:text-white/80" : "text-foreground hover:text-primary"
+            )}
+          >
             <ShoppingBag size={20} />
             <span className="absolute top-0 right-0 bg-primary text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
               0
             </span>
           </Link>
-          <Link to="/sign-in" className="button-outline py-2 text-sm">
+          <Link 
+            to="/sign-in" 
+            className={cn(
+              "button-outline py-2 text-sm",
+              isDarkPage && !isScrolled ? "border-white text-white hover:bg-white/10" : ""
+            )}
+          >
             Sign In
           </Link>
         </div>
         
         {/* Mobile Menu Button */}
         <div className="flex md:hidden items-center space-x-4">
-          <Link to="/cart" className="relative p-2 text-foreground hover:text-primary transition-colors">
+          <Link 
+            to="/cart" 
+            className={cn(
+              "relative p-2 transition-colors",
+              isScrolled ? "text-foreground hover:text-primary" : isDarkPage ? "text-white hover:text-white/80" : "text-foreground hover:text-primary"
+            )}
+          >
             <ShoppingBag size={20} />
             <span className="absolute top-0 right-0 bg-primary text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
               0
@@ -91,7 +128,10 @@ const Navbar: React.FC = () => {
           </Link>
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="p-2 text-foreground hover:text-primary focus:outline-none"
+            className={cn(
+              "p-2 focus:outline-none",
+              isScrolled ? "text-foreground hover:text-primary" : isDarkPage ? "text-white hover:text-white/80" : "text-foreground hover:text-primary"
+            )}
             aria-label="Toggle menu"
           >
             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}

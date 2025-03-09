@@ -2,40 +2,75 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../components/ui/navbar';
 import Footer from '../components/ui/footer';
-import { Search, MapPin, Locate, ExternalLink } from 'lucide-react';
+import BlurImage from '../components/ui/blur-image';
+import LocationMap from '../components/ui/location-map';
 import { cn } from '@/lib/utils';
+import { MapPin, Clock, Phone, ExternalLink, ChevronRight, Search } from 'lucide-react';
+import { toast } from '@/components/ui/use-toast';
 
+// Store location data
 const locations = [
   {
-    id: 1,
-    name: 'Downtown',
-    address: '123 Main Street, Downtown, CA 90001',
-    phone: '(555) 123-4567',
-    hours: 'Mon-Sat: 7:00 AM - 5:00 PM, Sun: 8:30 AM - 5:00 PM',
-    coordinates: { lat: 34.052235, lng: -118.243683 }
+    id: 'sf-downtown',
+    name: 'San Francisco - Downtown',
+    address: '123 Market Street, San Francisco, CA 94105',
+    phone: '(415) 555-1234',
+    hours: 'Mon-Fri: 7:00 AM - 5:00 PM | Sat-Sun: 8:30 AM - 5:00 PM',
+    coordinates: [-122.4194, 37.7749],
+    popular: true
   },
   {
-    id: 2,
-    name: 'Westside',
-    address: '456 Ocean Avenue, Westside, CA 90402',
-    phone: '(555) 987-6543',
-    hours: 'Mon-Sat: 7:00 AM - 5:00 PM, Sun: 8:30 AM - 5:00 PM',
-    coordinates: { lat: 34.023354, lng: -118.481887 }
+    id: 'la-venice',
+    name: 'Los Angeles - Venice',
+    address: '456 Abbot Kinney Blvd, Venice, CA 90291',
+    phone: '(310) 555-6789',
+    hours: 'Mon-Fri: 7:00 AM - 5:00 PM | Sat-Sun: 8:30 AM - 5:00 PM',
+    coordinates: [-118.4695, 33.9850],
+    popular: false
   },
   {
-    id: 3,
-    name: 'Eastside',
-    address: '789 Valley Blvd, Eastside, CA 90032',
-    phone: '(555) 456-7890',
-    hours: 'Mon-Sat: 7:00 AM - 5:00 PM, Sun: 8:30 AM - 5:00 PM',
-    coordinates: { lat: 34.085685, lng: -118.176186 }
-  }
+    id: 'ny-soho',
+    name: 'New York - SoHo',
+    address: '789 Broadway, New York, NY 10003',
+    phone: '(212) 555-9012',
+    hours: 'Mon-Fri: 7:00 AM - 5:00 PM | Sat-Sun: 8:30 AM - 5:00 PM',
+    coordinates: [-73.9845, 40.7238],
+    popular: true
+  },
+  {
+    id: 'sea-capitol',
+    name: 'Seattle - Capitol Hill',
+    address: '321 Pike Street, Seattle, WA 98101',
+    phone: '(206) 555-3456',
+    hours: 'Mon-Fri: 7:00 AM - 5:00 PM | Sat-Sun: 8:30 AM - 5:00 PM',
+    coordinates: [-122.3321, 47.6062],
+    popular: false
+  },
+  {
+    id: 'chi-river',
+    name: 'Chicago - River North',
+    address: '654 N Wells St, Chicago, IL 60654',
+    phone: '(312) 555-7890',
+    hours: 'Mon-Fri: 7:00 AM - 5:00 PM | Sat-Sun: 8:30 AM - 5:00 PM',
+    coordinates: [-87.6298, 41.8781],
+    popular: false
+  },
+  {
+    id: 'aus-downtown',
+    name: 'Austin - Downtown',
+    address: '987 Congress Ave, Austin, TX 78701',
+    phone: '(512) 555-2345',
+    hours: 'Mon-Fri: 7:00 AM - 5:00 PM | Sat-Sun: 8:30 AM - 5:00 PM',
+    coordinates: [-97.7431, 30.2672],
+    popular: true
+  },
 ];
 
 const FindLocation: React.FC = () => {
-  const [zipCode, setZipCode] = useState('');
-  const [activeLocation, setActiveLocation] = useState<number | null>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeLocation, setActiveLocation] = useState(locations[0]);
+  const [filteredLocations, setFilteredLocations] = useState(locations);
   
   // Animation on mount
   useEffect(() => {
@@ -63,169 +98,227 @@ const FindLocation: React.FC = () => {
       observer.disconnect();
     };
   }, []);
-  
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log(`Searching for locations near ${zipCode}`);
-    // In a real app, this would search for locations near the zipCode
+
+  // Filter locations based on search query
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setFilteredLocations(locations);
+      return;
+    }
+    
+    const filtered = locations.filter(location => 
+      location.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      location.address.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    
+    setFilteredLocations(filtered);
+  }, [searchQuery]);
+
+  const handleSetFavorite = (location: typeof locations[0]) => {
+    toast({
+      title: "Location Favorited",
+      description: `${location.name} has been set as your favorite location.`,
+      duration: 3000,
+    });
   };
-  
-  // Placeholder map component - in a real app, you would use Google Maps or another map provider
-  const MapPlaceholder = () => (
-    <div className="relative w-full h-full bg-secondary rounded-xl overflow-hidden">
-      <div className="absolute inset-0 flex items-center justify-center p-4 text-center text-muted-foreground">
-        <div>
-          <p className="mb-4">Interactive map would be displayed here.</p>
-          <p className="text-sm">
-            This would use the Google Maps API in a production environment.
-          </p>
-        </div>
-      </div>
-      
-      {/* Location markers */}
-      {locations.map((location) => (
-        <div 
-          key={location.id}
-          className={cn(
-            "absolute w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300",
-            activeLocation === location.id 
-              ? "bg-primary text-white scale-125" 
-              : "bg-muted text-foreground hover:bg-primary/70 hover:text-white"
-          )}
-          style={{ 
-            left: `${20 + location.id * 25}%`, 
-            top: `${30 + location.id * 15}%` 
-          }}
-          onClick={() => setActiveLocation(location.id)}
-        >
-          <MapPin size={14} />
-        </div>
-      ))}
-    </div>
-  );
+
+  const handleGetDirections = (location: typeof locations[0]) => {
+    // In a real application, this would open Google Maps or another mapping service
+    window.open(`https://maps.google.com/?q=${encodeURIComponent(location.address)}`, '_blank');
+  };
   
   return (
     <div className="min-h-screen">
       <Navbar />
       
       <main>
-        {/* Header */}
-        <section className="pt-32 pb-12 bg-accent">
-          <div className="container-custom">
+        {/* Hero Banner */}
+        <section className="relative h-80">
+          <div className="absolute inset-0">
+            <BlurImage
+              src="https://images.unsplash.com/photo-1577415124269-fc1140a69e91?q=80&w=2574&auto=format&fit=crop"
+              alt="Locations banner"
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/10"></div>
+          </div>
+          
+          <div className="relative container mx-auto px-4 flex flex-col justify-center h-full pt-24">
             <div className={cn(
-              "max-w-2xl mx-auto text-center transition-all duration-1000 transform",
+              "transition-all duration-1000 transform",
               isVisible ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"
             )}>
-              <h1 className="text-4xl md:text-5xl font-bold mb-4">Find a Location</h1>
-              <p className="text-muted-foreground mb-8">
-                Discover Tasty Hub locations near you. We're expanding to serve fresh, 
-                plant-based food to more communities.
+              <div className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4">
+                Our Locations
+              </div>
+              <h1 className="text-4xl md:text-5xl font-bold mb-4">Find a Tasty Hub Near You</h1>
+              <p className="text-muted-foreground max-w-xl">
+                Visit one of our many locations across the country and enjoy our fresh, sustainable menu in person.
               </p>
-              
-              {/* Search Form */}
-              <form onSubmit={handleSearch} className="max-w-md mx-auto">
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Search size={20} className="text-muted-foreground" />
-                  </div>
-                  <input
-                    type="text"
-                    value={zipCode}
-                    onChange={(e) => setZipCode(e.target.value)}
-                    placeholder="Enter your ZIP code"
-                    className="w-full pl-10 pr-4 py-3 rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  />
-                  <button 
-                    type="submit"
-                    className="absolute inset-y-0 right-0 px-4 text-primary font-medium"
-                  >
-                    Search
-                  </button>
-                </div>
-              </form>
             </div>
           </div>
         </section>
         
-        {/* Map and Locations Section */}
-        <section className="py-12">
-          <div className="container-custom">
+        {/* Location Finder Section */}
+        <section className="py-16">
+          <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Locations List */}
-              <div className="lg:col-span-1 space-y-4">
-                <h2 className="text-2xl font-bold mb-4 fade-up">Our Locations</h2>
-                
-                {locations.map((location, index) => (
-                  <div 
-                    key={location.id}
-                    className={cn(
-                      "p-5 rounded-xl transition-all duration-300 cursor-pointer stagger-item",
-                      activeLocation === location.id 
-                        ? "bg-primary text-white shadow-lg" 
-                        : "bg-white hover:bg-secondary shadow-md"
-                    )}
-                    onClick={() => setActiveLocation(location.id)}
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-bold">{location.name}</h3>
-                      {activeLocation === location.id && (
-                        <div className="px-2 py-1 bg-white/20 rounded-full text-xs">
-                          Selected
+              {/* Search & Location List */}
+              <div className="lg:col-span-1">
+                <div className="sticky top-24">
+                  <div className="relative mb-6">
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                      <Search size={18} className="text-muted-foreground" />
+                    </div>
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search by city or address"
+                      className="bg-background py-3 pl-10 pr-4 block w-full rounded-md border border-input focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    />
+                  </div>
+                  
+                  <div className="bg-card rounded-lg shadow-md border border-border overflow-hidden">
+                    <div className="px-4 py-3 border-b border-border">
+                      <h3 className="font-medium">Our Locations ({filteredLocations.length})</h3>
+                    </div>
+                    <div className="max-h-[500px] overflow-y-auto">
+                      {filteredLocations.length > 0 ? (
+                        filteredLocations.map((location) => (
+                          <div 
+                            key={location.id} 
+                            onClick={() => setActiveLocation(location)}
+                            className={cn(
+                              "p-4 border-b border-border cursor-pointer transition-colors",
+                              activeLocation.id === location.id 
+                                ? "bg-primary/10" 
+                                : "hover:bg-muted/50"
+                            )}
+                          >
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <h4 className="font-medium">{location.name}</h4>
+                                <p className="text-sm text-muted-foreground">{location.address}</p>
+                                <div className="flex items-center text-xs text-muted-foreground mt-1">
+                                  <Clock size={12} className="mr-1" />
+                                  <span>Open Today: 7:00 AM - 5:00 PM</span>
+                                </div>
+                              </div>
+                              <ChevronRight size={16} className={cn(
+                                "text-muted-foreground transition-transform",
+                                activeLocation.id === location.id ? "rotate-90" : ""
+                              )} />
+                            </div>
+                            {location.popular && (
+                              <span className="inline-block mt-2 text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">Popular Location</span>
+                            )}
+                          </div>
+                        ))
+                      ) : (
+                        <div className="p-6 text-center">
+                          <p className="text-muted-foreground">No locations found. Try a different search term.</p>
                         </div>
                       )}
                     </div>
-                    
-                    <div className={cn(
-                      "space-y-2 text-sm",
-                      activeLocation === location.id ? "text-white/90" : "text-muted-foreground"
-                    )}>
-                      <p>{location.address}</p>
-                      <p>{location.phone}</p>
-                      <p className="text-xs">{location.hours}</p>
-                    </div>
-                    
-                    <div className="mt-4 flex justify-between items-center">
-                      <button className={cn(
-                        "flex items-center space-x-1 text-xs font-medium",
-                        activeLocation === location.id 
-                          ? "text-white/90 hover:text-white" 
-                          : "text-primary hover:text-primary/80"
-                      )}>
-                        <ExternalLink size={14} />
-                        <span>Directions</span>
-                      </button>
-                      
-                      <button className={cn(
-                        "flex items-center space-x-1 text-xs font-medium",
-                        activeLocation === location.id 
-                          ? "text-white/90 hover:text-white" 
-                          : "text-primary hover:text-primary/80"
-                      )}>
-                        <span>Set as Favorite</span>
-                      </button>
-                    </div>
                   </div>
-                ))}
+                </div>
               </div>
               
-              {/* Map */}
-              <div className="lg:col-span-2 h-96 lg:h-auto fade-up">
-                <MapPlaceholder />
+              {/* Map & Location Details */}
+              <div className="lg:col-span-2">
+                <div className="bg-card rounded-lg shadow-md border border-border overflow-hidden">
+                  <div className="h-[400px]">
+                    <LocationMap />
+                  </div>
+                  
+                  {activeLocation && (
+                    <div className="p-6">
+                      <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                        <div>
+                          <h2 className="text-2xl font-bold mb-2">{activeLocation.name}</h2>
+                          <div className="flex items-start space-x-2 text-muted-foreground mb-1">
+                            <MapPin size={16} className="mt-0.5 flex-shrink-0" />
+                            <span>{activeLocation.address}</span>
+                          </div>
+                          <div className="flex items-center space-x-2 text-muted-foreground mb-1">
+                            <Phone size={16} className="flex-shrink-0" />
+                            <span>{activeLocation.phone}</span>
+                          </div>
+                          <div className="flex items-center space-x-2 text-muted-foreground">
+                            <Clock size={16} className="flex-shrink-0" />
+                            <span>{activeLocation.hours}</span>
+                          </div>
+                        </div>
+                        
+                        <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
+                          <button
+                            onClick={() => handleSetFavorite(activeLocation)}
+                            className="button-outline flex items-center justify-center py-2"
+                          >
+                            <span>Set as Favorite</span>
+                          </button>
+                          <button
+                            onClick={() => handleGetDirections(activeLocation)}
+                            className="button-primary flex items-center justify-center py-2"
+                          >
+                            <span className="mr-1">Get Directions</span>
+                            <ExternalLink size={14} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Nearby Info */}
+                <div className="mt-8 bg-secondary rounded-lg p-6">
+                  <h3 className="text-xl font-bold mb-4">Available at {activeLocation.name}</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="bg-card p-4 rounded-md border border-border shadow-sm">
+                      <div className="font-medium">Dine-In Services</div>
+                      <p className="text-sm text-muted-foreground">Comfortable indoor and outdoor seating available</p>
+                    </div>
+                    <div className="bg-card p-4 rounded-md border border-border shadow-sm">
+                      <div className="font-medium">Carry-Out</div>
+                      <p className="text-sm text-muted-foreground">Convenient pick-up options with online ordering</p>
+                    </div>
+                    <div className="bg-card p-4 rounded-md border border-border shadow-sm">
+                      <div className="font-medium">Delivery Radius</div>
+                      <p className="text-sm text-muted-foreground">Available within 3 miles of this location</p>
+                    </div>
+                    <div className="bg-card p-4 rounded-md border border-border shadow-sm">
+                      <div className="font-medium">Catering</div>
+                      <p className="text-sm text-muted-foreground">Available for events and group orders</p>
+                    </div>
+                    <div className="bg-card p-4 rounded-md border border-border shadow-sm">
+                      <div className="font-medium">WiFi</div>
+                      <p className="text-sm text-muted-foreground">Free high-speed internet for customers</p>
+                    </div>
+                    <div className="bg-card p-4 rounded-md border border-border shadow-sm">
+                      <div className="font-medium">Parking</div>
+                      <p className="text-sm text-muted-foreground">Street parking and nearby garages available</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </section>
         
         {/* Call to Action */}
-        <section className="py-16 bg-accent">
-          <div className="container-custom text-center fade-up">
-            <h2 className="text-3xl font-bold mb-4">Coming to Your Neighborhood Soon</h2>
-            <p className="text-muted-foreground max-w-md mx-auto mb-8">
-              We're expanding to bring fresh, sustainable, plant-based food to more communities.
+        <section className="py-16 bg-primary/10">
+          <div className="container mx-auto px-4 text-center">
+            <h2 className="text-3xl font-bold mb-6">Ready to Visit?</h2>
+            <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+              Make a reservation at any of our locations and get a 10% discount on your first visit.
             </p>
-            <button className="button-primary">
-              Request a Location
-            </button>
+            <a
+              href="/reservations"
+              className="inline-block bg-primary text-primary-foreground px-8 py-3 rounded-md font-medium text-lg hover:bg-primary/90 transition-colors"
+            >
+              Make a Reservation
+            </a>
           </div>
         </section>
       </main>
