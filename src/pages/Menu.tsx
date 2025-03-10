@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Navbar from '../components/ui/navbar';
@@ -6,7 +5,7 @@ import Footer from '../components/ui/footer';
 import { Coffee, Sandwich, Soup, Filter } from 'lucide-react';
 import BlurImage from '../components/ui/blur-image';
 import { cn } from '@/lib/utils';
-import { toast } from '@/components/ui/use-toast';
+import { useCart } from '@/context/CartContext';
 
 const categories = [
   { id: 'all', name: 'All Items', icon: null },
@@ -125,8 +124,8 @@ const Menu: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState('all');
   const [filteredItems, setFilteredItems] = useState(menuItems);
   const [isVisible, setIsVisible] = useState(false);
+  const { addItem } = useCart();
   
-  // Parse query params
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const category = params.get('category');
@@ -138,7 +137,6 @@ const Menu: React.FC = () => {
     }
   }, [location.search]);
   
-  // Filter items based on active category
   useEffect(() => {
     if (activeCategory === 'all') {
       setFilteredItems(menuItems);
@@ -147,7 +145,6 @@ const Menu: React.FC = () => {
     }
   }, [activeCategory]);
   
-  // Animation on mount
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsVisible(true);
@@ -156,7 +153,6 @@ const Menu: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
   
-  // Set up intersection observer for animations
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
@@ -175,10 +171,12 @@ const Menu: React.FC = () => {
   }, [filteredItems]);
 
   const handleAddToOrder = (item: typeof menuItems[0]) => {
-    toast({
-      title: "Added to Order",
-      description: `${item.name} has been added to your order.`,
-      duration: 3000,
+    addItem({
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      image: item.image,
+      category: categories.find(c => c.id === item.category)?.name
     });
   };
   
@@ -187,7 +185,6 @@ const Menu: React.FC = () => {
       <Navbar />
       
       <main>
-        {/* Hero Banner */}
         <section className="relative h-80">
           <div className="absolute inset-0">
             <BlurImage
@@ -214,10 +211,8 @@ const Menu: React.FC = () => {
           </div>
         </section>
         
-        {/* Menu Section */}
         <section className="py-12">
           <div className="container mx-auto px-4">
-            {/* Category Filter */}
             <div className="mb-10 overflow-x-auto">
               <div className="flex space-x-2 min-w-max">
                 {categories.map((category) => (
@@ -238,7 +233,6 @@ const Menu: React.FC = () => {
               </div>
             </div>
             
-            {/* Menu Items Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredItems.map((item, index) => (
                 <div 
@@ -251,7 +245,6 @@ const Menu: React.FC = () => {
                       alt={item.name}
                       className="object-cover"
                     />
-                    {/* Category tag */}
                     <div className="absolute top-4 right-4">
                       <div className="px-3 py-1 bg-primary text-primary-foreground text-xs font-medium rounded-full">
                         {categories.find(c => c.id === item.category)?.name}
@@ -276,7 +269,6 @@ const Menu: React.FC = () => {
               ))}
             </div>
             
-            {/* Empty state */}
             {filteredItems.length === 0 && (
               <div className="text-center py-12">
                 <p className="text-muted-foreground">No menu items found for this category.</p>

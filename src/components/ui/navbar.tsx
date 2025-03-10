@@ -2,14 +2,16 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { useCart } from '@/context/CartContext';
 import { 
-  Menu, X, ShoppingBag, User, Coffee, Sandwich, Navigation, Info, Percent, CalendarRange, Utensils
+  Menu, X, ShoppingBag, User, Coffee, Navigation, Info, Percent, CalendarRange, Utensils
 } from 'lucide-react';
 
 const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const { itemCount } = useCart();
   
   // Handle scroll effect
   useEffect(() => {
@@ -44,7 +46,7 @@ const Navbar: React.FC = () => {
       isScrolled 
         ? "bg-background/80 backdrop-blur-lg shadow-sm py-2" 
         : isDarkPage 
-          ? "bg-transparent py-4 text-white" 
+          ? "bg-background/80 backdrop-blur-lg shadow-sm py-2" 
           : "bg-transparent py-4"
     )}>
       <div className="container-custom flex items-center justify-between">
@@ -53,7 +55,7 @@ const Navbar: React.FC = () => {
           to="/" 
           className={cn(
             "flex items-center space-x-2 font-bold text-2xl transition-all hover-scale",
-            isScrolled ? "text-primary" : isDarkPage ? "text-white" : "text-primary"
+            isScrolled ? "text-primary" : isDarkPage ? "text-foreground" : "text-primary"
           )}
         >
           <Coffee size={28} strokeWidth={2.5} />
@@ -74,8 +76,8 @@ const Navbar: React.FC = () => {
                     : "text-muted-foreground hover:text-primary"
                   : isDarkPage
                     ? location.pathname === link.path
-                      ? "text-white"
-                      : "text-white/80 hover:text-white"
+                      ? "text-primary"
+                      : "text-foreground hover:text-primary"
                     : location.pathname === link.path
                       ? "text-primary"
                       : "text-muted-foreground hover:text-primary"
@@ -93,19 +95,19 @@ const Navbar: React.FC = () => {
             to="/cart" 
             className={cn(
               "relative p-2 transition-colors",
-              isScrolled ? "text-foreground hover:text-primary" : isDarkPage ? "text-white hover:text-white/80" : "text-foreground hover:text-primary"
+              isScrolled ? "text-foreground hover:text-primary" : isDarkPage ? "text-foreground hover:text-primary" : "text-foreground hover:text-primary"
             )}
           >
             <ShoppingBag size={20} />
             <span className="absolute top-0 right-0 bg-primary text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-              0
+              {itemCount}
             </span>
           </Link>
           <Link 
             to="/sign-in" 
             className={cn(
               "button-outline py-2 text-sm",
-              isDarkPage && !isScrolled ? "border-white text-white hover:bg-white/10" : ""
+              isDarkPage && !isScrolled ? "border-foreground text-foreground hover:bg-foreground/10" : ""
             )}
           >
             Sign In
@@ -118,19 +120,19 @@ const Navbar: React.FC = () => {
             to="/cart" 
             className={cn(
               "relative p-2 transition-colors",
-              isScrolled ? "text-foreground hover:text-primary" : isDarkPage ? "text-white hover:text-white/80" : "text-foreground hover:text-primary"
+              isScrolled ? "text-foreground hover:text-primary" : isDarkPage ? "text-foreground hover:text-foreground" : "text-foreground hover:text-primary"
             )}
           >
             <ShoppingBag size={20} />
             <span className="absolute top-0 right-0 bg-primary text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-              0
+              {itemCount}
             </span>
           </Link>
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className={cn(
               "p-2 focus:outline-none",
-              isScrolled ? "text-foreground hover:text-primary" : isDarkPage ? "text-white hover:text-white/80" : "text-foreground hover:text-primary"
+              isScrolled ? "text-foreground hover:text-primary" : isDarkPage ? "text-foreground hover:text-foreground" : "text-foreground hover:text-primary"
             )}
             aria-label="Toggle menu"
           >

@@ -1,14 +1,12 @@
-
 import React, { useState, useEffect } from 'react';
 import Navbar from '../components/ui/navbar';
 import Footer from '../components/ui/footer';
 import BlurImage from '../components/ui/blur-image';
 import LocationMap from '../components/ui/location-map';
 import { cn } from '@/lib/utils';
-import { MapPin, Clock, Phone, ExternalLink, ChevronRight, Search } from 'lucide-react';
-import { toast } from '@/components/ui/use-toast';
+import { MapPin, Clock, Phone, ExternalLink, ChevronRight, Search, Heart } from 'lucide-react';
+import { useFavorites } from '@/context/FavoritesContext';
 
-// Store location data
 const locations = [
   {
     id: 'sf-downtown',
@@ -71,8 +69,8 @@ const FindLocation: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeLocation, setActiveLocation] = useState(locations[0]);
   const [filteredLocations, setFilteredLocations] = useState(locations);
+  const { addFavoriteLocation, removeFavoriteLocation, isFavoriteLocation } = useFavorites();
   
-  // Animation on mount
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsVisible(true);
@@ -81,7 +79,6 @@ const FindLocation: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
   
-  // Set up intersection observer for animations
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
@@ -99,7 +96,6 @@ const FindLocation: React.FC = () => {
     };
   }, []);
 
-  // Filter locations based on search query
   useEffect(() => {
     if (!searchQuery.trim()) {
       setFilteredLocations(locations);
@@ -115,15 +111,17 @@ const FindLocation: React.FC = () => {
   }, [searchQuery]);
 
   const handleSetFavorite = (location: typeof locations[0]) => {
-    toast({
-      title: "Location Favorited",
-      description: `${location.name} has been set as your favorite location.`,
-      duration: 3000,
-    });
+    if (isFavoriteLocation(location.id)) {
+      removeFavoriteLocation(location.id);
+    } else {
+      addFavoriteLocation({
+        id: location.id,
+        name: location.name
+      });
+    }
   };
 
   const handleGetDirections = (location: typeof locations[0]) => {
-    // In a real application, this would open Google Maps or another mapping service
     window.open(`https://maps.google.com/?q=${encodeURIComponent(location.address)}`, '_blank');
   };
   
@@ -132,7 +130,6 @@ const FindLocation: React.FC = () => {
       <Navbar />
       
       <main>
-        {/* Hero Banner */}
         <section className="relative h-80">
           <div className="absolute inset-0">
             <BlurImage
@@ -159,11 +156,9 @@ const FindLocation: React.FC = () => {
           </div>
         </section>
         
-        {/* Location Finder Section */}
         <section className="py-16">
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Search & Location List */}
               <div className="lg:col-span-1">
                 <div className="sticky top-24">
                   <div className="relative mb-6">
@@ -225,7 +220,6 @@ const FindLocation: React.FC = () => {
                 </div>
               </div>
               
-              {/* Map & Location Details */}
               <div className="lg:col-span-2">
                 <div className="bg-card rounded-lg shadow-md border border-border overflow-hidden">
                   <div className="h-[400px]">
@@ -254,9 +248,20 @@ const FindLocation: React.FC = () => {
                         <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
                           <button
                             onClick={() => handleSetFavorite(activeLocation)}
-                            className="button-outline flex items-center justify-center py-2"
+                            className={cn(
+                              "button-outline flex items-center justify-center py-2",
+                              isFavoriteLocation(activeLocation.id) && "bg-primary/10"
+                            )}
                           >
-                            <span>Set as Favorite</span>
+                            <Heart size={16} className={cn(
+                              "mr-2",
+                              isFavoriteLocation(activeLocation.id) ? "fill-primary text-primary" : ""
+                            )} />
+                            <span>
+                              {isFavoriteLocation(activeLocation.id) 
+                                ? "Favorited" 
+                                : "Add to Favorites"}
+                            </span>
                           </button>
                           <button
                             onClick={() => handleGetDirections(activeLocation)}
@@ -271,7 +276,6 @@ const FindLocation: React.FC = () => {
                   )}
                 </div>
                 
-                {/* Nearby Info */}
                 <div className="mt-8 bg-secondary rounded-lg p-6">
                   <h3 className="text-xl font-bold mb-4">Available at {activeLocation.name}</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -306,7 +310,6 @@ const FindLocation: React.FC = () => {
           </div>
         </section>
         
-        {/* Call to Action */}
         <section className="py-16 bg-primary/10">
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-3xl font-bold mb-6">Ready to Visit?</h2>
