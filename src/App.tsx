@@ -12,6 +12,14 @@ import Deals from "./pages/Deals";
 import FindLocation from "./pages/FindLocation";
 import About from "./pages/About";
 import Cart from "./pages/Cart";
+import Reservations from "./pages/Reservations";
+import ReservationConfirmation from "./pages/ReservationConfirmation";
+import SignIn from "./pages/SignIn";
+import SignUp from "./pages/SignUp";
+import Checkout from "./pages/Checkout";
+import CheckoutConfirmation from "./pages/CheckoutConfirmation";
+import FavoriteLocations from "./pages/FavoriteLocations";
+import DishDetails from "./pages/DishDetails";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,10 +35,18 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/menu" element={<Menu />} />
+              <Route path="/menu/:dishId" element={<DishDetails />} />
               <Route path="/deals" element={<Deals />} />
               <Route path="/find-location" element={<FindLocation />} />
               <Route path="/about" element={<About />} />
               <Route path="/cart" element={<Cart />} />
+              <Route path="/reservations" element={<Reservations />} />
+              <Route path="/reservation-confirmation" element={<ReservationConfirmation />} />
+              <Route path="/sign-in" element={<SignIn />} />
+              <Route path="/sign-up" element={<SignUp />} />
+              <Route path="/checkout" element={<Checkout />} />
+              <Route path="/checkout-confirmation" element={<CheckoutConfirmation />} />
+              <Route path="/favorite-locations" element={<FavoriteLocations />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
