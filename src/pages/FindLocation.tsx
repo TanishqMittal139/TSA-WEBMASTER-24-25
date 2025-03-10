@@ -5,9 +5,21 @@ import Footer from '../components/ui/footer';
 import BlurImage from '../components/ui/blur-image';
 import LocationMap from '../components/ui/location-map';
 import { cn } from '@/lib/utils';
-import { MapPin, Clock, Phone, ExternalLink, ChevronRight, Search, Heart } from 'lucide-react';
+import { MapPin, Clock, Phone, ExternalLink, ChevronRight, Search, Heart, X, ArrowRight } from 'lucide-react';
 import { useFavorites } from '@/context/FavoritesContext';
 import { toast } from '@/components/ui/use-toast';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetClose,
+} from "@/components/ui/sheet";
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { isAuthenticated } from '@/services/auth';
+import { useNavigate } from 'react-router-dom';
 
 // Updated locations with Virginia locations
 const locations = [
@@ -17,7 +29,7 @@ const locations = [
     address: '4350 Pouncey Tract Rd, Glen Allen, VA 23060',
     phone: '(804) 555-7821',
     hours: 'Mon-Fri: 7:00 AM - 9:00 PM | Sat-Sun: 8:30 AM - 10:00 PM',
-    coordinates: [-77.6082, 37.6651],
+    coordinates: [-77.6082, 37.6651] as [number, number],
     popular: true
   },
   {
@@ -26,7 +38,7 @@ const locations = [
     address: '2150 Cunningham Dr, Hampton, VA 23666',
     phone: '(757) 555-3492',
     hours: 'Mon-Fri: 7:00 AM - 9:00 PM | Sat-Sun: 8:30 AM - 10:00 PM',
-    coordinates: [-76.3968, 37.0311],
+    coordinates: [-76.3968, 37.0311] as [number, number],
     popular: false
   },
   {
@@ -35,7 +47,7 @@ const locations = [
     address: '901 E Cary St, Richmond, VA 23219',
     phone: '(804) 555-9072',
     hours: 'Mon-Fri: 7:00 AM - 9:00 PM | Sat-Sun: 8:30 AM - 10:00 PM',
-    coordinates: [-77.4360, 37.5407],
+    coordinates: [-77.4360, 37.5407] as [number, number],
     popular: true
   },
   {
@@ -44,7 +56,7 @@ const locations = [
     address: '123 Market Street, San Francisco, CA 94105',
     phone: '(415) 555-1234',
     hours: 'Mon-Fri: 7:00 AM - 9:00 PM | Sat-Sun: 8:30 AM - 10:00 PM',
-    coordinates: [-122.4194, 37.7749],
+    coordinates: [-122.4194, 37.7749] as [number, number],
     popular: true
   },
   {
@@ -53,7 +65,7 @@ const locations = [
     address: '456 Abbot Kinney Blvd, Venice, CA 90291',
     phone: '(310) 555-6789',
     hours: 'Mon-Fri: 7:00 AM - 9:00 PM | Sat-Sun: 8:30 AM - 10:00 PM',
-    coordinates: [-118.4695, 33.9850],
+    coordinates: [-118.4695, 33.9850] as [number, number],
     popular: false
   },
   {
@@ -62,17 +74,86 @@ const locations = [
     address: '789 Broadway, New York, NY 10003',
     phone: '(212) 555-9012',
     hours: 'Mon-Fri: 7:00 AM - 9:00 PM | Sat-Sun: 8:30 AM - 10:00 PM',
-    coordinates: [-73.9845, 40.7238],
+    coordinates: [-73.9845, 40.7238] as [number, number],
     popular: true
   },
 ];
 
+// Helper to filter locations by search term
+const filterLocations = (searchTerm: string) => {
+  if (!searchTerm.trim()) return locations;
+  
+  const searchTermLower = searchTerm.toLowerCase();
+  return locations.filter(location => 
+    location.name.toLowerCase().includes(searchTermLower) ||
+    location.address.toLowerCase().includes(searchTermLower)
+  );
+};
+
+// Helper to filter locations by ZIP code (3-digit match for demo purposes)
+const filterLocationsByZip = (zipCode: string) => {
+  if (!zipCode.trim()) return [];
+  
+  // In a real app, this would use geocoding or database lookup
+  // For demo, we'll just return a location if zip code starts with the same 3 digits
+  const zipDigits = zipCode.substring(0, 3);
+  
+  const zipMap: Record<string, string[]> = {
+    "230": ["va-glenallen", "va-richmond"],
+    "236": ["va-hampton"],
+    "941": ["sf-downtown"],
+    "902": ["la-venice"],
+    "100": ["ny-soho"]
+  };
+  
+  const locationIds = zipMap[zipDigits] || [];
+  return locations.filter(loc => locationIds.includes(loc.id));
+};
+
+// Helper to check if location delivers to address (demo/simulated)
+const locationDeliversToAddress = (address: string, cityStateZip: string) => {
+  // This is a simulated check - in a real app this would use distance calculation
+  // For demo purposes, we'll just check if the address contains certain terms
+  const fullAddress = `${address} ${cityStateZip}`.toLowerCase();
+  
+  const cityMatches = {
+    "richmond": ["va-richmond"],
+    "glen allen": ["va-glenallen"],
+    "hampton": ["va-hampton"],
+    "san francisco": ["sf-downtown"],
+    "los angeles": ["la-venice"],
+    "new york": ["ny-soho"]
+  };
+  
+  for (const [city, locationIds] of Object.entries(cityMatches)) {
+    if (fullAddress.includes(city.toLowerCase())) {
+      return locations.filter(loc => locationIds.includes(loc.id));
+    }
+  }
+  
+  return [];
+};
+
 const FindLocation: React.FC = () => {
+  const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeLocation, setActiveLocation] = useState(locations[0]);
   const [filteredLocations, setFilteredLocations] = useState(locations);
   const { addFavoriteLocation, removeFavoriteLocation, isFavoriteLocation } = useFavorites();
+  
+  // Carry-out form state
+  const [isCarryOutOpen, setIsCarryOutOpen] = useState(false);
+  const [carryOutSearch, setCarryOutSearch] = useState('');
+  const [carryOutResults, setCarryOutResults] = useState<typeof locations>([]);
+  const [hasSearched, setHasSearched] = useState(false);
+  
+  // Delivery form state
+  const [isDeliveryOpen, setIsDeliveryOpen] = useState(false);
+  const [deliveryAddress, setDeliveryAddress] = useState('');
+  const [deliveryCityStateZip, setDeliveryCityStateZip] = useState('');
+  const [deliveryResults, setDeliveryResults] = useState<typeof locations>([]);
+  const [hasDeliverySearched, setHasDeliverySearched] = useState(false);
   
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -105,15 +186,20 @@ const FindLocation: React.FC = () => {
       return;
     }
     
-    const filtered = locations.filter(location => 
-      location.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      location.address.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    
-    setFilteredLocations(filtered);
+    setFilteredLocations(filterLocations(searchQuery));
   }, [searchQuery]);
 
   const handleSetFavorite = (location: typeof locations[0]) => {
+    if (!isAuthenticated()) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to save favorite locations",
+        variant: "destructive",
+      });
+      navigate('/sign-in');
+      return;
+    }
+    
     if (isFavoriteLocation(location.id)) {
       removeFavoriteLocation(location.id);
       toast({
@@ -134,6 +220,34 @@ const FindLocation: React.FC = () => {
 
   const handleGetDirections = (location: typeof locations[0]) => {
     window.open(`https://maps.google.com/?q=${encodeURIComponent(location.address)}`, '_blank');
+  };
+  
+  const handleCarryOutSearch = () => {
+    if (!carryOutSearch.trim()) {
+      setCarryOutResults([]);
+      setHasSearched(false);
+      return;
+    }
+    
+    // Determine if searching by ZIP or location name
+    if (/^\d+$/.test(carryOutSearch)) {
+      setCarryOutResults(filterLocationsByZip(carryOutSearch));
+    } else {
+      setCarryOutResults(filterLocations(carryOutSearch));
+    }
+    
+    setHasSearched(true);
+  };
+  
+  const handleDeliverySearch = () => {
+    if (!deliveryAddress.trim() || !deliveryCityStateZip.trim()) {
+      setDeliveryResults([]);
+      setHasDeliverySearched(false);
+      return;
+    }
+    
+    setDeliveryResults(locationDeliversToAddress(deliveryAddress, deliveryCityStateZip));
+    setHasDeliverySearched(true);
   };
   
   return (
@@ -163,6 +277,29 @@ const FindLocation: React.FC = () => {
               <p className="text-muted-foreground max-w-xl">
                 Visit one of our many locations across the country and enjoy our fresh, sustainable menu in person.
               </p>
+            </div>
+          </div>
+        </section>
+        
+        <section className="py-8">
+          <div className="container mx-auto px-4 text-center">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
+              <Button
+                onClick={() => setIsCarryOutOpen(true)}
+                size="lg" 
+                className="h-auto py-6 text-lg"
+              >
+                Carry Out
+              </Button>
+              
+              <Button
+                onClick={() => setIsDeliveryOpen(true)}
+                size="lg"
+                variant="outline"
+                className="h-auto py-6 text-lg"
+              >
+                Delivery
+              </Button>
             </div>
           </div>
         </section>
@@ -235,7 +372,11 @@ const FindLocation: React.FC = () => {
                 <div className="bg-card rounded-lg shadow-md border border-border overflow-hidden">
                   <div className="h-[400px]">
                     <LocationMap 
-                      locations={locations} 
+                      locations={locations.map(loc => ({
+                        id: loc.id,
+                        name: loc.name,
+                        coordinates: loc.coordinates
+                      }))} 
                       activeLocationId={activeLocation.id}
                       center={activeLocation.coordinates}
                     />
@@ -340,6 +481,169 @@ const FindLocation: React.FC = () => {
           </div>
         </section>
       </main>
+      
+      {/* Carry Out Sheet */}
+      <Sheet open={isCarryOutOpen} onOpenChange={setIsCarryOutOpen}>
+        <SheetContent side="right" className="sm:max-w-md md:max-w-lg">
+          <SheetHeader>
+            <SheetTitle>Find a Location for Carry Out</SheetTitle>
+            <SheetDescription>
+              Enter your ZIP code or city to find nearby locations for pickup
+            </SheetDescription>
+          </SheetHeader>
+          
+          <div className="mt-8 space-y-6">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">City, State or ZIP Code</label>
+              <div className="flex gap-2">
+                <Input 
+                  placeholder="e.g., Richmond, VA or 23219" 
+                  value={carryOutSearch}
+                  onChange={(e) => setCarryOutSearch(e.target.value)}
+                />
+                <Button onClick={handleCarryOutSearch}>Search</Button>
+              </div>
+            </div>
+            
+            <div className="mt-6">
+              {hasSearched && (
+                <h3 className="text-lg font-medium mb-4">
+                  {carryOutResults.length > 0 
+                    ? `${carryOutResults.length} Locations Found` 
+                    : "No Locations Found"}
+                </h3>
+              )}
+              
+              {hasSearched && carryOutResults.length === 0 && (
+                <div className="text-center py-8 bg-muted/30 rounded-lg">
+                  <p className="text-muted-foreground mb-2">
+                    We couldn't find any locations near that address.
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Try a different ZIP code or city.
+                  </p>
+                </div>
+              )}
+              
+              <div className="space-y-4 mt-4">
+                {carryOutResults.map(location => (
+                  <div 
+                    key={location.id}
+                    className="p-4 border border-border rounded-lg hover:border-primary/50 transition-colors"
+                  >
+                    <h4 className="font-medium">{location.name}</h4>
+                    <p className="text-sm text-muted-foreground mb-2">{location.address}</p>
+                    <div className="flex items-center justify-between mt-4">
+                      <div className="text-sm text-muted-foreground">
+                        <Clock size={14} className="inline mr-1" /> 
+                        Ready in 15-20 min
+                      </div>
+                      <SheetClose asChild>
+                        <Button size="sm" onClick={() => {
+                          setActiveLocation(location);
+                          toast({
+                            title: "Location Selected",
+                            description: `You've selected ${location.name} for carry out.`,
+                          });
+                        }}>
+                          <span>Select</span>
+                          <ArrowRight size={14} className="ml-1" />
+                        </Button>
+                      </SheetClose>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
+      
+      {/* Delivery Sheet */}
+      <Sheet open={isDeliveryOpen} onOpenChange={setIsDeliveryOpen}>
+        <SheetContent side="right" className="sm:max-w-md md:max-w-lg">
+          <SheetHeader>
+            <SheetTitle>Delivery Address</SheetTitle>
+            <SheetDescription>
+              Enter your address to find out if we deliver to your location
+            </SheetDescription>
+          </SheetHeader>
+          
+          <div className="mt-8 space-y-6">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Street Address</label>
+              <Input 
+                placeholder="e.g., 123 Main St" 
+                value={deliveryAddress}
+                onChange={(e) => setDeliveryAddress(e.target.value)}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-sm font-medium">City, State, ZIP</label>
+              <Input 
+                placeholder="e.g., Richmond, VA 23219" 
+                value={deliveryCityStateZip}
+                onChange={(e) => setDeliveryCityStateZip(e.target.value)}
+              />
+            </div>
+            
+            <Button onClick={handleDeliverySearch} className="w-full">Check Delivery Availability</Button>
+            
+            <div className="mt-6">
+              {hasDeliverySearched && (
+                <h3 className="text-lg font-medium mb-4">
+                  {deliveryResults.length > 0 
+                    ? "Delivery Available!" 
+                    : "Delivery Not Available"}
+                </h3>
+              )}
+              
+              {hasDeliverySearched && deliveryResults.length === 0 && (
+                <div className="text-center py-8 bg-muted/30 rounded-lg">
+                  <p className="text-muted-foreground mb-2">
+                    We're sorry, but we don't currently deliver to your address.
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Try our carry out service instead.
+                  </p>
+                </div>
+              )}
+              
+              <div className="space-y-4 mt-4">
+                {deliveryResults.map(location => (
+                  <div 
+                    key={location.id}
+                    className="p-4 border border-border rounded-lg hover:border-primary/50 transition-colors"
+                  >
+                    <h4 className="font-medium">Delivery from {location.name}</h4>
+                    <p className="text-sm text-muted-foreground mb-2">to {deliveryAddress}, {deliveryCityStateZip}</p>
+                    <div className="flex items-center justify-between mt-4">
+                      <div className="text-sm text-muted-foreground">
+                        <Clock size={14} className="inline mr-1" /> 
+                        Delivery in 30-45 min
+                      </div>
+                      <SheetClose asChild>
+                        <Button size="sm" onClick={() => {
+                          setActiveLocation(location);
+                          toast({
+                            title: "Delivery Location Selected",
+                            description: `You've selected ${location.name} for delivery to your address.`,
+                          });
+                          navigate('/menu');
+                        }}>
+                          <span>Order Now</span>
+                          <ArrowRight size={14} className="ml-1" />
+                        </Button>
+                      </SheetClose>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
       
       <Footer />
     </div>

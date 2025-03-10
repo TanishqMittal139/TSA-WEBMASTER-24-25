@@ -1,16 +1,27 @@
 
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useCart } from '@/context/CartContext';
+import { getCurrentUser, signOut, isAuthenticated } from '@/services/auth';
 import { 
-  Menu, X, ShoppingBag, User, Coffee, Navigation, Info, Percent, CalendarRange, Utensils, Heart
+  Menu, X, ShoppingBag, User, Coffee, Navigation, Info, Percent, CalendarRange, Utensils, Heart, LogOut
 } from 'lucide-react';
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { toast } from '@/components/ui/use-toast';
 
 const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [user, setUser] = useState(getCurrentUser());
   const location = useLocation();
+  const navigate = useNavigate();
   const { itemCount } = useCart();
   
   // Handle scroll effect
@@ -27,6 +38,11 @@ const Navbar: React.FC = () => {
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [location.pathname]);
+
+  // Check for user on mount and after auth changes
+  useEffect(() => {
+    setUser(getCurrentUser());
+  }, [location.pathname]);
   
   const navLinks = [
     { name: 'Home', path: '/', icon: <Coffee size={18} /> },
@@ -36,6 +52,16 @@ const Navbar: React.FC = () => {
     { name: 'About', path: '/about', icon: <Info size={18} /> },
     { name: 'Reservations', path: '/reservations', icon: <CalendarRange size={18} /> }
   ];
+
+  const handleSignOut = () => {
+    signOut();
+    setUser(null);
+    toast({
+      title: "Signed out",
+      description: "You have been successfully signed out",
+    });
+    navigate('/');
+  };
   
   // Determine if we're on a page that needs darker text for better contrast
   const isDarkPage = ['/menu', '/deals', '/find-location', '/reservations', '/about', '/cart', 
@@ -120,15 +146,44 @@ const Navbar: React.FC = () => {
             )}
           </Link>
           
-          <Link 
-            to="/sign-in" 
-            className={cn(
-              "button-outline py-2 text-sm",
-              isScrolled ? "" : isDarkPage ? "" : "border-background text-background hover:bg-background/10"
-            )}
-          >
-            Sign In
-          </Link>
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center space-x-2">
+                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                  <User size={16} className="text-primary" />
+                </div>
+                <span className={cn(
+                  "text-sm font-medium hidden sm:block",
+                  isScrolled ? "text-foreground" : isDarkPage ? "text-foreground" : "text-background"
+                )}>
+                  {user.name}
+                </span>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => navigate('/reservations')}>
+                  My Reservations
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/favorite-locations')}>
+                  Favorite Locations
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut} className="text-destructive flex items-center gap-2">
+                  <LogOut size={16} />
+                  <span>Sign Out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Link 
+              to="/sign-in" 
+              className={cn(
+                "button-outline py-2 text-sm",
+                isScrolled ? "" : isDarkPage ? "" : "border-background text-background hover:bg-background/10"
+              )}
+            >
+              Sign In
+            </Link>
+          )}
         </div>
         
         {/* Mobile Menu Button */}
@@ -169,6 +224,20 @@ const Navbar: React.FC = () => {
         )}
       >
         <div className="flex flex-col pt-24 px-6 h-full overflow-y-auto">
+          {user && (
+            <div className="py-4 mb-4 border-b border-border">
+              <div className="flex items-center space-x-3">
+                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <User size={20} className="text-primary" />
+                </div>
+                <div>
+                  <p className="font-medium">{user.name}</p>
+                  <p className="text-sm text-muted-foreground">{user.email}</p>
+                </div>
+              </div>
+            </div>
+          )}
+          
           {navLinks.map((link) => (
             <Link
               key={link.path}
@@ -193,13 +262,23 @@ const Navbar: React.FC = () => {
             <span>Favorite Locations</span>
           </Link>
           
-          <Link 
-            to="/sign-in" 
-            className="mt-6 flex items-center space-x-3 py-4 text-lg"
-          >
-            <User size={18} />
-            <span>Sign In</span>
-          </Link>
+          {user ? (
+            <button 
+              onClick={handleSignOut}
+              className="mt-6 flex items-center space-x-3 py-4 text-lg text-destructive"
+            >
+              <LogOut size={18} />
+              <span>Sign Out</span>
+            </button>
+          ) : (
+            <Link 
+              to="/sign-in" 
+              className="mt-6 flex items-center space-x-3 py-4 text-lg"
+            >
+              <User size={18} />
+              <span>Sign In</span>
+            </Link>
+          )}
         </div>
       </div>
     </header>

@@ -5,7 +5,7 @@ import { Loader } from 'lucide-react';
 interface LocationMapProps {
   center?: [number, number];
   zoom?: number;
-  locations?: Array<{id: string, name: string, coordinates: [number, number]}>;
+  locations?: Array<{id: string, name: string, coordinates: [number, number], address?: string, phone?: string, hours?: string, popular?: boolean}>;
   activeLocationId?: string;
 }
 
@@ -34,7 +34,7 @@ const LocationMap: React.FC<LocationMapProps> = ({
           <Loader className="animate-spin h-8 w-8 text-primary" />
         </div>
       ) : (
-        <div ref={mapContainer} className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1602665776367-5a69cb8fe0fb?q=80&w=2670&auto=format&fit=crop')] bg-cover bg-center">
+        <div ref={mapContainer} className="absolute inset-0 bg-[url('https://assets.mapbox.com/static/example/v1/light-v11-center-geojson-markers/640/400.png')] bg-cover bg-center">
           {/* Map overlay */}
           <div className="absolute inset-0 bg-black/10"></div>
           

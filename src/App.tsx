@@ -3,10 +3,11 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { CartProvider } from "./context/CartContext";
 import { FavoritesProvider } from "./context/FavoritesContext";
 import { useEffect } from "react";
+import { isAuthenticated } from "./services/auth";
 import Index from "./pages/Index";
 import Menu from "./pages/Menu";
 import Deals from "./pages/Deals";
@@ -22,6 +23,15 @@ import CheckoutConfirmation from "./pages/CheckoutConfirmation";
 import FavoriteLocations from "./pages/FavoriteLocations";
 import DishDetails from "./pages/DishDetails";
 import NotFound from "./pages/NotFound";
+
+// Protected route wrapper
+const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
+  if (!isAuthenticated()) {
+    return <Navigate to="/sign-in" replace />;
+  }
+  
+  return children;
+};
 
 const queryClient = new QueryClient();
 
@@ -49,12 +59,20 @@ const App = () => {
                 <Route path="/about" element={<About />} />
                 <Route path="/cart" element={<Cart />} />
                 <Route path="/reservations" element={<Reservations />} />
-                <Route path="/reservation-confirmation" element={<ReservationConfirmation />} />
+                <Route path="/reservation-confirmation" element={
+                  <ProtectedRoute>
+                    <ReservationConfirmation />
+                  </ProtectedRoute>
+                } />
                 <Route path="/sign-in" element={<SignIn />} />
                 <Route path="/sign-up" element={<SignUp />} />
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/checkout-confirmation" element={<CheckoutConfirmation />} />
-                <Route path="/favorite-locations" element={<FavoriteLocations />} />
+                <Route path="/favorite-locations" element={
+                  <ProtectedRoute>
+                    <FavoriteLocations />
+                  </ProtectedRoute>
+                } />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

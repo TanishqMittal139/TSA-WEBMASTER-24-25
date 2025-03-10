@@ -30,7 +30,7 @@ const isAuthenticated = (): boolean => {
 
 // Sign up function
 const signUp = async (name: string, email: string, password: string): Promise<AuthResponse> => {
-  // For demonstration purposes, we'll simulate an API call
+  // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 1000));
 
   try {
