@@ -34,7 +34,7 @@ const LocationMap: React.FC<LocationMapProps> = ({
           <Loader className="animate-spin h-8 w-8 text-primary" />
         </div>
       ) : (
-        <div ref={mapContainer} className="absolute inset-0 bg-[url('https://assets.mapbox.com/static/example/v1/light-v11-center-geojson-markers/640/400.png')] bg-cover bg-center">
+        <div ref={mapContainer} className="absolute inset-0 bg-[url('https://maptiler.com/static/img/example-usa-states-county.png')] bg-cover bg-center">
           {/* Map overlay */}
           <div className="absolute inset-0 bg-black/10"></div>
           

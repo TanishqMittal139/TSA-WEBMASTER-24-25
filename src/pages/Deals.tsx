@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/ui/navbar';
 import Footer from '../components/ui/footer';
 import BlurImage from '../components/ui/blur-image';
@@ -7,8 +8,27 @@ import { cn } from '@/lib/utils';
 import { Link } from 'react-router-dom';
 import { Check, Coffee, Soup, Sandwich, Gift, Users, Package } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
+import { isAuthenticated } from '@/services/auth';
+import { useCart } from '@/context/CartContext';
 
-const deals = [
+export interface DealData {
+  id: string;
+  title: string;
+  description: string;
+  discount: string;
+  image: string;
+  features: { icon: React.ReactNode; text: string }[];
+  popular: boolean;
+  discountAmount: number;
+  discountType: 'percentage' | 'fixed';
+  appliesTo: 'all' | 'category' | 'specific';
+  categories?: string[];
+  items?: string[];
+  minimumPurchase?: number;
+  code: string;
+}
+
+const deals: DealData[] = [
   {
     id: 'combo-meal',
     title: 'Combo Meal Deal',
@@ -20,7 +40,12 @@ const deals = [
       { icon: <Coffee size={16} />, text: '1 Coffee of your choice' },
       { icon: <Soup size={16} />, text: '1 Soup of your choice' }
     ],
-    popular: true
+    popular: true,
+    discountAmount: 15,
+    discountType: 'percentage',
+    appliesTo: 'category',
+    categories: ['sandwiches', 'beverages', 'soups'],
+    code: 'COMBO15'
   },
   {
     id: 'catering',
@@ -33,7 +58,12 @@ const deals = [
       { icon: <Package size={16} />, text: 'Custom packaging options' },
       { icon: <Check size={16} />, text: 'Available for delivery or pickup' }
     ],
-    popular: false
+    popular: false,
+    discountAmount: 10,
+    discountType: 'percentage',
+    appliesTo: 'all',
+    minimumPurchase: 100,
+    code: 'CATER10'
   },
   {
     id: 'subscription',
@@ -46,7 +76,11 @@ const deals = [
       { icon: <Check size={16} />, text: 'Skip or modify anytime' },
       { icon: <Check size={16} />, text: 'Convenient billing options' }
     ],
-    popular: false
+    popular: false,
+    discountAmount: 20,
+    discountType: 'percentage',
+    appliesTo: 'all',
+    code: 'WEEKLY20'
   },
   {
     id: 'gift-card',
@@ -59,12 +93,19 @@ const deals = [
       { icon: <Check size={16} />, text: 'Digital or physical card options' },
       { icon: <Check size={16} />, text: 'No expiration date' }
     ],
-    popular: false
+    popular: false,
+    discountAmount: 5,
+    discountType: 'fixed',
+    appliesTo: 'specific',
+    items: ['gift-card-50'],
+    code: 'GIFT5'
   }
 ];
 
 const Deals: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
+  const navigate = useNavigate();
+  const { addItem } = useCart();
   
   // Animation on mount
   useEffect(() => {
@@ -93,12 +134,27 @@ const Deals: React.FC = () => {
     };
   }, []);
 
-  const handleGetDeal = (deal: typeof deals[0]) => {
+  const handleGetDeal = (deal: DealData) => {
+    if (!isAuthenticated()) {
+      toast({
+        title: "Authentication Required",
+        description: `Please sign in to redeem the ${deal.title}.`,
+        duration: 3000,
+      });
+      navigate('/sign-in', { state: { redirectTo: '/deals', dealId: deal.id } });
+      return;
+    }
+
+    // Store the active deal in localStorage
+    localStorage.setItem('active_deal', JSON.stringify(deal));
+    
     toast({
-      title: "Deal Selected",
-      description: `You've selected the ${deal.title}. Sign in to redeem this offer.`,
+      title: "Deal Activated",
+      description: `The ${deal.title} has been applied. Head to the menu to use it!`,
       duration: 3000,
     });
+    
+    navigate('/menu');
   };
   
   return (
@@ -145,7 +201,7 @@ const Deals: React.FC = () => {
             
             {/* Deals Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-              {deals.map((deal, index) => (
+              {deals.map((deal) => (
                 <div key={deal.id} className={`stagger-item rounded-xl overflow-hidden shadow-lg bg-card transition-all duration-500 transform hover:-translate-y-1 hover:shadow-xl ${deal.popular ? 'border-2 border-primary' : 'border border-border'}`}>
                   <div className="relative">
                     <BlurImage
@@ -181,14 +237,16 @@ const Deals: React.FC = () => {
                         onClick={() => handleGetDeal(deal)}
                         className="flex-1 bg-primary text-primary-foreground px-4 py-2 rounded-md font-medium hover:bg-primary/90 transition-colors"
                       >
-                        Get This Deal
+                        {isAuthenticated() ? "Get This Deal" : "Sign In to Redeem"}
                       </button>
-                      <Link
-                        to="/sign-in"
-                        className="flex-1 border border-primary text-primary px-4 py-2 rounded-md font-medium hover:bg-primary/10 transition-colors text-center"
-                      >
-                        Sign In to Redeem
-                      </Link>
+                      {!isAuthenticated() && (
+                        <Link
+                          to="/sign-in"
+                          className="flex-1 border border-primary text-primary px-4 py-2 rounded-md font-medium hover:bg-primary/10 transition-colors text-center"
+                        >
+                          Sign In
+                        </Link>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -204,12 +262,21 @@ const Deals: React.FC = () => {
             <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
               Sign up today to unlock all our special offers and start saving on your favorite meals.
             </p>
-            <Link
-              to="/sign-in"
-              className="inline-block bg-primary text-primary-foreground px-8 py-3 rounded-md font-medium text-lg hover:bg-primary/90 transition-colors"
-            >
-              Get Started
-            </Link>
+            {!isAuthenticated() ? (
+              <Link
+                to="/sign-in"
+                className="inline-block bg-primary text-primary-foreground px-8 py-3 rounded-md font-medium text-lg hover:bg-primary/90 transition-colors"
+              >
+                Get Started
+              </Link>
+            ) : (
+              <Link
+                to="/menu"
+                className="inline-block bg-primary text-primary-foreground px-8 py-3 rounded-md font-medium text-lg hover:bg-primary/90 transition-colors"
+              >
+                Browse Menu
+              </Link>
+            )}
           </div>
         </section>
       </main>

@@ -20,119 +20,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { isAuthenticated } from '@/services/auth';
 import { useNavigate } from 'react-router-dom';
-
-// Updated locations with Virginia locations
-const locations = [
-  {
-    id: 'va-glenallen',
-    name: 'Glen Allen - Virginia',
-    address: '4350 Pouncey Tract Rd, Glen Allen, VA 23060',
-    phone: '(804) 555-7821',
-    hours: 'Mon-Fri: 7:00 AM - 9:00 PM | Sat-Sun: 8:30 AM - 10:00 PM',
-    coordinates: [-77.6082, 37.6651] as [number, number],
-    popular: true
-  },
-  {
-    id: 'va-hampton',
-    name: 'Hampton - Virginia',
-    address: '2150 Cunningham Dr, Hampton, VA 23666',
-    phone: '(757) 555-3492',
-    hours: 'Mon-Fri: 7:00 AM - 9:00 PM | Sat-Sun: 8:30 AM - 10:00 PM',
-    coordinates: [-76.3968, 37.0311] as [number, number],
-    popular: false
-  },
-  {
-    id: 'va-richmond',
-    name: 'Richmond - Virginia',
-    address: '901 E Cary St, Richmond, VA 23219',
-    phone: '(804) 555-9072',
-    hours: 'Mon-Fri: 7:00 AM - 9:00 PM | Sat-Sun: 8:30 AM - 10:00 PM',
-    coordinates: [-77.4360, 37.5407] as [number, number],
-    popular: true
-  },
-  {
-    id: 'sf-downtown',
-    name: 'San Francisco - Downtown',
-    address: '123 Market Street, San Francisco, CA 94105',
-    phone: '(415) 555-1234',
-    hours: 'Mon-Fri: 7:00 AM - 9:00 PM | Sat-Sun: 8:30 AM - 10:00 PM',
-    coordinates: [-122.4194, 37.7749] as [number, number],
-    popular: true
-  },
-  {
-    id: 'la-venice',
-    name: 'Los Angeles - Venice',
-    address: '456 Abbot Kinney Blvd, Venice, CA 90291',
-    phone: '(310) 555-6789',
-    hours: 'Mon-Fri: 7:00 AM - 9:00 PM | Sat-Sun: 8:30 AM - 10:00 PM',
-    coordinates: [-118.4695, 33.9850] as [number, number],
-    popular: false
-  },
-  {
-    id: 'ny-soho',
-    name: 'New York - SoHo',
-    address: '789 Broadway, New York, NY 10003',
-    phone: '(212) 555-9012',
-    hours: 'Mon-Fri: 7:00 AM - 9:00 PM | Sat-Sun: 8:30 AM - 10:00 PM',
-    coordinates: [-73.9845, 40.7238] as [number, number],
-    popular: true
-  },
-];
-
-// Helper to filter locations by search term
-const filterLocations = (searchTerm: string) => {
-  if (!searchTerm.trim()) return locations;
-  
-  const searchTermLower = searchTerm.toLowerCase();
-  return locations.filter(location => 
-    location.name.toLowerCase().includes(searchTermLower) ||
-    location.address.toLowerCase().includes(searchTermLower)
-  );
-};
-
-// Helper to filter locations by ZIP code (3-digit match for demo purposes)
-const filterLocationsByZip = (zipCode: string) => {
-  if (!zipCode.trim()) return [];
-  
-  // In a real app, this would use geocoding or database lookup
-  // For demo, we'll just return a location if zip code starts with the same 3 digits
-  const zipDigits = zipCode.substring(0, 3);
-  
-  const zipMap: Record<string, string[]> = {
-    "230": ["va-glenallen", "va-richmond"],
-    "236": ["va-hampton"],
-    "941": ["sf-downtown"],
-    "902": ["la-venice"],
-    "100": ["ny-soho"]
-  };
-  
-  const locationIds = zipMap[zipDigits] || [];
-  return locations.filter(loc => locationIds.includes(loc.id));
-};
-
-// Helper to check if location delivers to address (demo/simulated)
-const locationDeliversToAddress = (address: string, cityStateZip: string) => {
-  // This is a simulated check - in a real app this would use distance calculation
-  // For demo purposes, we'll just check if the address contains certain terms
-  const fullAddress = `${address} ${cityStateZip}`.toLowerCase();
-  
-  const cityMatches = {
-    "richmond": ["va-richmond"],
-    "glen allen": ["va-glenallen"],
-    "hampton": ["va-hampton"],
-    "san francisco": ["sf-downtown"],
-    "los angeles": ["la-venice"],
-    "new york": ["ny-soho"]
-  };
-  
-  for (const [city, locationIds] of Object.entries(cityMatches)) {
-    if (fullAddress.includes(city.toLowerCase())) {
-      return locations.filter(loc => locationIds.includes(loc.id));
-    }
-  }
-  
-  return [];
-};
+import { locations, filterLocationsBySearch, filterLocationsByZip, locationDeliversToAddress } from '@/data/locations';
 
 const FindLocation: React.FC = () => {
   const navigate = useNavigate();
@@ -145,14 +33,14 @@ const FindLocation: React.FC = () => {
   // Carry-out form state
   const [isCarryOutOpen, setIsCarryOutOpen] = useState(false);
   const [carryOutSearch, setCarryOutSearch] = useState('');
-  const [carryOutResults, setCarryOutResults] = useState<typeof locations>([]);
+  const [carryOutResults, setCarryOutResults] = useState(locations.slice(0, 0));
   const [hasSearched, setHasSearched] = useState(false);
   
   // Delivery form state
   const [isDeliveryOpen, setIsDeliveryOpen] = useState(false);
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [deliveryCityStateZip, setDeliveryCityStateZip] = useState('');
-  const [deliveryResults, setDeliveryResults] = useState<typeof locations>([]);
+  const [deliveryResults, setDeliveryResults] = useState(locations.slice(0, 0));
   const [hasDeliverySearched, setHasDeliverySearched] = useState(false);
   
   useEffect(() => {
@@ -186,7 +74,7 @@ const FindLocation: React.FC = () => {
       return;
     }
     
-    setFilteredLocations(filterLocations(searchQuery));
+    setFilteredLocations(filterLocationsBySearch(searchQuery));
   }, [searchQuery]);
 
   const handleSetFavorite = (location: typeof locations[0]) => {
@@ -233,7 +121,7 @@ const FindLocation: React.FC = () => {
     if (/^\d+$/.test(carryOutSearch)) {
       setCarryOutResults(filterLocationsByZip(carryOutSearch));
     } else {
-      setCarryOutResults(filterLocations(carryOutSearch));
+      setCarryOutResults(filterLocationsBySearch(carryOutSearch));
     }
     
     setHasSearched(true);
@@ -275,7 +163,7 @@ const FindLocation: React.FC = () => {
               </div>
               <h1 className="text-4xl md:text-5xl font-bold mb-4">Find a Tasty Hub Near You</h1>
               <p className="text-muted-foreground max-w-xl">
-                Visit one of our many locations across the country and enjoy our fresh, sustainable menu in person.
+                Visit one of our {locations.length} locations across the country and enjoy our fresh, sustainable menu in person.
               </p>
             </div>
           </div>
@@ -283,20 +171,19 @@ const FindLocation: React.FC = () => {
         
         <section className="py-8">
           <div className="container mx-auto px-4 text-center">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-lg mx-auto">
               <Button
                 onClick={() => setIsCarryOutOpen(true)}
-                size="lg" 
-                className="h-auto py-6 text-lg"
+                variant="default"
+                className="h-auto py-3 px-4 text-sm rounded-full shadow-md hover:shadow-lg transition-all"
               >
                 Carry Out
               </Button>
               
               <Button
                 onClick={() => setIsDeliveryOpen(true)}
-                size="lg"
                 variant="outline"
-                className="h-auto py-6 text-lg"
+                className="h-auto py-3 px-4 text-sm rounded-full shadow-sm hover:shadow-md transition-all"
               >
                 Delivery
               </Button>
