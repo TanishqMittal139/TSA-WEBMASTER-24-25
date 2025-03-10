@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Navbar from '../components/ui/navbar';
 import Footer from '../components/ui/footer';
@@ -6,14 +7,43 @@ import LocationMap from '../components/ui/location-map';
 import { cn } from '@/lib/utils';
 import { MapPin, Clock, Phone, ExternalLink, ChevronRight, Search, Heart } from 'lucide-react';
 import { useFavorites } from '@/context/FavoritesContext';
+import { toast } from '@/components/ui/use-toast';
 
+// Updated locations with Virginia locations
 const locations = [
+  {
+    id: 'va-glenallen',
+    name: 'Glen Allen - Virginia',
+    address: '4350 Pouncey Tract Rd, Glen Allen, VA 23060',
+    phone: '(804) 555-7821',
+    hours: 'Mon-Fri: 7:00 AM - 9:00 PM | Sat-Sun: 8:30 AM - 10:00 PM',
+    coordinates: [-77.6082, 37.6651],
+    popular: true
+  },
+  {
+    id: 'va-hampton',
+    name: 'Hampton - Virginia',
+    address: '2150 Cunningham Dr, Hampton, VA 23666',
+    phone: '(757) 555-3492',
+    hours: 'Mon-Fri: 7:00 AM - 9:00 PM | Sat-Sun: 8:30 AM - 10:00 PM',
+    coordinates: [-76.3968, 37.0311],
+    popular: false
+  },
+  {
+    id: 'va-richmond',
+    name: 'Richmond - Virginia',
+    address: '901 E Cary St, Richmond, VA 23219',
+    phone: '(804) 555-9072',
+    hours: 'Mon-Fri: 7:00 AM - 9:00 PM | Sat-Sun: 8:30 AM - 10:00 PM',
+    coordinates: [-77.4360, 37.5407],
+    popular: true
+  },
   {
     id: 'sf-downtown',
     name: 'San Francisco - Downtown',
     address: '123 Market Street, San Francisco, CA 94105',
     phone: '(415) 555-1234',
-    hours: 'Mon-Fri: 7:00 AM - 5:00 PM | Sat-Sun: 8:30 AM - 5:00 PM',
+    hours: 'Mon-Fri: 7:00 AM - 9:00 PM | Sat-Sun: 8:30 AM - 10:00 PM',
     coordinates: [-122.4194, 37.7749],
     popular: true
   },
@@ -22,7 +52,7 @@ const locations = [
     name: 'Los Angeles - Venice',
     address: '456 Abbot Kinney Blvd, Venice, CA 90291',
     phone: '(310) 555-6789',
-    hours: 'Mon-Fri: 7:00 AM - 5:00 PM | Sat-Sun: 8:30 AM - 5:00 PM',
+    hours: 'Mon-Fri: 7:00 AM - 9:00 PM | Sat-Sun: 8:30 AM - 10:00 PM',
     coordinates: [-118.4695, 33.9850],
     popular: false
   },
@@ -31,35 +61,8 @@ const locations = [
     name: 'New York - SoHo',
     address: '789 Broadway, New York, NY 10003',
     phone: '(212) 555-9012',
-    hours: 'Mon-Fri: 7:00 AM - 5:00 PM | Sat-Sun: 8:30 AM - 5:00 PM',
+    hours: 'Mon-Fri: 7:00 AM - 9:00 PM | Sat-Sun: 8:30 AM - 10:00 PM',
     coordinates: [-73.9845, 40.7238],
-    popular: true
-  },
-  {
-    id: 'sea-capitol',
-    name: 'Seattle - Capitol Hill',
-    address: '321 Pike Street, Seattle, WA 98101',
-    phone: '(206) 555-3456',
-    hours: 'Mon-Fri: 7:00 AM - 5:00 PM | Sat-Sun: 8:30 AM - 5:00 PM',
-    coordinates: [-122.3321, 47.6062],
-    popular: false
-  },
-  {
-    id: 'chi-river',
-    name: 'Chicago - River North',
-    address: '654 N Wells St, Chicago, IL 60654',
-    phone: '(312) 555-7890',
-    hours: 'Mon-Fri: 7:00 AM - 5:00 PM | Sat-Sun: 8:30 AM - 5:00 PM',
-    coordinates: [-87.6298, 41.8781],
-    popular: false
-  },
-  {
-    id: 'aus-downtown',
-    name: 'Austin - Downtown',
-    address: '987 Congress Ave, Austin, TX 78701',
-    phone: '(512) 555-2345',
-    hours: 'Mon-Fri: 7:00 AM - 5:00 PM | Sat-Sun: 8:30 AM - 5:00 PM',
-    coordinates: [-97.7431, 30.2672],
     popular: true
   },
 ];
@@ -113,10 +116,18 @@ const FindLocation: React.FC = () => {
   const handleSetFavorite = (location: typeof locations[0]) => {
     if (isFavoriteLocation(location.id)) {
       removeFavoriteLocation(location.id);
+      toast({
+        title: "Location removed",
+        description: `${location.name} has been removed from your favorites.`,
+      });
     } else {
       addFavoriteLocation({
         id: location.id,
         name: location.name
+      });
+      toast({
+        title: "Location added",
+        description: `${location.name} has been added to your favorites.`,
       });
     }
   };
@@ -223,7 +234,11 @@ const FindLocation: React.FC = () => {
               <div className="lg:col-span-2">
                 <div className="bg-card rounded-lg shadow-md border border-border overflow-hidden">
                   <div className="h-[400px]">
-                    <LocationMap />
+                    <LocationMap 
+                      locations={locations} 
+                      activeLocationId={activeLocation.id}
+                      center={activeLocation.coordinates}
+                    />
                   </div>
                   
                   {activeLocation && (

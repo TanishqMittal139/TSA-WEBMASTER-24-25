@@ -33,6 +33,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from '@/components/ui/use-toast';
+import { createReservation } from '@/services/reservations';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -67,23 +68,42 @@ const Reservations = () => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    toast({
-      title: "Reservation Confirmed!",
-      description: `Your table for ${values.guests} is booked for ${format(values.date, 'MMMM d, yyyy')} at ${values.time}.`,
-    });
-    
-    setIsSubmitting(false);
-    navigate('/reservation-confirmation', { 
-      state: { 
-        reservationDetails: {
-          ...values,
-          date: format(values.date, 'MMMM d, yyyy')
-        } 
+    try {
+      const result = await createReservation(values);
+      
+      if (result.success) {
+        toast({
+          title: "Reservation Confirmed!",
+          description: `Your table for ${values.guests} is booked for ${format(values.date, 'MMMM d, yyyy')} at ${values.time}.`,
+        });
+        
+        // Navigate to confirmation page
+        navigate('/reservation-confirmation', { 
+          state: { 
+            reservationDetails: {
+              ...values,
+              date: format(values.date, 'MMMM d, yyyy'),
+              reservationId: result.reservationId
+            } 
+          }
+        });
+      } else {
+        toast({
+          title: "Reservation Failed",
+          description: result.message,
+          variant: "destructive",
+        });
       }
-    });
+    } catch (error) {
+      console.error("Reservation error:", error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
