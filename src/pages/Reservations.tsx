@@ -50,7 +50,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { toast } from '@/components/ui/use-toast';
-import { createReservation, getReservationsByEmail, cancelReservation } from '@/services/reservations';
+import { createReservation, getReservationsByEmail, cancelReservation, ReservationData } from '@/services/reservations';
 import { getCurrentUser, isAuthenticated } from '@/services/auth';
 
 const formSchema = z.object({
@@ -73,7 +73,7 @@ const Reservations = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState("new");
-  const [myReservations, setMyReservations] = useState<any[]>([]);
+  const [myReservations, setMyReservations] = useState<ReservationData[]>([]);
   const user = getCurrentUser();
   
   // Redirect to sign in if not authenticated
@@ -117,7 +117,15 @@ const Reservations = () => {
     setIsSubmitting(true);
     
     try {
-      const result = await createReservation(values);
+      // Create a complete reservation object with all required fields
+      const reservationData = {
+        ...values,
+        userId: user.id,
+        status: 'confirmed' as const,
+        createdAt: new Date()
+      };
+      
+      const result = await createReservation(reservationData);
       
       if (result.success) {
         toast({
