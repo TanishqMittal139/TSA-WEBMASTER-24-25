@@ -52,6 +52,10 @@ const sendContactForm = async (data: ContactData): Promise<ContactResponse> => {
   }
 };
 
+// Alias for the function (this was missing and causing the error)
+const submitContactForm = sendContactForm;
+
 export {
-  sendContactForm
+  sendContactForm,
+  submitContactForm
 };

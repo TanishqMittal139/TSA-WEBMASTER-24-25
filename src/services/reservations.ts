@@ -1,17 +1,21 @@
 
-// A simple frontend reservation service
-// Note: In a real application, this would connect to a backend API
+// This file would typically interact with a backend API.
+// For this demo, we're using localStorage to simulate persistence.
+
+import { v4 as uuidv4 } from 'uuid';
 
 export interface ReservationData {
   id: string;
+  userId: string;
   name: string;
   email: string;
   phone: string;
   date: Date;
   time: string;
   guests: string;
-  specialRequests: string;
-  userId: string;
+  specialRequests?: string;
+  status: 'confirmed' | 'pending' | 'cancelled';
+  createdAt: Date;
 }
 
 interface ReservationResponse {
@@ -20,27 +24,29 @@ interface ReservationResponse {
   reservation?: ReservationData;
 }
 
-// Simulated reservation storage
-const STORAGE_KEY = 'tasty_hub_reservations';
-
-// Get all reservations
-const getAllReservations = (): ReservationData[] => {
-  const reservationsData = localStorage.getItem(STORAGE_KEY);
-  return reservationsData ? JSON.parse(reservationsData) : [];
+// Load reservations from localStorage
+const getReservations = (): ReservationData[] => {
+  try {
+    const reservations = localStorage.getItem('reservations');
+    return reservations ? JSON.parse(reservations) : [];
+  } catch (error) {
+    console.error('Error loading reservations:', error);
+    return [];
+  }
 };
 
-// Get user reservations
-const getUserReservations = (userId: string): ReservationData[] => {
-  const allReservations = getAllReservations();
-  return allReservations.filter(reservation => reservation.userId === userId);
+// Save reservations to localStorage
+const saveReservations = (reservations: ReservationData[]): void => {
+  localStorage.setItem('reservations', JSON.stringify(reservations));
 };
 
-// Create a reservation
+// Create a new reservation
 const createReservation = async (data: Omit<ReservationData, 'id'>): Promise<ReservationResponse> => {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 1000));
 
   try {
+    // Simple validation
     if (!data.name || !data.email || !data.phone || !data.date || !data.time || !data.guests) {
       return {
         success: false,
@@ -48,78 +54,85 @@ const createReservation = async (data: Omit<ReservationData, 'id'>): Promise<Res
       };
     }
 
-    // Simple email validation
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-      return {
-        success: false,
-        message: 'Invalid email format'
-      };
-    }
-
-    // Get existing reservations
-    const reservations = getAllReservations();
-
     // Create new reservation
     const newReservation: ReservationData = {
+      id: uuidv4(),
       ...data,
-      id: Date.now().toString()
+      status: 'confirmed',
+      createdAt: new Date()
     };
 
-    // Save to "database" (localStorage)
+    // Get existing reservations and add the new one
+    const reservations = getReservations();
     reservations.push(newReservation);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(reservations));
+    saveReservations(reservations);
 
     // Simulate sending confirmation email
-    console.log(`Sending confirmation email to ${data.email} for reservation #${newReservation.id}`);
+    console.log(`Confirmation email sent to ${data.email} for reservation on ${data.date} at ${data.time}`);
 
     return {
       success: true,
-      message: 'Reservation created successfully',
+      message: 'Your reservation has been confirmed!',
       reservation: newReservation
     };
   } catch (error) {
-    console.error('Reservation creation error:', error);
+    console.error('Error creating reservation:', error);
     return {
       success: false,
-      message: 'An unexpected error occurred'
+      message: 'An error occurred while processing your reservation. Please try again.'
     };
   }
+};
+
+// Get all reservations for a specific email
+const getReservationsByEmail = (email: string): ReservationData[] => {
+  const reservations = getReservations();
+  return reservations.filter(res => res.email.toLowerCase() === email.toLowerCase());
+};
+
+// Get a reservation by id
+const getReservationById = (id: string): ReservationData | undefined => {
+  const reservations = getReservations();
+  return reservations.find(res => res.id === id);
 };
 
 // Cancel a reservation
 const cancelReservation = async (id: string): Promise<ReservationResponse> => {
   // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  await new Promise(resolve => setTimeout(resolve, 800));
 
   try {
-    const reservations = getAllReservations();
-    const updatedReservations = reservations.filter(reservation => reservation.id !== id);
+    const reservations = getReservations();
+    const index = reservations.findIndex(res => res.id === id);
     
-    if (reservations.length === updatedReservations.length) {
+    if (index === -1) {
       return {
         success: false,
         message: 'Reservation not found'
       };
     }
-    
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedReservations));
-    
+
+    // Update status to cancelled
+    reservations[index].status = 'cancelled';
+    saveReservations(reservations);
+
     return {
       success: true,
-      message: 'Reservation cancelled successfully'
+      message: 'Your reservation has been cancelled',
+      reservation: reservations[index]
     };
   } catch (error) {
-    console.error('Reservation cancellation error:', error);
+    console.error('Error cancelling reservation:', error);
     return {
       success: false,
-      message: 'An unexpected error occurred'
+      message: 'An error occurred while cancelling your reservation. Please try again.'
     };
   }
 };
 
 export {
-  getAllReservations,
-  getUserReservations,
   createReservation,
+  getReservationById,
+  getReservationsByEmail,
   cancelReservation
 };

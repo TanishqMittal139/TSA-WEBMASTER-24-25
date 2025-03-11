@@ -45,7 +45,7 @@ const formSchema = z.object({
 });
 
 const Checkout = () => {
-  const { items } = useCart();
+  const { items, clearCart } = useCart();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -126,6 +126,9 @@ const Checkout = () => {
         }
       }
     });
+    
+    // Only clear the cart AFTER navigating to the confirmation page
+    clearCart();
   };
   
   if (items.length === 0) {

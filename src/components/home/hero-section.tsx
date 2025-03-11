@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronRight, ArrowRight } from 'lucide-react';
+import { ChevronRight, ArrowRight, ShoppingBag, Truck } from 'lucide-react';
 import BlurImage from '../ui/blur-image';
 import { cn } from '@/lib/utils';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetClose } from "@/components/ui/sheet";
@@ -13,8 +13,8 @@ import { useNavigate } from 'react-router-dom';
 import { filterLocationsBySearch, filterLocationsByZip, locationDeliversToAddress } from '@/data/locations';
 
 const OrderOptions = [
-  { id: 'carryout', label: 'Carry Out' },
-  { id: 'delivery', label: 'Delivery' }
+  { id: 'carryout', label: 'Carryout', icon: <ShoppingBag size={14} /> },
+  { id: 'delivery', label: 'Delivery', icon: <Truck size={14} /> }
 ];
 
 const HeroSection: React.FC = () => {
@@ -94,18 +94,19 @@ const HeroSection: React.FC = () => {
             isVisible ? "translate-x-0 opacity-100" : "-translate-x-12 opacity-0"
           )}>
             {/* Order Type Selector */}
-            <div className="inline-flex p-1 bg-secondary rounded-full">
+            <div className="inline-flex p-1 bg-secondary/80 backdrop-blur-sm rounded-full shadow-sm">
               {OrderOptions.map((option) => (
                 <button
                   key={option.id}
                   onClick={() => setSelectedOption(option.id)}
                   className={cn(
-                    "px-6 py-2 rounded-full text-sm font-medium transition-all duration-300",
+                    "px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-1.5",
                     selectedOption === option.id
-                      ? "bg-primary text-white shadow-md"
+                      ? "bg-primary text-primary-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
                   )}
                 >
+                  {option.icon}
                   {option.label}
                 </button>
               ))}
@@ -171,7 +172,7 @@ const HeroSection: React.FC = () => {
       <Sheet open={isCarryOutOpen} onOpenChange={setIsCarryOutOpen}>
         <SheetContent side="right" className="sm:max-w-md md:max-w-lg">
           <SheetHeader>
-            <SheetTitle>Find a Location for Carry Out</SheetTitle>
+            <SheetTitle>Find a Location for Carryout</SheetTitle>
             <SheetDescription>
               Enter your ZIP code or city to find nearby locations for pickup
             </SheetDescription>
@@ -227,7 +228,7 @@ const HeroSection: React.FC = () => {
                         <Button size="sm" onClick={() => {
                           toast({
                             title: "Location Selected",
-                            description: `You've selected ${location.name} for carry out.`,
+                            description: `You've selected ${location.name} for carryout.`,
                           });
                           navigate('/menu');
                         }}>
@@ -290,7 +291,7 @@ const HeroSection: React.FC = () => {
                     We're sorry, but we don't currently deliver to your address.
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Try our carry out service instead.
+                    Try our carryout service instead.
                   </p>
                 </div>
               )}

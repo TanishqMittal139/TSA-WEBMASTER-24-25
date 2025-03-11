@@ -11,6 +11,7 @@ import { isAuthenticated } from "./services/auth";
 import Index from "./pages/Index";
 import Menu from "./pages/Menu";
 import Deals from "./pages/Deals";
+import DealUse from "./pages/DealUse";
 import FindLocation from "./pages/FindLocation";
 import About from "./pages/About";
 import Cart from "./pages/Cart";
@@ -55,6 +56,11 @@ const App = () => {
                 <Route path="/menu" element={<Menu />} />
                 <Route path="/menu/:dishId" element={<DishDetails />} />
                 <Route path="/deals" element={<Deals />} />
+                <Route path="/deals/:dealId/use" element={
+                  <ProtectedRoute>
+                    <DealUse />
+                  </ProtectedRoute>
+                } />
                 <Route path="/find-location" element={<FindLocation />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/cart" element={<Cart />} />

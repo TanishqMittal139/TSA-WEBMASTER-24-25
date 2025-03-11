@@ -105,7 +105,6 @@ const deals: DealData[] = [
 const Deals: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
   const navigate = useNavigate();
-  const { addItem } = useCart();
   
   // Animation on mount
   useEffect(() => {
@@ -150,11 +149,11 @@ const Deals: React.FC = () => {
     
     toast({
       title: "Deal Activated",
-      description: `The ${deal.title} has been applied. Head to the menu to use it!`,
+      description: `The ${deal.title} has been applied. Select items to use it!`,
       duration: 3000,
     });
     
-    navigate('/menu');
+    navigate(`/deals/${deal.id}/use`);
   };
   
   return (

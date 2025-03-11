@@ -34,22 +34,36 @@ const LocationMap: React.FC<LocationMapProps> = ({
           <Loader className="animate-spin h-8 w-8 text-primary" />
         </div>
       ) : (
-        <div ref={mapContainer} className="absolute inset-0 bg-[url('https://maptiler.com/static/img/example-usa-states-county.png')] bg-cover bg-center">
+        <div ref={mapContainer} className="absolute inset-0">
+          {/* Map background image */}
+          <img 
+            src="https://maptiler.com/static/img/maps/osm-bright.png" 
+            alt="Map background"
+            className="w-full h-full object-cover"
+          />
+          
           {/* Map overlay */}
-          <div className="absolute inset-0 bg-black/10"></div>
+          <div className="absolute inset-0 bg-black/5"></div>
           
           {/* Store markers */}
           {locations.map(location => (
             <div 
               key={location.id}
-              className={`absolute transform -translate-x-1/2 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center ${activeLocationId === location.id ? 'bg-primary scale-125' : 'bg-primary/70'}`}
+              className={`absolute transform -translate-x-1/2 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center ${activeLocationId === location.id ? 'bg-primary scale-125 z-10' : 'bg-primary/70'}`}
               style={{
                 // These are approximate mappings for demonstration
-                top: `${50 - (location.coordinates[1] - center[1]) * 10}%`,
-                left: `${50 + (location.coordinates[0] - center[0]) * 10}%`,
+                top: `${50 - (location.coordinates[1] - center[1]) * 5}%`,
+                left: `${50 + (location.coordinates[0] - center[0]) * 5}%`,
               }}
             >
               <div className="w-3 h-3 bg-white rounded-full"></div>
+              
+              {/* Tooltip for location name */}
+              {activeLocationId === location.id && (
+                <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-background text-foreground text-xs font-medium py-1 px-2 rounded shadow-md whitespace-nowrap">
+                  {location.name}
+                </div>
+              )}
             </div>
           ))}
         </div>
