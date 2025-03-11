@@ -58,8 +58,8 @@ const createReservation = async (data: Omit<ReservationData, 'id'>): Promise<Res
     const newReservation: ReservationData = {
       id: uuidv4(),
       ...data,
-      status: 'confirmed',
-      createdAt: new Date()
+      status: data.status || 'confirmed',
+      createdAt: data.createdAt || new Date()
     };
 
     // Get existing reservations and add the new one
