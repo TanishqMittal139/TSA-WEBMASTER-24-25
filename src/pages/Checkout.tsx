@@ -1,168 +1,149 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { MapPin, CreditCard, ArrowLeft, Truck, Store } from 'lucide-react';
+import { CreditCard, Check, Landmark, AlertCircle, ArrowLeft, Home } from 'lucide-react';
+import { useCart } from '@/context/CartContext';
 import Navbar from '@/components/ui/navbar';
 import Footer from '@/components/ui/footer';
-import { useCart } from '@/context/CartContext';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { toast } from '@/components/ui/use-toast';
+import { Separator } from '@/components/ui/separator';
+import { isAuthenticated } from '@/services/auth';
 
 const formSchema = z.object({
-  name: z.string().min(2, { message: 'Name is required' }),
-  email: z.string().email({ message: 'Valid email is required' }),
-  phone: z.string().min(10, { message: 'Valid phone number is required' }),
-  orderType: z.enum(['delivery', 'pickup']),
-  address: z.string().optional(),
-  city: z.string().optional(),
-  zipCode: z.string().optional(),
-  cardNumber: z.string().min(16, { message: 'Valid card number is required' }),
-  cardName: z.string().min(2, { message: 'Cardholder name is required' }),
-  expDate: z.string().min(5, { message: 'Valid expiry date is required' }),
-  cvv: z.string().min(3, { message: 'Valid CVV is required' }),
-}).refine((data) => {
-  if (data.orderType === 'delivery') {
-    return !!data.address && !!data.city && !!data.zipCode;
-  }
-  return true;
-}, {
-  message: "Address information is required for delivery",
-  path: ["address"],
+  fullName: z.string().min(2, 'Full name must be at least 2 characters'),
+  email: z.string().email('Invalid email address'),
+  address: z.string().min(5, 'Address must be at least 5 characters'),
+  city: z.string().min(2, 'City must be at least 2 characters'),
+  state: z.string().min(2, 'State must be at least 2 characters'),
+  zipCode: z.string().min(5, 'Zip code must be at least 5 characters'),
+  cardNumber: z.string().regex(/^\d{16}$/, 'Card number must be 16 digits'),
+  expiryDate: z.string().regex(/^(0[1-9]|1[0-2])\/\d{2}$/, 'Expiry date must be in MM/YY format'),
+  cvv: z.string().regex(/^\d{3,4}$/, 'CVV must be 3 or 4 digits'),
+  paymentMethod: z.enum(['credit', 'debit', 'paypal'])
 });
 
 const Checkout = () => {
-  const { items, clearCart } = useCart();
+  const { items, totalAmount, clearCart } = useCart();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // If cart is empty, redirect to cart page
-  React.useEffect(() => {
+  // Check if cart is empty
+  useEffect(() => {
     if (items.length === 0) {
-      navigate('/cart');
+      toast({
+        title: "Cart is empty",
+        description: "Add some items to your cart before checking out.",
+        variant: "destructive",
+      });
+      navigate('/menu');
     }
-  }, [items.length, navigate]);
+  }, [items, navigate]);
+  
+  // Check if user is authenticated
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to proceed with checkout",
+        variant: "destructive",
+      });
+      navigate('/sign-in');
+    }
+  }, [navigate]);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: '',
+      fullName: '',
       email: '',
-      phone: '',
-      orderType: 'delivery',
       address: '',
       city: '',
+      state: '',
       zipCode: '',
       cardNumber: '',
-      cardName: '',
-      expDate: '',
+      expiryDate: '',
       cvv: '',
-    },
+      paymentMethod: 'credit'
+    }
   });
   
-  const orderType = form.watch('orderType');
-  
-  // Calculate order totals
-  const subtotal = items.reduce((total, item) => {
-    const price = parseFloat(item.price.replace('$', ''));
-    return total + (price * item.quantity);
-  }, 0);
-  
-  const tax = subtotal * 0.0825; // 8.25% tax
-  const deliveryFee = orderType === 'delivery' ? 3.99 : 0;
-  const total = subtotal + tax + deliveryFee;
-  
-  const formatPrice = (price: number) => {
-    return `$${price.toFixed(2)}`;
-  };
-  
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onSubmit = (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
     
     // Simulate payment processing
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Generate random order number
-    const orderNumber = `TH${Math.floor(100000 + Math.random() * 900000)}`;
-    
-    toast({
-      title: "Order Placed Successfully",
-      description: "Your payment has been processed.",
-    });
-    
-    setIsSubmitting(false);
-    
-    // Prepare detailed address
-    let fullAddress = '';
-    if (values.orderType === 'delivery') {
-      fullAddress = `${values.address}, ${values.city}, ${values.zipCode}`;
-    }
-    
-    // Navigate to confirmation with order details
-    navigate('/checkout-confirmation', {
-      state: {
-        orderDetails: {
-          orderNumber,
-          orderType: values.orderType === 'delivery' ? 'Delivery' : 'Pickup',
-          address: fullAddress,
-          items,
-          subtotal: formatPrice(subtotal),
-          tax: formatPrice(tax),
-          deliveryFee: formatPrice(deliveryFee),
-          total: formatPrice(total),
-        }
-      }
-    });
-    
-    // Only clear the cart AFTER navigating to the confirmation page
-    clearCart();
+    setTimeout(() => {
+      setIsSubmitting(false);
+      
+      // Success - clear cart and redirect to confirmation
+      clearCart();
+      
+      toast({
+        title: "Order Placed Successfully!",
+        description: "Your payment has been processed and your order is confirmed.",
+      });
+      
+      navigate('/checkout-confirmation');
+    }, 2000);
   };
   
-  if (items.length === 0) {
-    return null; // We'll redirect to cart page
-  }
+  // Calculate summary values
+  const subtotal = totalAmount;
+  const tax = subtotal * 0.08; // 8% tax
+  const deliveryFee = 3.99;
+  const total = subtotal + tax + deliveryFee;
+  
+  const formatCardNumber = (value: string) => {
+    return value
+      .replace(/\s/g, '')
+      .replace(/(\d{4})/g, '$1 ')
+      .trim();
+  };
   
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen">
       <Navbar />
       
-      <main className="flex-grow pt-20">
-        <div className="container mx-auto px-4 py-8">
-          <Button 
-            variant="ghost" 
-            onClick={() => navigate('/cart')}
-            className="mb-6 flex items-center"
-          >
-            <ArrowLeft size={16} className="mr-2" />
-            Back to Cart
-          </Button>
-          
-          <h1 className="text-3xl font-bold mb-8">Checkout</h1>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2">
-              <div className="bg-card rounded-xl shadow-md p-6">
+      <main className="pt-28 pb-16">
+        <div className="container mx-auto px-4">
+          <div className="max-w-5xl mx-auto">
+            <div className="flex items-center mb-6">
+              <Button 
+                variant="ghost" 
+                onClick={() => navigate('/cart')}
+                className="group mr-2"
+              >
+                <ArrowLeft size={16} className="mr-1 group-hover:-translate-x-1 transition-transform" />
+                Back to Cart
+              </Button>
+              <h1 className="text-2xl font-bold">Checkout</h1>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {/* Checkout Form */}
+              <div className="md:col-span-2">
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                    <div>
-                      <h2 className="text-xl font-semibold mb-4">Contact Information</h2>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-card rounded-lg shadow-md p-6 space-y-6">
+                      <div>
+                        <h2 className="text-lg font-medium flex items-center">
+                          <Home className="mr-2 h-5 w-5" />
+                          Delivery Information
+                        </h2>
+                        <Separator className="my-3" />
+                      </div>
+                      
+                      <div className="space-y-4">
                         <FormField
                           control={form.control}
-                          name="name"
+                          name="fullName"
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Full Name</FormLabel>
@@ -176,23 +157,9 @@ const Checkout = () => {
                         
                         <FormField
                           control={form.control}
-                          name="phone"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Phone Number</FormLabel>
-                              <FormControl>
-                                <Input placeholder="(555) 123-4567" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <FormField
-                          control={form.control}
                           name="email"
                           render={({ field }) => (
-                            <FormItem className="md:col-span-2">
+                            <FormItem>
                               <FormLabel>Email</FormLabel>
                               <FormControl>
                                 <Input placeholder="you@example.com" type="email" {...field} />
@@ -201,42 +168,104 @@ const Checkout = () => {
                             </FormItem>
                           )}
                         />
+                        
+                        <FormField
+                          control={form.control}
+                          name="address"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Address</FormLabel>
+                              <FormControl>
+                                <Input placeholder="123 Main St" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                          <FormField
+                            control={form.control}
+                            name="city"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>City</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="New York" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          
+                          <FormField
+                            control={form.control}
+                            name="state"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>State</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="NY" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        
+                        <FormField
+                          control={form.control}
+                          name="zipCode"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Zip Code</FormLabel>
+                              <FormControl>
+                                <Input placeholder="10001" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                       </div>
                     </div>
                     
-                    <Separator />
-                    
-                    <div>
-                      <h2 className="text-xl font-semibold mb-4">Delivery Options</h2>
+                    <div className="bg-card rounded-lg shadow-md p-6 space-y-6">
+                      <div>
+                        <h2 className="text-lg font-medium flex items-center">
+                          <CreditCard className="mr-2 h-5 w-5" />
+                          Payment Method
+                        </h2>
+                        <Separator className="my-3" />
+                      </div>
                       
                       <FormField
                         control={form.control}
-                        name="orderType"
+                        name="paymentMethod"
                         render={({ field }) => (
                           <FormItem className="space-y-3">
                             <FormControl>
                               <RadioGroup
                                 onValueChange={field.onChange}
                                 defaultValue={field.value}
-                                className="flex flex-col space-y-3"
+                                className="flex gap-6"
                               >
                                 <FormItem className="flex items-center space-x-3 space-y-0">
                                   <FormControl>
-                                    <RadioGroupItem value="delivery" />
+                                    <RadioGroupItem value="credit" />
                                   </FormControl>
-                                  <FormLabel className="font-normal cursor-pointer flex items-center">
-                                    <Truck className="mr-2 h-4 w-4" />
-                                    Delivery (+$3.99)
-                                  </FormLabel>
+                                  <FormLabel className="font-normal">Credit Card</FormLabel>
                                 </FormItem>
                                 <FormItem className="flex items-center space-x-3 space-y-0">
                                   <FormControl>
-                                    <RadioGroupItem value="pickup" />
+                                    <RadioGroupItem value="debit" />
                                   </FormControl>
-                                  <FormLabel className="font-normal cursor-pointer flex items-center">
-                                    <Store className="mr-2 h-4 w-4" />
-                                    Pickup (Free)
-                                  </FormLabel>
+                                  <FormLabel className="font-normal">Debit Card</FormLabel>
+                                </FormItem>
+                                <FormItem className="flex items-center space-x-3 space-y-0">
+                                  <FormControl>
+                                    <RadioGroupItem value="paypal" />
+                                  </FormControl>
+                                  <FormLabel className="font-normal">PayPal</FormLabel>
                                 </FormItem>
                               </RadioGroup>
                             </FormControl>
@@ -245,59 +274,6 @@ const Checkout = () => {
                         )}
                       />
                       
-                      {orderType === 'delivery' && (
-                        <div className="mt-4 space-y-4">
-                          <FormField
-                            control={form.control}
-                            name="address"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Address</FormLabel>
-                                <FormControl>
-                                  <Input placeholder="123 Main St" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <FormField
-                              control={form.control}
-                              name="city"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>City</FormLabel>
-                                  <FormControl>
-                                    <Input placeholder="Anytown" {...field} />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                            
-                            <FormField
-                              control={form.control}
-                              name="zipCode"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>ZIP Code</FormLabel>
-                                  <FormControl>
-                                    <Input placeholder="12345" {...field} />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    
-                    <Separator />
-                    
-                    <div>
-                      <h2 className="text-xl font-semibold mb-4">Payment Information</h2>
                       <div className="space-y-4">
                         <FormField
                           control={form.control}
@@ -306,36 +282,47 @@ const Checkout = () => {
                             <FormItem>
                               <FormLabel>Card Number</FormLabel>
                               <FormControl>
-                                <Input placeholder="1234 5678 9012 3456" {...field} />
+                                <Input 
+                                  placeholder="1234 5678 9012 3456" 
+                                  {...field} 
+                                  onChange={(e) => {
+                                    const formatted = formatCardNumber(e.target.value.replace(/[^\d]/g, ''));
+                                    field.onChange(formatted.replace(/\s/g, ''));
+                                  }}
+                                  value={formatCardNumber(field.value)}
+                                  maxLength={19}
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
                         />
                         
-                        <FormField
-                          control={form.control}
-                          name="cardName"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Cardholder Name</FormLabel>
-                              <FormControl>
-                                <Input placeholder="John Doe" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-2 gap-4">
                           <FormField
                             control={form.control}
-                            name="expDate"
+                            name="expiryDate"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Expiry Date (MM/YY)</FormLabel>
+                                <FormLabel>Expiry Date</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="MM/YY" {...field} />
+                                  <Input 
+                                    placeholder="MM/YY" 
+                                    {...field} 
+                                    onChange={(e) => {
+                                      const value = e.target.value.replace(/[^\d]/g, '');
+                                      if (value.length > 0) {
+                                        let formatted = value;
+                                        if (value.length > 2) {
+                                          formatted = value.slice(0, 2) + '/' + value.slice(2, 4);
+                                        }
+                                        field.onChange(formatted);
+                                      } else {
+                                        field.onChange('');
+                                      }
+                                    }}
+                                    maxLength={5}
+                                  />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -349,7 +336,16 @@ const Checkout = () => {
                               <FormItem>
                                 <FormLabel>CVV</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="123" {...field} />
+                                  <Input 
+                                    placeholder="123" 
+                                    type="password"
+                                    {...field} 
+                                    onChange={(e) => {
+                                      const value = e.target.value.replace(/[^\d]/g, '');
+                                      field.onChange(value);
+                                    }}
+                                    maxLength={4}
+                                  />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -357,70 +353,70 @@ const Checkout = () => {
                           />
                         </div>
                       </div>
+                      
+                      <Alert>
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertTitle>Secure Payment</AlertTitle>
+                        <AlertDescription>
+                          Your payment information is encrypted and secure. We never store your full card details.
+                        </AlertDescription>
+                      </Alert>
                     </div>
                     
-                    <Button
-                      type="submit"
-                      className="w-full"
+                    <Button 
+                      type="submit" 
+                      className="w-full" 
                       size="lg"
                       disabled={isSubmitting}
                     >
                       {isSubmitting ? (
-                        "Processing Payment..."
+                        <span className="flex items-center">
+                          Processing... <Landmark className="ml-2 animate-pulse" />
+                        </span>
                       ) : (
-                        <>Place Order: {formatPrice(total)}</>
+                        <span className="flex items-center">
+                          Complete Order <Check className="ml-2" />
+                        </span>
                       )}
                     </Button>
                   </form>
                 </Form>
               </div>
-            </div>
-            
-            <div>
-              <div className="bg-card rounded-xl shadow-md p-6 sticky top-24">
-                <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
-                
-                <div className="space-y-4 mb-4">
-                  {items.map((item) => (
-                    <div key={item.id} className="flex justify-between items-center">
-                      <div className="flex items-center">
-                        <div className="h-10 w-10 rounded overflow-hidden flex-shrink-0 mr-3">
-                          <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
-                        </div>
-                        <div>
-                          <p className="font-medium">{item.name}</p>
-                          <p className="text-sm text-muted-foreground">Qty: {item.quantity}</p>
-                        </div>
+              
+              {/* Order Summary */}
+              <div className="md:col-span-1">
+                <div className="bg-card rounded-lg shadow-md p-6 sticky top-28">
+                  <h2 className="text-lg font-medium mb-4">Order Summary</h2>
+                  
+                  <div className="space-y-4 mb-6">
+                    {items.map((item) => (
+                      <div key={item.id} className="flex justify-between text-sm">
+                        <span>
+                          {item.name} <span className="text-muted-foreground">x{item.quantity}</span>
+                        </span>
+                        <span>${(parseFloat(item.price.replace('$', '')) * item.quantity).toFixed(2)}</span>
                       </div>
-                      <p className="font-medium">{item.price}</p>
+                    ))}
+                  </div>
+                  
+                  <div className="border-t pt-4 space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Subtotal</span>
+                      <span>${subtotal.toFixed(2)}</span>
                     </div>
-                  ))}
-                </div>
-                
-                <Separator className="my-4" />
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Subtotal</span>
-                    <span>{formatPrice(subtotal)}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Tax</span>
-                    <span>{formatPrice(tax)}</span>
-                  </div>
-                  {orderType === 'delivery' && (
-                    <div className="flex justify-between text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Tax</span>
+                      <span>${tax.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between">
                       <span className="text-muted-foreground">Delivery Fee</span>
-                      <span>{formatPrice(deliveryFee)}</span>
+                      <span>${deliveryFee.toFixed(2)}</span>
                     </div>
-                  )}
-                </div>
-                
-                <Separator className="my-4" />
-                
-                <div className="flex justify-between font-bold">
-                  <span>Total</span>
-                  <span>{formatPrice(total)}</span>
+                    <div className="flex justify-between font-medium text-lg pt-2 border-t">
+                      <span>Total</span>
+                      <span>${total.toFixed(2)}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

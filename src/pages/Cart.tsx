@@ -1,9 +1,10 @@
+
 import React from 'react';
 import Navbar from '../components/ui/navbar';
 import Footer from '../components/ui/footer';
 import { useCart } from '../context/CartContext';
 import { Link } from 'react-router-dom';
-import { X, Minus, Plus, ShoppingBag, ArrowLeft } from 'lucide-react';
+import { X, Minus, Plus, ShoppingBag, ArrowLeft, ShoppingCart } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import BlurImage from '../components/ui/blur-image';
 import { Button } from '@/components/ui/button';

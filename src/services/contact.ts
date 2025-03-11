@@ -1,26 +1,19 @@
 
-// A simple frontend contact service
-// Note: In a real application, this would connect to a backend API
+// Create this file if it doesn't exist
 
 export interface ContactData {
   name: string;
   email: string;
-  subject: string;
   message: string;
+  subject?: string;
 }
 
-interface ContactResponse {
-  success: boolean;
-  message: string;
-}
-
-// Send contact form data
-const sendContactForm = async (data: ContactData): Promise<ContactResponse> => {
+export const submitContactForm = async (data: ContactData) => {
   // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 1500));
+  await new Promise(resolve => setTimeout(resolve, 1000));
 
   try {
-    // In a real app, this would send data to a server
+    // Simple validation
     if (!data.name || !data.email || !data.message) {
       return {
         success: false,
@@ -28,34 +21,18 @@ const sendContactForm = async (data: ContactData): Promise<ContactResponse> => {
       };
     }
 
-    // Simple email validation
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-      return {
-        success: false,
-        message: 'Invalid email format'
-      };
-    }
+    // Simulate sending email
+    console.log(`Contact form submitted by ${data.name} (${data.email}): ${data.message}`);
 
-    console.log('Contact form data:', data);
-
-    // Simulate successful submission
     return {
       success: true,
-      message: 'Your message has been sent successfully. We will contact you soon!'
+      message: 'Your message has been sent!'
     };
   } catch (error) {
-    console.error('Contact form submission error:', error);
+    console.error('Error submitting contact form:', error);
     return {
       success: false,
-      message: 'An unexpected error occurred. Please try again later.'
+      message: 'An error occurred while sending your message. Please try again.'
     };
   }
-};
-
-// Alias for the function
-const submitContactForm = sendContactForm;
-
-export {
-  sendContactForm,
-  submitContactForm
 };

@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
 import { CalendarIcon, Clock, Users, Utensils, Trash2, UserCheck, Lock, ShieldAlert } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -76,7 +75,6 @@ const Reservations = () => {
   const [myReservations, setMyReservations] = useState<ReservationData[]>([]);
   const user = getCurrentUser();
   
-  // Redirect to sign in if not authenticated
   useEffect(() => {
     if (!isAuthenticated()) {
       toast({
@@ -86,7 +84,6 @@ const Reservations = () => {
       });
       navigate('/sign-in');
     } else {
-      // Load user's reservations
       loadUserReservations();
     }
   }, [navigate]);
@@ -97,7 +94,7 @@ const Reservations = () => {
       setMyReservations(reservations);
     }
   };
-  
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -117,11 +114,16 @@ const Reservations = () => {
     setIsSubmitting(true);
     
     try {
-      // Create a complete reservation object with all required fields
-      const reservationData = {
-        ...values,
+      const reservationData: Omit<ReservationData, 'id'> = {
         userId: user.id,
-        status: 'confirmed' as const,
+        name: values.name,
+        email: values.email,
+        phone: values.phone,
+        date: values.date,
+        time: values.time,
+        guests: values.guests,
+        specialRequests: values.specialRequests,
+        status: 'confirmed',
         createdAt: new Date()
       };
       
@@ -133,10 +135,8 @@ const Reservations = () => {
           description: `Your table for ${values.guests} is booked for ${format(values.date, 'MMMM d, yyyy')} at ${values.time}.`,
         });
         
-        // Reload user reservations
         loadUserReservations();
         
-        // Switch to "My Reservations" tab
         setActiveTab("my");
       } else {
         toast({
@@ -167,7 +167,6 @@ const Reservations = () => {
           description: "Your reservation has been successfully cancelled.",
         });
         
-        // Reload reservations
         loadUserReservations();
       } else {
         toast({
