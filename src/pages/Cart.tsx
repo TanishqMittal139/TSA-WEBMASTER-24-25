@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Navbar from '../components/ui/navbar';
 import Footer from '../components/ui/footer';
@@ -7,6 +6,8 @@ import { Link } from 'react-router-dom';
 import { X, Minus, Plus, ShoppingBag, ArrowLeft } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import BlurImage from '../components/ui/blur-image';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 const Cart: React.FC = () => {
   const { items, removeItem, updateQuantity, clearCart, itemCount } = useCart();
@@ -27,6 +28,8 @@ const Cart: React.FC = () => {
     clearCart();
   };
   
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -148,12 +151,15 @@ const Cart: React.FC = () => {
                       </div>
                     </div>
                     
-                    <button
-                      onClick={handleCheckout}
-                      className="w-full mt-6 bg-primary text-primary-foreground font-medium py-3 px-4 rounded-md hover:bg-primary/90 transition-colors"
+                    <Button 
+                      className="w-full mt-4"
+                      size="lg"
+                      onClick={() => navigate('/checkout')}
+                      disabled={items.length === 0}
                     >
+                      <ShoppingCart className="mr-2 h-5 w-5" />
                       Proceed to Checkout
-                    </button>
+                    </Button>
                     
                     <div className="mt-4 text-xs text-muted-foreground text-center">
                       By proceeding, you agree to our Terms of Service and Privacy Policy.

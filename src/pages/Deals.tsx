@@ -144,6 +144,18 @@ const Deals: React.FC = () => {
       return;
     }
 
+    // Check if there's already an active deal
+    const existingDeal = localStorage.getItem('active_deal');
+    if (existingDeal) {
+      toast({
+        title: "Deal Already Active",
+        description: "You can only apply one deal at a time. Please use or remove your current deal first.",
+        variant: "destructive",
+        duration: 3000,
+      });
+      return;
+    }
+
     // Store the active deal in localStorage
     localStorage.setItem('active_deal', JSON.stringify(deal));
     
@@ -161,11 +173,11 @@ const Deals: React.FC = () => {
       <Navbar />
       
       <main>
-        {/* Hero Banner */}
+        {/* Hero Banner - Updated image */}
         <section className="relative h-80">
           <div className="absolute inset-0">
             <BlurImage
-              src="https://images.unsplash.com/photo-1591348278863-a8fb3887e2aa?q=80&w=2574&auto=format&fit=crop"
+              src="https://images.unsplash.com/photo-1615887623796-537387615e26?q=80&w=2670&auto=format&fit=crop"
               alt="Deals banner"
               className="object-cover"
             />

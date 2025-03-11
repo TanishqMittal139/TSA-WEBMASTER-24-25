@@ -214,6 +214,17 @@ const DealUse: React.FC = () => {
       return;
     }
     
+    // Check if cart already has discounted items
+    if (useCart().hasDiscountedItems) {
+      toast({
+        title: "Only One Deal Allowed",
+        description: "You can only apply one deal per order. Please remove discounted items first.",
+        variant: "destructive",
+        duration: 3000,
+      });
+      return;
+    }
+    
     // Add each item to cart with discounted price
     selectedItems.forEach(item => {
       addItem({
@@ -221,7 +232,8 @@ const DealUse: React.FC = () => {
         name: item.name,
         price: applyDiscountToPrice(item.price),
         image: item.image,
-        category: item.category
+        category: item.category,
+        hasDiscount: true
       });
     });
     
