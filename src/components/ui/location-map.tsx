@@ -5,9 +5,10 @@ import { Loader } from 'lucide-react';
 interface LocationMapProps {
   center?: [number, number];
   zoom?: number;
-  locations?: Array<{id: string, name: string, coordinates: [number, number], address?: string, phone?: string, hours?: string, popular?: boolean}>;
+  locations?: Array<{id: string, name: string, coordinates: [number, number], address?: string, phone?: string, hours?: string, popular?: boolean, image?: string}>;
   activeLocationId?: string;
   interactive?: boolean;
+  className?: string;
 }
 
 const LocationMap: React.FC<LocationMapProps> = ({
@@ -15,7 +16,8 @@ const LocationMap: React.FC<LocationMapProps> = ({
   zoom = 7,
   locations = [],
   activeLocationId,
-  interactive = false
+  interactive = false,
+  className = ""
 }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(true);
@@ -40,7 +42,7 @@ const LocationMap: React.FC<LocationMapProps> = ({
   }, [center, zoom]);
 
   return (
-    <div className="relative w-full h-full min-h-[400px] rounded-lg overflow-hidden bg-muted/30">
+    <div className={`relative w-full h-full min-h-[300px] rounded-lg overflow-hidden bg-muted/30 ${className}`}>
       {loading ? (
         <div className="absolute inset-0 flex items-center justify-center">
           <Loader className="animate-spin h-8 w-8 text-primary" />
@@ -56,7 +58,7 @@ const LocationMap: React.FC<LocationMapProps> = ({
             ></iframe>
           ) : (
             <img 
-              src="https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/pin-s+f00(${center[0]},${center[1]})/${center[0]},${center[1]},${zoom},0/600x400@2x?access_token=pk.mapbox_placeholder"
+              src={`https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/${center[0]},${center[1]},${zoom},0/600x400@2x?access_token=pk.mapbox_placeholder`}
               alt="Map background"
               className="w-full h-full object-cover"
               onError={(e) => {

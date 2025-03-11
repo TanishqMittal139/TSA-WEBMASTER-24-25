@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import Navbar from '../components/ui/navbar';
@@ -65,15 +64,12 @@ const Menu: React.FC = () => {
   }, [location.search]);
   
   useEffect(() => {
-    // Apply all filters
     let items = allMenuItems;
     
-    // First filter by category
     if (activeCategory !== 'all') {
       items = items.filter(item => item.category === activeCategory);
     }
     
-    // Then filter by search term
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       items = items.filter(item => 
@@ -83,7 +79,6 @@ const Menu: React.FC = () => {
       );
     }
     
-    // Filter by dietary preferences
     if (activeDietaryTags.length > 0) {
       items = items.filter(item => {
         return activeDietaryTags.every(tag => {
@@ -101,7 +96,6 @@ const Menu: React.FC = () => {
       });
     }
     
-    // Filter by cuisine type
     if (activeCuisineTypes.length > 0) {
       items = items.filter(item => 
         item.cuisineType && activeCuisineTypes.includes(item.cuisineType.toLowerCase())
@@ -191,15 +185,15 @@ const Menu: React.FC = () => {
               <div className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4">
                 Our Menu
               </div>
-              <h1 className="text-4xl md:text-5xl font-bold mb-4">Explore Our Offerings</h1>
-              <p className="text-muted-foreground max-w-xl">
+              <h3 className="text-3xl md:text-4xl font-bold mb-3">Explore Our Offerings</h3>
+              <p className="text-muted-foreground max-w-xl text-sm">
                 Fresh, sustainable ingredients prepared with care. All items are made to order.
               </p>
             </div>
           </div>
         </section>
         
-        <section className="py-8">
+        <section className="py-6">
           <div className="container mx-auto px-4">
             <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0 mb-6">
               <div className="relative">
@@ -224,41 +218,41 @@ const Menu: React.FC = () => {
               </div>
 
               <div className="flex items-center space-x-3">
-                <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
+                <Sheet>
                   <SheetTrigger asChild>
-                    <Button variant="outline" className="flex items-center gap-2">
-                      <Filter size={16} />
-                      <span>Filters</span>
+                    <Button variant="outline" size="sm" className="flex items-center gap-1.5 h-9">
+                      <Filter size={14} />
+                      <span className="text-sm">Filters</span>
                       {(activeDietaryTags.length > 0 || activeCuisineTypes.length > 0) && (
-                        <Badge variant="secondary" className="ml-1">
+                        <Badge variant="secondary" className="ml-1 h-5 min-w-5 flex items-center justify-center text-xs">
                           {activeDietaryTags.length + activeCuisineTypes.length}
                         </Badge>
                       )}
                     </Button>
                   </SheetTrigger>
-                  <SheetContent side="right">
+                  <SheetContent side="right" className="w-[300px] sm:w-[350px] p-4">
                     <div className="flex flex-col h-full">
-                      <div className="flex items-center justify-between mb-6">
-                        <h3 className="text-lg font-medium">Filter Menu</h3>
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-base font-medium">Filter Menu</h3>
                         {(activeDietaryTags.length > 0 || activeCuisineTypes.length > 0) && (
-                          <Button variant="ghost" size="sm" onClick={clearAllFilters}>
+                          <Button variant="ghost" size="sm" className="h-7 text-xs px-2" onClick={clearAllFilters}>
                             Clear All
                           </Button>
                         )}
                       </div>
                       
-                      <div className="flex-1 overflow-auto">
-                        <div className="mb-6">
-                          <h4 className="font-medium mb-3 flex items-center gap-2">
-                            <TagIcon size={16} />
+                      <div className="flex-1 overflow-auto space-y-5">
+                        <div>
+                          <h4 className="text-sm font-medium mb-2 flex items-center gap-1.5">
+                            <TagIcon size={14} />
                             Dietary Preferences
                           </h4>
-                          <div className="flex flex-wrap gap-2">
+                          <div className="flex flex-wrap gap-1.5 mt-1.5">
                             {dietaryTags.map(tag => (
                               <Badge 
                                 key={tag.id}
                                 variant={activeDietaryTags.includes(tag.id) ? "default" : "outline"}
-                                className="cursor-pointer"
+                                className="cursor-pointer text-xs"
                                 onClick={() => toggleDietaryTag(tag.id)}
                               >
                                 {tag.name}
@@ -267,17 +261,17 @@ const Menu: React.FC = () => {
                           </div>
                         </div>
                         
-                        <div className="mb-6">
-                          <h4 className="font-medium mb-3 flex items-center gap-2">
-                            <Utensils size={16} />
+                        <div>
+                          <h4 className="text-sm font-medium mb-2 flex items-center gap-1.5">
+                            <Utensils size={14} />
                             Cuisine Types
                           </h4>
-                          <div className="flex flex-wrap gap-2">
+                          <div className="flex flex-wrap gap-1.5 mt-1.5">
                             {cuisineTypes.map(cuisine => (
                               <Badge 
                                 key={cuisine.id}
                                 variant={activeCuisineTypes.includes(cuisine.id) ? "default" : "outline"}
-                                className="cursor-pointer"
+                                className="cursor-pointer text-xs"
                                 onClick={() => toggleCuisineType(cuisine.id)}
                               >
                                 {cuisine.name}
@@ -288,7 +282,7 @@ const Menu: React.FC = () => {
                       </div>
                       
                       <SheetClose asChild>
-                        <Button className="mt-6">Apply Filters</Button>
+                        <Button className="mt-4" size="sm">Apply Filters</Button>
                       </SheetClose>
                     </div>
                   </SheetContent>
@@ -296,33 +290,45 @@ const Menu: React.FC = () => {
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="flex items-center gap-2">
-                      <span>Sort By</span>
-                      <ChevronDown size={16} />
+                    <Button variant="outline" size="sm" className="flex items-center gap-1.5 h-9">
+                      <span className="text-sm">Sort</span>
+                      <ChevronDown size={14} />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Sort Options</DropdownMenuLabel>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuLabel className="text-xs">Sort Options</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem>Price: Low to High</DropdownMenuItem>
-                    <DropdownMenuItem>Price: High to Low</DropdownMenuItem>
-                    <DropdownMenuItem>Name: A to Z</DropdownMenuItem>
-                    <DropdownMenuItem>Popularity</DropdownMenuItem>
+                    <DropdownMenuItem className="text-sm">Price: Low to High</DropdownMenuItem>
+                    <DropdownMenuItem className="text-sm">Price: High to Low</DropdownMenuItem>
+                    <DropdownMenuItem className="text-sm">Name: A to Z</DropdownMenuItem>
+                    <DropdownMenuItem className="text-sm">Popularity</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
             </div>
             
-            <div className="mb-10 overflow-x-auto">
+            <div className="mb-6 overflow-x-auto scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent pb-1">
               <div className="flex space-x-2 min-w-max">
-                {menuCategories.map((category) => (
+                <button
+                  onClick={() => setActiveCategory('all')}
+                  className={cn(
+                    "px-3 py-1.5 rounded-full flex items-center space-x-1.5 transition-all text-sm",
+                    activeCategory === 'all'
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "bg-secondary hover:bg-secondary/70 text-secondary-foreground"
+                  )}
+                >
+                  <Utensils size={14} />
+                  <span>All Items</span>
+                </button>
+                {menuCategories.filter(c => c.id !== 'all').map((category) => (
                   <button
                     key={category.id}
                     onClick={() => setActiveCategory(category.id)}
                     className={cn(
-                      "px-4 py-2 rounded-full flex items-center space-x-2 transition-all",
+                      "px-3 py-1.5 rounded-full flex items-center space-x-1.5 transition-all text-sm",
                       activeCategory === category.id
-                        ? "bg-primary text-primary-foreground shadow-md"
+                        ? "bg-primary text-primary-foreground shadow-sm"
                         : "bg-secondary hover:bg-secondary/70 text-secondary-foreground"
                     )}
                   >
@@ -333,19 +339,18 @@ const Menu: React.FC = () => {
               </div>
             </div>
             
-            {/* Active filters display */}
             {(activeDietaryTags.length > 0 || activeCuisineTypes.length > 0) && (
-              <div className="flex flex-wrap items-center gap-2 mb-6">
-                <span className="text-sm text-muted-foreground">Active filters:</span>
+              <div className="flex flex-wrap items-center gap-1.5 mb-4">
+                <span className="text-xs text-muted-foreground">Active filters:</span>
                 {activeDietaryTags.map(tag => (
                   <Badge 
                     key={tag}
                     variant="secondary"
-                    className="flex items-center gap-1"
+                    className="flex items-center gap-1 text-xs py-0.5 px-2"
                   >
                     {dietaryTags.find(t => t.id === tag)?.name}
                     <X 
-                      size={14} 
+                      size={12} 
                       className="cursor-pointer" 
                       onClick={() => toggleDietaryTag(tag)}
                     />
@@ -355,11 +360,11 @@ const Menu: React.FC = () => {
                   <Badge 
                     key={cuisine}
                     variant="secondary"
-                    className="flex items-center gap-1"
+                    className="flex items-center gap-1 text-xs py-0.5 px-2"
                   >
                     {cuisineTypes.find(c => c.id === cuisine)?.name}
                     <X 
-                      size={14} 
+                      size={12} 
                       className="cursor-pointer" 
                       onClick={() => toggleCuisineType(cuisine)}
                     />
@@ -368,7 +373,7 @@ const Menu: React.FC = () => {
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="text-xs h-7 px-2" 
+                  className="text-xs h-6 px-2" 
                   onClick={clearAllFilters}
                 >
                   Clear All
@@ -376,14 +381,14 @@ const Menu: React.FC = () => {
               </div>
             )}
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {filteredItems.map((item, index) => (
                 <motion.div 
                   key={item.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: index * 0.05 }}
-                  className="bg-card rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 relative"
+                  className="bg-card rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 relative border border-border/30"
                   onMouseEnter={() => setHoveredItem(item.id)}
                   onMouseLeave={() => setHoveredItem(null)}
                 >
@@ -418,7 +423,6 @@ const Menu: React.FC = () => {
                         )}
                       </div>
                       
-                      {/* Nutrition overlay on hover */}
                       <div 
                         className={cn(
                           "absolute inset-0 bg-background/90 p-4 flex flex-col justify-center transition-opacity duration-300",

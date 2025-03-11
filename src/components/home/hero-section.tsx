@@ -11,10 +11,39 @@ import { Clock } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { filterLocationsBySearch, filterLocationsByZip, locationDeliversToAddress } from '@/data/locations';
+import LocationMap from '@/components/ui/location-map';
+import ImageSlider from './image-slider';
 
 const OrderOptions = [
   { id: 'carryout', label: 'Carryout', icon: <ShoppingBag size={14} /> },
   { id: 'delivery', label: 'Delivery', icon: <Truck size={14} /> }
+];
+
+const sliderImages = [
+  {
+    src: "https://images.unsplash.com/photo-1484980972926-edee96e0960d?q=80&w=2574&auto=format&fit=crop",
+    alt: "Delicious plant-based food arrangement",
+    title: "Farm to Table Experience",
+    description: "Locally sourced ingredients prepared with care for sustainable dining."
+  },
+  {
+    src: "https://images.unsplash.com/photo-1466637574441-749b8f19452f?q=80&w=2428&auto=format&fit=crop",
+    alt: "Organic vegetables and herbs",
+    title: "Fresh Organic Ingredients",
+    description: "We use only the freshest organic produce in all our dishes."
+  },
+  {
+    src: "https://images.unsplash.com/photo-1551807501-9e2e9c277c76?q=80&w=2624&auto=format&fit=crop",
+    alt: "Chef preparing food",
+    title: "Crafted With Passion",
+    description: "Our chefs bring years of experience and creativity to every plate."
+  },
+  {
+    src: "https://images.unsplash.com/photo-1478144592103-25e218a04891?q=80&w=2672&auto=format&fit=crop",
+    alt: "Beautifully plated meal",
+    title: "Culinary Excellence",
+    description: "Experience artfully prepared dishes that delight all senses."
+  }
 ];
 
 const HeroSection: React.FC = () => {
@@ -137,33 +166,12 @@ const HeroSection: React.FC = () => {
             </div>
           </div>
           
-          {/* Image */}
+          {/* Image Slider */}
           <div className={cn(
-            "relative h-[500px] rounded-2xl overflow-hidden shadow-2xl transform transition-all duration-1000 ease-out delay-300",
+            "relative transform transition-all duration-1000 ease-out delay-300",
             isVisible ? "translate-x-0 opacity-100" : "translate-x-12 opacity-0"
           )}>
-            <BlurImage
-              src="https://images.unsplash.com/photo-1484980972926-edee96e0960d?q=80&w=2574&auto=format&fit=crop"
-              alt="Delicious plant-based food arrangement"
-              className="rounded-2xl"
-            />
-            
-            {/* Floating elements */}
-            <div className="absolute top-6 right-6 glass-card p-4 rounded-xl shadow-lg animate-float">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-                  <span className="text-white font-bold">4.9</span>
-                </div>
-                <div>
-                  <p className="font-semibold">Top Rated</p>
-                  <p className="text-xs text-muted-foreground">350+ Reviews</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="absolute bottom-6 left-6 glass-card p-4 rounded-xl shadow-lg max-w-[200px] animate-float" style={{ animationDelay: '1s' }}>
-              <p className="font-medium">Eco-friendly packaging for all orders</p>
-            </div>
+            <ImageSlider images={sliderImages} className="shadow-2xl rounded-2xl" />
           </div>
         </div>
       </div>
@@ -190,6 +198,19 @@ const HeroSection: React.FC = () => {
                 <Button onClick={handleCarryOutSearch}>Search</Button>
               </div>
             </div>
+            
+            {/* Map for locations */}
+            {hasSearched && carryOutResults.length > 0 && (
+              <div className="mt-4">
+                <LocationMap 
+                  locations={carryOutResults}
+                  interactive={true}
+                  className="h-[200px] mb-4"
+                  zoom={9}
+                  center={carryOutResults[0].coordinates}
+                />
+              </div>
+            )}
             
             <div className="mt-6">
               {hasSearched && (
@@ -275,6 +296,19 @@ const HeroSection: React.FC = () => {
             </div>
             
             <Button onClick={handleDeliverySearch} className="w-full">Check Delivery Availability</Button>
+            
+            {/* Map for delivery locations */}
+            {hasDeliverySearched && deliveryResults.length > 0 && (
+              <div className="mt-4">
+                <LocationMap 
+                  locations={deliveryResults}
+                  interactive={true}
+                  className="h-[200px] mb-4"
+                  zoom={11}
+                  center={deliveryResults[0].coordinates}
+                />
+              </div>
+            )}
             
             <div className="mt-6">
               {hasDeliverySearched && (
