@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
-import { submitContactForm } from '@/services/contact';
+import { submitContactForm, ContactData } from '@/services/contact';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -41,7 +41,15 @@ const ContactForm: React.FC = () => {
     setIsSubmitting(true);
     
     try {
-      const result = await submitContactForm(values);
+      // Ensure required fields are present before submitting
+      const contactData: ContactData = {
+        name: values.name,
+        email: values.email,
+        message: values.message,
+        subject: values.subject
+      };
+      
+      const result = await submitContactForm(contactData);
       
       if (result.success) {
         toast({

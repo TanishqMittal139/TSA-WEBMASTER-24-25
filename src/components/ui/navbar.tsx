@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { toast } from '@/components/ui/use-toast';
+import ThemeToggle from '@/components/ui/theme-toggle';
 
 const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -65,7 +66,7 @@ const Navbar: React.FC = () => {
   
   // Determine if we're on a page that needs darker text for better contrast
   const isDarkPage = ['/menu', '/deals', '/find-location', '/reservations', '/about', '/cart', 
-                      '/favorite-locations', '/checkout', '/sign-in', '/sign-up'].includes(location.pathname) || 
+                      '/favorite-locations', '/checkout', '/sign-in', '/sign-up', '/profile'].includes(location.pathname) || 
                       location.pathname.startsWith('/menu/');
   
   return (
@@ -119,6 +120,9 @@ const Navbar: React.FC = () => {
         
         {/* Action Buttons */}
         <div className="hidden md:flex items-center space-x-4">
+          {/* Theme Toggle */}
+          <ThemeToggle />
+          
           <Link 
             to="/favorite-locations" 
             className={cn(
@@ -160,6 +164,9 @@ const Navbar: React.FC = () => {
                 </span>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => navigate('/profile')}>
+                  My Profile
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate('/reservations')}>
                   My Reservations
                 </DropdownMenuItem>
@@ -188,6 +195,9 @@ const Navbar: React.FC = () => {
         
         {/* Mobile Menu Button */}
         <div className="flex md:hidden items-center space-x-4">
+          {/* Theme Toggle for Mobile */}
+          <ThemeToggle />
+          
           <Link 
             to="/cart" 
             className={cn(
@@ -260,6 +270,14 @@ const Navbar: React.FC = () => {
           >
             <Heart size={18} />
             <span>Favorite Locations</span>
+          </Link>
+          
+          <Link 
+            to="/profile" 
+            className="flex items-center space-x-3 py-4 text-lg border-b border-border"
+          >
+            <User size={18} />
+            <span>Profile</span>
           </Link>
           
           {user ? (
