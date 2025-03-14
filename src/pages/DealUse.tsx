@@ -103,9 +103,12 @@ const DealUse: React.FC = () => {
   const [deal, setDeal] = useState<DealData | null>(null);
   const [selectedItems, setSelectedItems] = useState<any[]>([]);
   const [filteredItems, setFilteredItems] = useState<any[]>([]);
-  const { addItem } = useCart();
+  const { addItem, items } = useCart();
   
   useEffect(() => {
+    // Scroll to top on component mount
+    window.scrollTo(0, 0);
+    
     // Redirect if not authenticated
     if (!isAuthenticated()) {
       toast({
@@ -215,7 +218,9 @@ const DealUse: React.FC = () => {
     }
     
     // Check if cart already has discounted items
-    if (useCart().hasDiscountedItems) {
+    const hasDiscountedItems = items.some(item => item.hasDiscount);
+    
+    if (hasDiscountedItems) {
       toast({
         title: "Only One Deal Allowed",
         description: "You can only apply one deal per order. Please remove discounted items first.",

@@ -106,6 +106,11 @@ const Deals: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
   const navigate = useNavigate();
   
+  // Scroll to top on component mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+  
   // Animation on mount
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -144,18 +149,9 @@ const Deals: React.FC = () => {
       return;
     }
 
-    // Check if there's already an active deal
-    const existingDeal = localStorage.getItem('active_deal');
-    if (existingDeal) {
-      toast({
-        title: "Deal Already Active",
-        description: "You can only apply one deal at a time. Please use or remove your current deal first.",
-        variant: "destructive",
-        duration: 3000,
-      });
-      return;
-    }
-
+    // Clear any existing active deal before setting a new one
+    localStorage.removeItem('active_deal');
+    
     // Store the active deal in localStorage
     localStorage.setItem('active_deal', JSON.stringify(deal));
     
@@ -177,7 +173,7 @@ const Deals: React.FC = () => {
         <section className="relative h-80">
           <div className="absolute inset-0">
             <BlurImage
-              src="https://images.unsplash.com/photo-1615887623796-537387615e26?q=80&w=2670&auto=format&fit=crop"
+              src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=2670&auto=format&fit=crop"
               alt="Deals banner"
               className="object-cover"
             />

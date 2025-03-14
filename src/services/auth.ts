@@ -1,3 +1,4 @@
+
 // Mock user storage - in a real app, this would be handled by a backend
 let currentUser: any = null;
 
@@ -15,6 +16,19 @@ const users = [
     birthdate: '1990-01-01'
   }
 ];
+
+// Initialize the auth state from localStorage on module load
+(function initializeAuth() {
+  const storedUser = localStorage.getItem('tastyHubUser');
+  if (storedUser) {
+    try {
+      currentUser = JSON.parse(storedUser);
+    } catch (e) {
+      console.error('Failed to parse user data from localStorage', e);
+      localStorage.removeItem('tastyHubUser');
+    }
+  }
+})();
 
 // Sign in function
 export const signIn = (email: string, password: string) => {
@@ -82,8 +96,14 @@ export const isAuthenticated = () => {
   
   const storedUser = localStorage.getItem('tastyHubUser');
   if (storedUser) {
-    currentUser = JSON.parse(storedUser);
-    return true;
+    try {
+      currentUser = JSON.parse(storedUser);
+      return true;
+    } catch (e) {
+      console.error('Failed to parse user data from localStorage', e);
+      localStorage.removeItem('tastyHubUser');
+      return false;
+    }
   }
   
   return false;
@@ -95,8 +115,14 @@ export const getCurrentUser = () => {
   
   const storedUser = localStorage.getItem('tastyHubUser');
   if (storedUser) {
-    currentUser = JSON.parse(storedUser);
-    return currentUser;
+    try {
+      currentUser = JSON.parse(storedUser);
+      return currentUser;
+    } catch (e) {
+      console.error('Failed to parse user data from localStorage', e);
+      localStorage.removeItem('tastyHubUser');
+      return null;
+    }
   }
   
   return null;
