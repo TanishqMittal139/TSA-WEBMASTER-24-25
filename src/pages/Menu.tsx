@@ -1,11 +1,12 @@
+
 import React, { useState, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
+import { Coffee, Sandwich, Soup, Filter, X, ChevronDown, Utensils, Cake, Salad, Croissant, Clock, Phone, Heart } from 'lucide-react';
 import Navbar from '../components/ui/navbar';
 import Footer from '../components/ui/footer';
-import { Coffee, Sandwich, Soup, Filter, X, ChevronDown, Utensils, Cake, Salad, Croissant, Clock, TagIcon } from 'lucide-react';
-import BlurImage from '../components/ui/blur-image';
 import { cn } from '@/lib/utils';
 import { useCart } from '@/context/CartContext';
+import { useFavoriteMeals } from '@/context/FavoriteMealsContext';
 import { menuCategories, allMenuItems, dietaryTags, cuisineTypes, MenuItem } from '@/data/menu-data';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -20,6 +21,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from '@/components/ui/input';
 import { motion } from 'framer-motion';
+import BlurImage from '@/components/ui/blur-image';
 
 const getCategoryIcon = (categoryId: string) => {
   switch (categoryId) {
@@ -46,6 +48,7 @@ const Menu: React.FC = () => {
   const [filteredItems, setFilteredItems] = useState<MenuItem[]>(allMenuItems);
   const [isVisible, setIsVisible] = useState(false);
   const { addItem } = useCart();
+  const { addFavoriteMeal, removeFavoriteMeal, isFavoriteMeal } = useFavoriteMeals();
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeDietaryTags, setActiveDietaryTags] = useState<string[]>([]);
@@ -138,6 +141,20 @@ const Menu: React.FC = () => {
       image: item.image,
       category: menuCategories.find(c => c.id === item.category)?.name
     });
+  };
+
+  const handleFavoriteToggle = (item: MenuItem) => {
+    if (isFavoriteMeal(item.id)) {
+      removeFavoriteMeal(item.id);
+    } else {
+      addFavoriteMeal({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        image: item.image,
+        category: menuCategories.find(c => c.id === item.category)?.name
+      });
+    }
   };
   
   const toggleDietaryTag = (tagId: string) => {
@@ -244,7 +261,7 @@ const Menu: React.FC = () => {
                       <div className="flex-1 overflow-auto space-y-5">
                         <div>
                           <h4 className="text-sm font-medium mb-2 flex items-center gap-1.5">
-                            <TagIcon size={14} />
+                            <Utensils size={14} />
                             Dietary Preferences
                           </h4>
                           <div className="flex flex-wrap gap-1.5 mt-1.5">
@@ -332,7 +349,7 @@ const Menu: React.FC = () => {
                         : "bg-secondary hover:bg-secondary/70 text-secondary-foreground"
                     )}
                   >
-                    {category.icon || getCategoryIcon(category.id)}
+                    {getCategoryIcon(category.id)}
                     <span>{category.name}</span>
                   </button>
                 ))}
@@ -432,16 +449,16 @@ const Menu: React.FC = () => {
                         <h4 className="font-bold text-lg mb-2">Nutrition Facts</h4>
                         <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
                           <div>
-                            <span className="font-medium">Calories:</span> {item.nutrition?.calories}
+                            <span className="font-medium">Calories:</span> {item.nutrition?.calories || "N/A"}
                           </div>
                           <div>
-                            <span className="font-medium">Protein:</span> {item.nutrition?.protein}
+                            <span className="font-medium">Protein:</span> {item.nutrition?.protein || "N/A"}
                           </div>
                           <div>
-                            <span className="font-medium">Carbs:</span> {item.nutrition?.carbs}
+                            <span className="font-medium">Carbs:</span> {item.nutrition?.carbs || "N/A"}
                           </div>
                           <div>
-                            <span className="font-medium">Fat:</span> {item.nutrition?.fat}
+                            <span className="font-medium">Fat:</span> {item.nutrition?.fat || "N/A"}
                           </div>
                         </div>
                         
@@ -498,12 +515,26 @@ const Menu: React.FC = () => {
                       )}
                     </div>
                     
-                    <button 
-                      onClick={() => handleAddToOrder(item)}
-                      className="w-full px-4 py-2 border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-colors duration-200 rounded-md text-sm font-medium"
-                    >
-                      Add to Order
-                    </button>
+                    <div className="flex space-x-2">
+                      <button 
+                        onClick={() => handleAddToOrder(item)}
+                        className="flex-1 px-4 py-2 border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-colors duration-200 rounded-md text-sm font-medium"
+                      >
+                        Add to Order
+                      </button>
+                      <button
+                        onClick={() => handleFavoriteToggle(item)}
+                        className={cn(
+                          "p-2 rounded-md border",
+                          isFavoriteMeal(item.id)
+                            ? "bg-primary/10 border-primary text-primary"
+                            : "border-muted-foreground/30 text-muted-foreground hover:border-primary hover:text-primary"
+                        )}
+                        aria-label={isFavoriteMeal(item.id) ? "Remove from favorites" : "Add to favorites"}
+                      >
+                        <Heart size={16} className={isFavoriteMeal(item.id) ? "fill-primary" : ""} />
+                      </button>
+                    </div>
                   </div>
                 </motion.div>
               ))}

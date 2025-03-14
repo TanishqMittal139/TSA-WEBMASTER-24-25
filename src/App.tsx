@@ -48,8 +48,8 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <ThemeProvider>
+      <ThemeProvider>
+        <TooltipProvider>
           <Toaster />
           <Sonner />
           <CartProvider>
@@ -96,8 +96,8 @@ const App = () => {
               </FavoriteMealsProvider>
             </FavoritesProvider>
           </CartProvider>
-        </ThemeProvider>
-      </TooltipProvider>
+        </TooltipProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 };

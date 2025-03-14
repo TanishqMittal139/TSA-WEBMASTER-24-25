@@ -9,13 +9,16 @@ import BlurImage from '@/components/ui/blur-image';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { useCart } from '@/context/CartContext';
+import { useFavoriteMeals } from '@/context/FavoriteMealsContext';
 import { getMenuItemById } from '@/data/menu-data';
 import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 const DishDetails = () => {
   const { dishId } = useParams<{ dishId: string }>();
   const navigate = useNavigate();
   const { addItem } = useCart();
+  const { addFavoriteMeal, removeFavoriteMeal, isFavoriteMeal } = useFavoriteMeals();
   const [dish, setDish] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   
@@ -35,6 +38,22 @@ const DishDetails = () => {
   const handleAddToCart = () => {
     if (dish) {
       addItem({
+        id: dish.id,
+        name: dish.name,
+        price: dish.price,
+        image: dish.image,
+        category: dish.category
+      });
+    }
+  };
+  
+  const handleFavoriteToggle = () => {
+    if (!dish) return;
+    
+    if (isFavoriteMeal(dish.id)) {
+      removeFavoriteMeal(dish.id);
+    } else {
+      addFavoriteMeal({
         id: dish.id,
         name: dish.name,
         price: dish.price,
@@ -106,9 +125,13 @@ const DishDetails = () => {
               <Button 
                 variant="outline" 
                 size="icon" 
-                className="absolute top-4 right-4 bg-background/80 hover:bg-background"
+                className={cn(
+                  "absolute top-4 right-4 bg-background/80 hover:bg-background",
+                  isFavoriteMeal(dish.id) && "bg-primary/10 border-primary text-primary"
+                )}
+                onClick={handleFavoriteToggle}
               >
-                <Heart className="h-5 w-5" />
+                <Heart className={cn("h-5 w-5", isFavoriteMeal(dish.id) && "fill-primary")} />
               </Button>
             </motion.div>
             
@@ -178,7 +201,7 @@ const DishDetails = () => {
               </div>
               
               {dish.allergens && dish.allergens.length > 0 && (
-                <div className="flex items-center mb-6 p-3 bg-yellow-50 border border-yellow-200 rounded-md text-yellow-800">
+                <div className="flex items-center mb-6 p-3 bg-yellow-50 border border-yellow-200 rounded-md text-yellow-800 dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-300">
                   <AlertTriangle className="h-5 w-5 mr-2 flex-shrink-0" />
                   <div className="text-sm">
                     <span className="font-medium">Allergens:</span> {dish.allergens.join(', ')}
@@ -186,14 +209,28 @@ const DishDetails = () => {
                 </div>
               )}
               
-              <Button 
-                onClick={handleAddToCart}
-                className="w-full mb-8 flex items-center justify-center"
-                size="lg"
-              >
-                <ShoppingBag className="mr-2 h-5 w-5" />
-                Add to Order
-              </Button>
+              <div className="flex space-x-2 mb-8">
+                <Button 
+                  onClick={handleAddToCart}
+                  className="flex-1 flex items-center justify-center"
+                  size="lg"
+                >
+                  <ShoppingBag className="mr-2 h-5 w-5" />
+                  Add to Order
+                </Button>
+                
+                <Button 
+                  onClick={handleFavoriteToggle}
+                  variant={isFavoriteMeal(dish.id) ? "default" : "outline"}
+                  className={cn(
+                    "px-4",
+                    isFavoriteMeal(dish.id) && "bg-primary/10 text-primary hover:bg-primary/20 border-primary"
+                  )}
+                  size="lg"
+                >
+                  <Heart className={cn("h-5 w-5", isFavoriteMeal(dish.id) && "fill-primary")} />
+                </Button>
+              </div>
               
               <Tabs defaultValue="ingredients">
                 <TabsList className="grid w-full grid-cols-3">
@@ -238,35 +275,35 @@ const DishDetails = () => {
                   {dish.nutrition ? (
                     <>
                       <div className="border-t border-b py-2">
-                        <div className="font-semibold">Calories: {dish.nutrition.calories}</div>
+                        <div className="font-semibold">Calories: {dish.nutrition.calories || "N/A"}</div>
                       </div>
                       <div className="grid grid-cols-2 gap-4 py-4">
                         <div className="space-y-2">
                           <div className="flex justify-between">
                             <span className="text-muted-foreground">Total Fat</span>
-                            <span className="font-medium">{dish.nutrition.fat}</span>
+                            <span className="font-medium">{dish.nutrition.fat || "N/A"}</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-muted-foreground">Total Carbs</span>
-                            <span className="font-medium">{dish.nutrition.carbs}</span>
+                            <span className="font-medium">{dish.nutrition.carbs || "N/A"}</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-muted-foreground">Protein</span>
-                            <span className="font-medium">{dish.nutrition.protein}</span>
+                            <span className="font-medium">{dish.nutrition.protein || "N/A"}</span>
                           </div>
                         </div>
                         <div className="space-y-2">
                           <div className="flex justify-between">
                             <span className="text-muted-foreground">Sodium</span>
-                            <span className="font-medium">{dish.nutrition.sodium}</span>
+                            <span className="font-medium">{dish.nutrition.sodium || "N/A"}</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-muted-foreground">Fiber</span>
-                            <span className="font-medium">{dish.nutrition.fiber}</span>
+                            <span className="font-medium">{dish.nutrition.fiber || "N/A"}</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-muted-foreground">Sugar</span>
-                            <span className="font-medium">{dish.nutrition.sugar}</span>
+                            <span className="font-medium">{dish.nutrition.sugar || "N/A"}</span>
                           </div>
                         </div>
                       </div>

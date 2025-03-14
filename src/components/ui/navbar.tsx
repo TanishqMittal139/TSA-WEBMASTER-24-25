@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useCart } from '@/context/CartContext';
 import { getCurrentUser, signOut, isAuthenticated } from '@/services/auth';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { 
   Menu, X, ShoppingBag, User, Coffee, Navigation, Info, Percent, CalendarRange, Utensils, Heart, LogOut
 } from 'lucide-react';
@@ -24,6 +25,7 @@ const Navbar: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { itemCount } = useCart();
+  const isMobile = useIsMobile();
   
   // Handle scroll effect
   useEffect(() => {
@@ -64,28 +66,18 @@ const Navbar: React.FC = () => {
     navigate('/');
   };
   
-  // Determine if we're on a page that needs darker text for better contrast
-  const isDarkPage = ['/menu', '/deals', '/find-location', '/reservations', '/about', '/cart', 
-                      '/favorite-locations', '/checkout', '/sign-in', '/sign-up', '/profile'].includes(location.pathname) || 
-                      location.pathname.startsWith('/menu/');
+  // Always show the navbar with background for consistency
+  const showNavbarBackground = true;
   
   return (
     <header className={cn(
-      "fixed w-full z-50 transition-all duration-300",
-      isScrolled 
-        ? "bg-background/90 backdrop-blur-lg shadow-sm py-2" 
-        : isDarkPage 
-          ? "bg-background/90 backdrop-blur-lg shadow-sm py-2" 
-          : "bg-transparent py-4"
+      "fixed w-full z-50 transition-all duration-300 bg-background/90 backdrop-blur-lg shadow-sm py-2"
     )}>
-      <div className="container-custom flex items-center justify-between">
+      <div className="container mx-auto px-4 flex items-center justify-between">
         {/* Logo */}
         <Link 
           to="/" 
-          className={cn(
-            "flex items-center space-x-2 font-bold text-2xl transition-all hover-scale",
-            isScrolled ? "text-primary" : isDarkPage ? "text-primary" : "text-primary"
-          )}
+          className="flex items-center space-x-2 font-bold text-2xl transition-all hover-scale text-primary"
         >
           <Coffee size={28} strokeWidth={2.5} />
           <span>Tasty Hub</span>
@@ -99,17 +91,9 @@ const Navbar: React.FC = () => {
               to={link.path}
               className={cn(
                 "flex items-center space-x-1 text-sm font-medium transition-colors duration-200",
-                isScrolled
-                  ? location.pathname === link.path
-                    ? "text-primary"
-                    : "text-foreground hover:text-primary"
-                  : isDarkPage
-                    ? location.pathname === link.path
-                      ? "text-primary"
-                      : "text-foreground hover:text-primary"
-                    : location.pathname === link.path
-                      ? "text-primary"
-                      : "text-background hover:text-primary"
+                location.pathname === link.path
+                  ? "text-primary"
+                  : "text-foreground hover:text-primary"
               )}
             >
               {link.icon}
@@ -125,10 +109,7 @@ const Navbar: React.FC = () => {
           
           <Link 
             to="/favorite-locations" 
-            className={cn(
-              "p-2 transition-colors",
-              isScrolled ? "text-foreground hover:text-primary" : isDarkPage ? "text-foreground hover:text-primary" : "text-background hover:text-primary"
-            )}
+            className="p-2 transition-colors text-foreground hover:text-primary"
             aria-label="Favorite Locations"
           >
             <Heart size={20} />
@@ -136,10 +117,7 @@ const Navbar: React.FC = () => {
           
           <Link 
             to="/cart" 
-            className={cn(
-              "relative p-2 transition-colors",
-              isScrolled ? "text-foreground hover:text-primary" : isDarkPage ? "text-foreground hover:text-primary" : "text-background hover:text-primary"
-            )}
+            className="relative p-2 transition-colors text-foreground hover:text-primary"
             aria-label="Shopping Cart"
           >
             <ShoppingBag size={20} />
@@ -156,10 +134,7 @@ const Navbar: React.FC = () => {
                 <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
                   <User size={16} className="text-primary" />
                 </div>
-                <span className={cn(
-                  "text-sm font-medium hidden sm:block",
-                  isScrolled ? "text-foreground" : isDarkPage ? "text-foreground" : "text-background"
-                )}>
+                <span className="text-sm font-medium hidden sm:block text-foreground">
                   {user.name}
                 </span>
               </DropdownMenuTrigger>
@@ -183,10 +158,7 @@ const Navbar: React.FC = () => {
           ) : (
             <Link 
               to="/sign-in" 
-              className={cn(
-                "button-outline py-2 text-sm",
-                isScrolled ? "" : isDarkPage ? "" : "border-background text-background hover:bg-background/10"
-              )}
+              className="button-outline py-2 text-sm"
             >
               Sign In
             </Link>
@@ -200,10 +172,7 @@ const Navbar: React.FC = () => {
           
           <Link 
             to="/cart" 
-            className={cn(
-              "relative p-2 transition-colors",
-              isScrolled ? "text-foreground hover:text-primary" : isDarkPage ? "text-foreground hover:text-primary" : "text-background hover:text-primary"
-            )}
+            className="relative p-2 transition-colors text-foreground hover:text-primary"
             aria-label="Shopping Cart"
           >
             <ShoppingBag size={20} />
@@ -215,10 +184,7 @@ const Navbar: React.FC = () => {
           </Link>
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className={cn(
-              "p-2 focus:outline-none",
-              isScrolled ? "text-foreground hover:text-primary" : isDarkPage ? "text-foreground hover:text-primary" : "text-background hover:text-primary"
-            )}
+            className="p-2 focus:outline-none text-foreground hover:text-primary"
             aria-label="Toggle menu"
           >
             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -229,11 +195,11 @@ const Navbar: React.FC = () => {
       {/* Mobile Navigation Menu */}
       <div
         className={cn(
-          "fixed inset-0 bg-background/95 backdrop-blur-sm z-40 transform transition-transform duration-300 ease-in-out md:hidden",
+          "fixed inset-0 bg-background/95 backdrop-blur-sm z-40 transform transition-transform duration-300 ease-in-out md:hidden pt-16",
           isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
         )}
       >
-        <div className="flex flex-col pt-24 px-6 h-full overflow-y-auto">
+        <div className="flex flex-col pt-4 px-6 h-full overflow-y-auto">
           {user && (
             <div className="py-4 mb-4 border-b border-border">
               <div className="flex items-center space-x-3">
