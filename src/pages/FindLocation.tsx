@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/ui/navbar';
@@ -135,7 +134,7 @@ const locations: Location[] = [
 
 const FindLocation: React.FC = () => {
   const navigate = useNavigate();
-  const { favorites, addFavorite, removeFavorite, isFavorite } = useFavorites();
+  const { favoriteLocations, addFavoriteLocation, removeFavoriteLocation, isFavoriteLocation } = useFavorites();
   const [activeLocation, setActiveLocation] = useState<Location | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isVisible, setIsVisible] = useState(false);
@@ -143,7 +142,6 @@ const FindLocation: React.FC = () => {
   const map = useRef<mapboxgl.Map | null>(null);
   const markers = useRef<mapboxgl.Marker[]>([]);
 
-  // Scroll to top on component mount with smooth behavior
   useEffect(() => {
     window.scrollTo({
       top: 0,
@@ -151,7 +149,6 @@ const FindLocation: React.FC = () => {
     });
   }, []);
   
-  // Animation on mount
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsVisible(true);
@@ -160,7 +157,6 @@ const FindLocation: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Initialize map
   useEffect(() => {
     if (mapContainerRef.current && !map.current) {
       map.current = new mapboxgl.Map({
@@ -170,10 +166,8 @@ const FindLocation: React.FC = () => {
         zoom: 9
       });
 
-      // Add navigation controls
       map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
-      // Add markers when map loads
       map.current.on('load', () => {
         locations.forEach(location => {
           const marker = new mapboxgl.Marker({ color: '#4B5563' })
@@ -198,7 +192,6 @@ const FindLocation: React.FC = () => {
     };
   }, []);
 
-  // Update marker color when active location changes
   useEffect(() => {
     markers.current.forEach((marker, index) => {
       marker.remove();
@@ -250,8 +243,8 @@ const FindLocation: React.FC = () => {
       return;
     }
 
-    if (isFavorite(locationId)) {
-      removeFavorite(locationId);
+    if (isFavoriteLocation(locationId)) {
+      removeFavoriteLocation(locationId);
       toast({
         title: "Removed from Favorites",
         description: "Location has been removed from your favorites.",
@@ -260,11 +253,9 @@ const FindLocation: React.FC = () => {
     } else {
       const location = locations.find(loc => loc.id === locationId);
       if (location) {
-        addFavorite({
+        addFavoriteLocation({
           id: location.id,
-          name: location.name,
-          address: `${location.address}, ${location.city}, ${location.state} ${location.zip}`,
-          image: location.image
+          name: location.name
         });
         toast({
           title: "Added to Favorites",
@@ -280,7 +271,6 @@ const FindLocation: React.FC = () => {
       <Navbar />
       
       <main className="flex-grow">
-        {/* Hero Section */}
         <section className="relative h-80">
           <div className="absolute inset-0">
             <BlurImage
@@ -307,11 +297,9 @@ const FindLocation: React.FC = () => {
           </div>
         </section>
         
-        {/* Map & Locations Section */}
         <section className="py-16">
           <div className="container mx-auto px-4">
             <div className="flex flex-col lg:flex-row gap-8">
-              {/* Left Column - Location List */}
               <div className="w-full lg:w-2/5 space-y-6">
                 <div className="relative">
                   <Input
@@ -351,12 +339,12 @@ const FindLocation: React.FC = () => {
                                   e.stopPropagation();
                                   handleToggleFavorite(location.id);
                                 }}
-                                aria-label={isFavorite(location.id) ? "Remove from favorites" : "Add to favorites"}
+                                aria-label={isFavoriteLocation(location.id) ? "Remove from favorites" : "Add to favorites"}
                                 className="text-muted-foreground hover:text-primary transition-colors"
                               >
                                 <Heart 
                                   size={18} 
-                                  className={isFavorite(location.id) ? "fill-primary text-primary" : ""} 
+                                  className={isFavoriteLocation(location.id) ? "fill-primary text-primary" : ""} 
                                 />
                               </button>
                             </div>
@@ -392,7 +380,6 @@ const FindLocation: React.FC = () => {
                 </div>
               </div>
               
-              {/* Right Column - Map */}
               <div className="w-full lg:w-3/5">
                 <div className="rounded-xl overflow-hidden border border-border h-[600px] shadow-sm">
                   <div ref={mapContainerRef} className="w-full h-full" />
@@ -402,7 +389,6 @@ const FindLocation: React.FC = () => {
           </div>
         </section>
         
-        {/* Location Details */}
         {activeLocation && (
           <section className="py-8 bg-secondary/30">
             <div className="container mx-auto px-4">
@@ -412,13 +398,13 @@ const FindLocation: React.FC = () => {
                     <div className="flex justify-between items-center">
                       <CardTitle>{activeLocation.name}</CardTitle>
                       <Button
-                        variant={isFavorite(activeLocation.id) ? "default" : "outline"}
+                        variant={isFavoriteLocation(activeLocation.id) ? "default" : "outline"}
                         size="sm"
                         onClick={() => handleToggleFavorite(activeLocation.id)}
                         className="flex items-center gap-1"
                       >
-                        <Heart size={16} className={isFavorite(activeLocation.id) ? "fill-primary-foreground" : ""} />
-                        {isFavorite(activeLocation.id) ? "Saved" : "Save"}
+                        <Heart size={16} className={isFavoriteLocation(activeLocation.id) ? "fill-primary-foreground" : ""} />
+                        {isFavoriteLocation(activeLocation.id) ? "Saved" : "Save"}
                       </Button>
                     </div>
                   </CardHeader>
@@ -520,3 +506,4 @@ const FindLocation: React.FC = () => {
 };
 
 export default FindLocation;
+
