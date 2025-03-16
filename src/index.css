@@ -53,7 +53,7 @@
     --secondary-foreground: 0 0% 98%;
 
     --muted: 240 4% 16%;
-    --muted-foreground: 240 5% 64.9%;
+    --muted-foreground: 240 5% 80%; /* Increased brightness for better visibility */
 
     --accent: 142 70% 10%;
     --accent-foreground: 0 0% 98%;
@@ -129,6 +129,19 @@
   
   .container-custom {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Dark mode specific styles for better visibility */
+  .dark .section-title {
+    @apply text-white/90;
+  }
+
+  .dark .section-subtitle {
+    @apply text-white/80;
+  }
+
+  .dark .hours-section-title {
+    @apply text-white font-bold;
   }
 }
 

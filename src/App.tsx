@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { CartProvider } from "./context/CartContext";
 import { FavoritesProvider } from "./context/FavoritesContext";
 import { FavoriteMealsProvider } from "./context/FavoriteMealsContext";
@@ -27,6 +27,21 @@ import FavoriteLocations from "./pages/FavoriteLocations";
 import DishDetails from "./pages/DishDetails";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import Careers from "./pages/Careers";
+
+// Scroll to top component
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  }, [pathname]);
+
+  return null;
+};
 
 // Protected route wrapper
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
@@ -56,6 +71,7 @@ const App = () => {
             <FavoritesProvider>
               <FavoriteMealsProvider>
                 <BrowserRouter>
+                  <ScrollToTop />
                   <Routes>
                     <Route path="/" element={<Index />} />
                     <Route path="/menu" element={<Menu />} />
@@ -84,6 +100,7 @@ const App = () => {
                         <FavoriteLocations />
                       </ProtectedRoute>
                     } />
+                    <Route path="/careers" element={<Careers />} />
                     <Route path="/profile" element={
                       <ProtectedRoute>
                         <Profile />

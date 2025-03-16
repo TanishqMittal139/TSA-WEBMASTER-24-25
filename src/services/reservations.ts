@@ -64,8 +64,9 @@ const sendConfirmationEmail = async (reservation: ReservationData): Promise<bool
     </ul>
     <p>We look forward to seeing you soon!</p>
     <p>Tasty Hub Team<br>
-    <a href="mailto:contact@tastyhub.com">contact@tastyhub.com</a><br>
+    <a href="mailto:contact@tastyhub-va.com">contact@tastyhub-va.com</a><br>
     (703) 555-1234</p>
+    <p>456 Wilson Blvd, Arlington, VA 22203</p>
   `;
   
   console.log('Email content:', emailContent);

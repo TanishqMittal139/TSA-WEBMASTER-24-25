@@ -21,13 +21,13 @@ const Footer: React.FC = () => {
               and plant-based options. Serving Virginia since 2009.
             </p>
             <div className="flex space-x-4 pt-2">
-              <a href="https://facebook.com/tastyhub" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors" aria-label="Facebook">
+              <a href="https://facebook.com/tastyhub_va" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors" aria-label="Facebook">
                 <Facebook size={20} />
               </a>
               <a href="https://instagram.com/tastyhub_va" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors" aria-label="Instagram">
                 <Instagram size={20} />
               </a>
-              <a href="https://twitter.com/tastyhub" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors" aria-label="Twitter">
+              <a href="https://twitter.com/tastyhub_va" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors" aria-label="Twitter">
                 <Twitter size={20} />
               </a>
             </div>
@@ -79,8 +79,8 @@ const Footer: React.FC = () => {
               </li>
               <li className="flex items-center space-x-3 text-muted-foreground">
                 <Mail size={18} className="flex-shrink-0" />
-                <a href="mailto:contact@tastyhub.com" className="hover:text-primary transition-colors">
-                  contact@tastyhub.com
+                <a href="mailto:contact@tastyhub-va.com" className="hover:text-primary transition-colors">
+                  contact@tastyhub-va.com
                 </a>
               </li>
             </ul>

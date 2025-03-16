@@ -11,7 +11,7 @@ const users = [
     password: 'password123',
     avatar: 'https://i.pravatar.cc/150?img=68',
     phone: '+1 (703) 123-4567',
-    address: '123 Main St, Alexandria, VA 22314',
+    address: '123 Main St, Arlington, VA 22314',
     bio: 'Food enthusiast and regular customer.',
     birthdate: '1990-01-01'
   }
@@ -196,10 +196,11 @@ export const resetPassword = (email: string) => {
   
   // In a real app, this would send a reset link to the user's email
   // For this mock version, we'll just reset to a default password
-  users[userIndex].password = 'resetpassword123';
+  const newPassword = 'resetpassword123';
+  users[userIndex].password = newPassword;
   
   return { 
     success: true, 
-    message: 'Password has been reset. In a real app, we would send an email with instructions.' 
+    message: `Password has been reset to "${newPassword}". In a real app, we would email this or a reset link.` 
   };
 };
