@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -6,7 +5,7 @@ import { useCart } from '@/context/CartContext';
 import { getCurrentUser, signOut, isAuthenticated } from '@/services/auth';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { 
-  Menu, X, ShoppingBag, User, Coffee, Navigation, Info, Percent, CalendarRange, Utensils, Heart, LogOut
+  Menu, X, ShoppingBag, User, Coffee, Navigation, Info, Percent, CalendarRange, Utensils, LogOut
 } from 'lucide-react';
 import { 
   DropdownMenu,
@@ -27,7 +26,6 @@ const Navbar: React.FC = () => {
   const { itemCount } = useCart();
   const isMobile = useIsMobile();
   
-  // Handle scroll effect
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
@@ -37,12 +35,10 @@ const Navbar: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
   
-  // Close mobile menu when changing routes
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [location.pathname]);
-
-  // Check for user on mount and after auth changes
+  
   useEffect(() => {
     setUser(getCurrentUser());
   }, [location.pathname]);
@@ -66,7 +62,6 @@ const Navbar: React.FC = () => {
     navigate('/');
   };
   
-  // Always show the navbar with background for consistency
   const showNavbarBackground = true;
   
   return (
@@ -74,7 +69,6 @@ const Navbar: React.FC = () => {
       "fixed w-full z-50 transition-all duration-300 bg-background/90 backdrop-blur-lg shadow-sm py-2"
     )}>
       <div className="container mx-auto px-4 flex items-center justify-between">
-        {/* Logo */}
         <Link 
           to="/" 
           className="flex items-center space-x-2 font-bold text-2xl transition-all hover-scale text-primary"
@@ -83,7 +77,6 @@ const Navbar: React.FC = () => {
           <span>Tasty Hub</span>
         </Link>
         
-        {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-8">
           {navLinks.map((link) => (
             <Link
@@ -102,18 +95,8 @@ const Navbar: React.FC = () => {
           ))}
         </nav>
         
-        {/* Action Buttons */}
         <div className="hidden md:flex items-center space-x-4">
-          {/* Theme Toggle */}
           <ThemeToggle />
-          
-          <Link 
-            to="/favorite-locations" 
-            className="p-2 transition-colors text-foreground hover:text-primary"
-            aria-label="Favorite Locations"
-          >
-            <Heart size={20} />
-          </Link>
           
           <Link 
             to="/cart" 
@@ -145,9 +128,6 @@ const Navbar: React.FC = () => {
                 <DropdownMenuItem onClick={() => navigate('/reservations')}>
                   My Reservations
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/favorite-locations')}>
-                  Favorite Locations
-                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut} className="text-destructive flex items-center gap-2">
                   <LogOut size={16} />
@@ -165,9 +145,7 @@ const Navbar: React.FC = () => {
           )}
         </div>
         
-        {/* Mobile Menu Button */}
         <div className="flex md:hidden items-center space-x-4">
-          {/* Theme Toggle for Mobile */}
           <ThemeToggle />
           
           <Link 
@@ -192,7 +170,6 @@ const Navbar: React.FC = () => {
         </div>
       </div>
       
-      {/* Mobile Navigation Menu */}
       <div
         className={cn(
           "fixed inset-0 bg-background/95 backdrop-blur-sm z-40 transform transition-transform duration-300 ease-in-out md:hidden pt-16",
@@ -229,14 +206,6 @@ const Navbar: React.FC = () => {
               <span>{link.name}</span>
             </Link>
           ))}
-          
-          <Link 
-            to="/favorite-locations" 
-            className="flex items-center space-x-3 py-4 text-lg border-b border-border"
-          >
-            <Heart size={18} />
-            <span>Favorite Locations</span>
-          </Link>
           
           <Link 
             to="/profile" 

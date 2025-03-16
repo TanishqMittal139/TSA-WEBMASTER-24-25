@@ -15,8 +15,20 @@ import { toast } from '@/components/ui/use-toast';
 import { isAuthenticated, getCurrentUser, updateUserProfile } from '@/services/auth';
 import { 
   User, Mail, Phone, MapPin, Calendar, Edit2, Save, Key, LogOut,
-  ShoppingBag, Heart, Settings, AlertCircle
+  ShoppingBag, Settings, AlertCircle, Camera
 } from 'lucide-react';
+
+// List of avatar options for profile customization
+const avatarOptions = [
+  { id: 'avatar1', src: 'https://api.dicebear.com/7.x/bottts/svg?seed=tasty1', alt: 'Robot Avatar 1' },
+  { id: 'avatar2', src: 'https://api.dicebear.com/7.x/bottts/svg?seed=tasty2', alt: 'Robot Avatar 2' },
+  { id: 'avatar3', src: 'https://api.dicebear.com/7.x/bottts/svg?seed=tasty3', alt: 'Robot Avatar 3' },
+  { id: 'avatar4', src: 'https://api.dicebear.com/7.x/bottts/svg?seed=tasty4', alt: 'Robot Avatar 4' },
+  { id: 'avatar5', src: 'https://api.dicebear.com/7.x/bottts/svg?seed=tasty5', alt: 'Robot Avatar 5' },
+  { id: 'avatar6', src: 'https://api.dicebear.com/7.x/bottts/svg?seed=food1', alt: 'Food Avatar 1' },
+  { id: 'avatar7', src: 'https://api.dicebear.com/7.x/bottts/svg?seed=food2', alt: 'Food Avatar 2' },
+  { id: 'avatar8', src: 'https://api.dicebear.com/7.x/bottts/svg?seed=food3', alt: 'Food Avatar 3' },
+];
 
 // Mock function for updating profile (replace with actual implementation)
 const saveProfile = async (profileData: any) => {
@@ -37,6 +49,8 @@ const Profile: React.FC = () => {
   const [user, setUser] = useState(getCurrentUser());
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [showAvatarSelector, setShowAvatarSelector] = useState(false);
+  const [selectedAvatar, setSelectedAvatar] = useState(user?.avatar || avatarOptions[0].src);
   
   // Profile form state
   const [formData, setFormData] = useState({
@@ -45,7 +59,8 @@ const Profile: React.FC = () => {
     phone: user?.phone || '',
     address: user?.address || '',
     bio: user?.bio || '',
-    birthdate: user?.birthdate || ''
+    birthdate: user?.birthdate || '',
+    avatar: user?.avatar || avatarOptions[0].src
   });
   
   // Check if user is authenticated
@@ -60,11 +75,17 @@ const Profile: React.FC = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
   
+  const handleAvatarSelect = (avatarSrc: string) => {
+    setSelectedAvatar(avatarSrc);
+    setFormData(prev => ({ ...prev, avatar: avatarSrc }));
+    setShowAvatarSelector(false);
+  };
+  
   const handleSaveProfile = async () => {
     setIsSaving(true);
     
     try {
-      const result = await saveProfile(formData);
+      const result = await saveProfile({...formData, avatar: selectedAvatar});
       
       if (result.success) {
         toast({
@@ -74,7 +95,7 @@ const Profile: React.FC = () => {
         });
         setIsEditing(false);
         // Update local user data
-        setUser({...user, ...formData});
+        setUser({...user, ...formData, avatar: selectedAvatar});
       } else {
         toast({
           title: "Update Failed",
@@ -108,15 +129,46 @@ const Profile: React.FC = () => {
                 <Card>
                   <CardContent className="pt-6">
                     <div className="flex flex-col items-center">
-                      <Avatar className="h-24 w-24 mb-4">
-                        <AvatarImage 
-                          src={user?.avatar || 'https://via.placeholder.com/150'} 
-                          alt={user?.name || 'User'} 
-                        />
-                        <AvatarFallback className="text-xl">
-                          {user?.name?.split(' ').map(n => n[0]).join('') || 'U'}
-                        </AvatarFallback>
-                      </Avatar>
+                      <div className="relative">
+                        <Avatar className="h-24 w-24 mb-4">
+                          <AvatarImage 
+                            src={selectedAvatar} 
+                            alt={user?.name || 'User'} 
+                          />
+                          <AvatarFallback className="text-xl">
+                            {user?.name?.split(' ').map(n => n[0]).join('') || 'U'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <Button 
+                          variant="outline" 
+                          size="icon" 
+                          className="absolute bottom-3 right-0 rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
+                          onClick={() => setShowAvatarSelector(!showAvatarSelector)}
+                        >
+                          <Camera size={14} />
+                        </Button>
+                      </div>
+                      
+                      {showAvatarSelector && (
+                        <div className="mt-2 mb-4 p-3 bg-card border border-border rounded-lg">
+                          <h4 className="text-sm font-medium mb-2">Select an Avatar</h4>
+                          <div className="grid grid-cols-4 gap-2">
+                            {avatarOptions.map((avatar) => (
+                              <div 
+                                key={avatar.id}
+                                className={`cursor-pointer p-1 rounded-md ${selectedAvatar === avatar.src ? 'bg-primary/20 ring-2 ring-primary' : 'hover:bg-secondary'}`}
+                                onClick={() => handleAvatarSelect(avatar.src)}
+                              >
+                                <img 
+                                  src={avatar.src} 
+                                  alt={avatar.alt}
+                                  className="w-10 h-10 rounded-md"
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                       
                       <h2 className="text-xl font-semibold">{user?.name}</h2>
                       <p className="text-sm text-muted-foreground mb-4">{user?.email}</p>
@@ -182,10 +234,6 @@ const Profile: React.FC = () => {
                     <TabsTrigger value="orders" className="flex items-center gap-2">
                       <ShoppingBag size={16} />
                       <span>Orders</span>
-                    </TabsTrigger>
-                    <TabsTrigger value="favorites" className="flex items-center gap-2">
-                      <Heart size={16} />
-                      <span>Favorites</span>
                     </TabsTrigger>
                     <TabsTrigger value="settings" className="flex items-center gap-2">
                       <Settings size={16} />
@@ -352,31 +400,6 @@ const Profile: React.FC = () => {
                             </p>
                             <Button onClick={() => navigate('/menu')}>
                               Browse Menu
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </TabsContent>
-                  
-                  <TabsContent value="favorites">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Your Favorites</CardTitle>
-                        <CardDescription>
-                          Manage your favorite locations and meals
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex items-center justify-center p-8 text-center">
-                          <div>
-                            <Heart className="mx-auto h-12 w-12 text-muted-foreground opacity-50 mb-4" />
-                            <h3 className="text-lg font-medium mb-2">No favorites added</h3>
-                            <p className="text-muted-foreground mb-4">
-                              Your favorite locations and meals will appear here
-                            </p>
-                            <Button onClick={() => navigate('/favorite-locations')}>
-                              View Favorites
                             </Button>
                           </div>
                         </div>

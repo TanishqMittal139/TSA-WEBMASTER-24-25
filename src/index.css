@@ -157,6 +157,16 @@
   .dark .hours-section h3 {
     @apply text-white;
   }
+
+  /* Special styling for store hours section in dark mode */
+  .dark .store-hours-heading {
+    @apply text-white font-bold text-2xl mb-4;
+  }
+  
+  /* Make sure all headings are visible in dark mode */
+  .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+    @apply text-white/95;
+  }
 }
 
 /* Custom animations and scroll behavior */

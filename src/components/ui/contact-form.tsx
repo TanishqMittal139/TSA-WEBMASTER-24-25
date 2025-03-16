@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -46,8 +45,7 @@ const ContactForm: React.FC = () => {
         name: values.name,
         email: values.email,
         message: values.message,
-        subject: values.subject || "Contact Form Submission",
-        recipientEmail: "contact@tastyhub-va.com" // Add the recipient email
+        subject: values.subject || "Contact Form Submission"
       };
       
       const result = await submitContactForm(contactData);
