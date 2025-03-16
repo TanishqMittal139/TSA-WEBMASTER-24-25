@@ -1,89 +1,151 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Navbar from '@/components/ui/navbar';
 import Footer from '@/components/ui/footer';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { toast } from '@/components/ui/use-toast';
+import { MapPin, Users, DollarSign, ThumbsUp, Clock, Coffee, ChefHat, Utensils, Truck, Headphones } from 'lucide-react';
 import BlurImage from '@/components/ui/blur-image';
-import { Card, CardContent } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { 
-  Building2, 
-  Users, 
-  Heart, 
-  Clock, 
-  DollarSign, 
-  GraduationCap, 
-  Utensils, 
-  ChefHat, 
-  ShoppingBag, 
-  Car, 
-  HeartHandshake
-} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Link } from 'react-router-dom';
 
 interface JobPosition {
   id: string;
   title: string;
-  department: string;
   location: string;
-  type: 'Full-time' | 'Part-time' | 'Contract';
+  type: string;
+  salary: string;
+  department: string;
   description: string;
+  requirements: string[];
+  benefits: string[];
   icon: React.ReactNode;
 }
 
-const jobPositions: JobPosition[] = [
+const positions: JobPosition[] = [
   {
-    id: 'chef-1',
+    id: 'chef',
     title: 'Head Chef',
+    location: 'Arlington, VA',
+    type: 'Full-time',
+    salary: '$60,000 - $75,000/year',
     department: 'Kitchen',
-    location: 'Downtown Location',
-    type: 'Full-time',
-    description: 'Lead our kitchen team, create new menu items, and maintain quality standards for all dishes.',
-    icon: <ChefHat className="h-10 w-10 text-primary" />
+    description: 'We are looking for an experienced Head Chef to lead our kitchen team and create innovative dishes that showcase local ingredients.',
+    requirements: [
+      'Minimum 3 years of experience in a similar role',
+      'Culinary degree or equivalent experience',
+      'Strong leadership and communication skills',
+      'Knowledge of food safety regulations',
+      'Passion for sustainable cooking practices'
+    ],
+    benefits: [
+      'Health, dental, and vision insurance',
+      'Paid time off',
+      'Employee meal program',
+      'Career growth opportunities',
+      'Professional development support'
+    ],
+    icon: <ChefHat />
   },
   {
-    id: 'server-1',
+    id: 'server',
     title: 'Server',
+    location: 'Arlington, VA',
+    type: 'Full-time / Part-time',
+    salary: '$15-20/hour + tips',
     department: 'Front of House',
-    location: 'Multiple Locations',
-    type: 'Full-time',
-    description: 'Provide exceptional service to guests, take orders, and ensure a pleasant dining experience.',
-    icon: <Utensils className="h-10 w-10 text-primary" />
+    description: 'Join our team as a server to provide exceptional service to our guests while showcasing our menu and creating memorable dining experiences.',
+    requirements: [
+      'Previous serving experience preferred',
+      'Excellent communication and interpersonal skills',
+      'Ability to work in a fast-paced environment',
+      'Knowledge of food and beverages',
+      'Team player attitude'
+    ],
+    benefits: [
+      'Flexible scheduling',
+      'Health insurance (full-time)',
+      'Employee meal program',
+      'Growth opportunities',
+      'Tip-sharing program'
+    ],
+    icon: <Utensils />
   },
   {
-    id: 'marketing-1',
-    title: 'Marketing Specialist',
-    department: 'Marketing',
-    location: 'Corporate Office',
-    type: 'Full-time',
-    description: 'Develop and implement marketing strategies to increase brand awareness and customer engagement.',
-    icon: <ShoppingBag className="h-10 w-10 text-primary" />
-  },
-  {
-    id: 'driver-1',
+    id: 'delivery',
     title: 'Delivery Driver',
-    department: 'Operations',
-    location: 'Multiple Locations',
+    location: 'Arlington, VA',
     type: 'Part-time',
-    description: 'Deliver orders promptly and safely to our customers while maintaining food quality.',
-    icon: <Car className="h-10 w-10 text-primary" />
+    salary: '$16-18/hour + tips',
+    department: 'Operations',
+    description: 'We need reliable delivery drivers to ensure our customers receive their orders promptly and with a smile.',
+    requirements: [
+      'Valid driver\'s license with clean driving record',
+      'Reliable vehicle',
+      'Knowledge of local area',
+      'Customer service skills',
+      'Ability to lift up to 30 pounds'
+    ],
+    benefits: [
+      'Flexible scheduling',
+      'Fuel reimbursement',
+      'Employee meal program',
+      'Tip-sharing program',
+      'Vehicle maintenance allowance'
+    ],
+    icon: <Truck />
   },
   {
-    id: 'manager-1',
-    title: 'Restaurant Manager',
-    department: 'Management',
-    location: 'Suburban Location',
-    type: 'Full-time',
-    description: 'Oversee daily operations, staff management, and ensure guest satisfaction.',
-    icon: <Building2 className="h-10 w-10 text-primary" />
+    id: 'barista',
+    title: 'Barista',
+    location: 'Arlington, VA',
+    type: 'Full-time / Part-time',
+    salary: '$15-17/hour + tips',
+    department: 'Café',
+    description: 'Create exceptional coffee beverages and provide friendly service to our café customers.',
+    requirements: [
+      'Previous barista experience preferred',
+      'Knowledge of coffee preparation techniques',
+      'Customer service skills',
+      'Ability to work mornings',
+      'Passion for coffee culture'
+    ],
+    benefits: [
+      'Flexible scheduling',
+      'Health insurance (full-time)',
+      'Employee meal program',
+      'Coffee education opportunities',
+      'Tip-sharing program'
+    ],
+    icon: <Coffee />
   },
   {
-    id: 'community-1',
-    title: 'Community Relations Coordinator',
-    department: 'Public Relations',
-    location: 'Corporate Office',
+    id: 'customer-service',
+    title: 'Customer Service Representative',
+    location: 'Arlington, VA',
     type: 'Full-time',
-    description: 'Build partnerships with local organizations and coordinate community outreach programs.',
-    icon: <HeartHandshake className="h-10 w-10 text-primary" />
+    salary: '$38,000 - $45,000/year',
+    department: 'Operations',
+    description: 'Handle customer inquiries, process orders, and ensure exceptional customer satisfaction across all communication channels.',
+    requirements: [
+      'Previous customer service experience',
+      'Excellent communication skills',
+      'Problem-solving abilities',
+      'Basic computer skills',
+      'Multitasking capabilities'
+    ],
+    benefits: [
+      'Health, dental, and vision insurance',
+      'Paid time off',
+      'Employee meal program',
+      'Career advancement opportunities',
+      '401(k) program with company match'
+    ],
+    icon: <Headphones />
   }
 ];
 
@@ -91,260 +153,371 @@ const benefits = [
   {
     icon: <DollarSign className="h-6 w-6 text-primary" />,
     title: 'Competitive Pay',
-    description: 'We offer industry-leading compensation packages based on experience and performance.'
+    description: 'We offer industry-leading compensation and regular performance-based raises.'
   },
   {
-    icon: <Heart className="h-6 w-6 text-primary" />,
+    icon: <ThumbsUp className="h-6 w-6 text-primary" />,
     title: 'Health Benefits',
     description: 'Comprehensive health, dental, and vision insurance for full-time employees.'
   },
   {
     icon: <Clock className="h-6 w-6 text-primary" />,
-    title: 'Flexible Scheduling',
-    description: 'Work-life balance matters. We offer flexible scheduling options to fit your lifestyle.'
+    title: 'Work-Life Balance',
+    description: 'Flexible scheduling and paid time off to ensure you have time to recharge.'
   },
   {
-    icon: <GraduationCap className="h-6 w-6 text-primary" />,
-    title: 'Career Growth',
-    description: 'Ongoing training and clear pathways for advancement within our organization.'
+    icon: <Users className="h-6 w-6 text-primary" />,
+    title: 'Team Culture',
+    description: 'Join a collaborative, diverse team that feels like family.'
   }
 ];
 
 const Careers: React.FC = () => {
+  const [activePosition, setActivePosition] = useState<string | null>(null);
+  const [isVisible, setIsVisible] = useState(false);
+  const [isApplying, setIsApplying] = useState(false);
+  const [applicationData, setApplicationData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    position: '',
+    resume: null as File | null,
+    coverLetter: ''
+  });
+
+  // Scroll to top on component mount with smooth behavior
   useEffect(() => {
-    // Scroll to top on component mount
-    window.scrollTo(0, 0);
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  }, []);
+  
+  // Animation on mount
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsVisible(true);
+    }, 100);
+    
+    return () => clearTimeout(timer);
   }, []);
 
+  const handleApply = (jobId: string) => {
+    setIsApplying(true);
+    setApplicationData(prev => ({ ...prev, position: jobId }));
+    
+    // Scroll to application form
+    setTimeout(() => {
+      const element = document.getElementById('application-form');
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 100);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setApplicationData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setApplicationData(prev => ({ ...prev, resume: e.target.files![0] }));
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // In a real app, this would send the form data to a server
+    toast({
+      title: "Application Submitted",
+      description: "Thank you for your interest! We'll review your application and contact you soon.",
+      duration: 5000,
+    });
+    
+    setIsApplying(false);
+    setApplicationData({
+      name: '',
+      email: '',
+      phone: '',
+      position: '',
+      resume: null,
+      coverLetter: ''
+    });
+  };
+  
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen flex flex-col">
       <Navbar />
       
-      <main>
+      <main className="flex-grow">
         {/* Hero Section */}
-        <section className="relative h-96">
+        <section className="relative h-80">
           <div className="absolute inset-0">
             <BlurImage
               src="https://images.unsplash.com/photo-1600565193348-f74bd3c7ccdf?q=80&w=2670&auto=format&fit=crop"
-              alt="Team working in restaurant kitchen"
+              alt="Careers at Tasty Hub"
               className="object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/10"></div>
           </div>
           
-          <div className="relative container mx-auto px-4 h-full flex flex-col justify-center pt-20">
-            <div className="max-w-3xl">
+          <div className="relative container mx-auto px-4 flex flex-col justify-center h-full pt-24">
+            <div className={cn(
+              "transition-all duration-1000 transform",
+              isVisible ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"
+            )}>
               <div className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4">
                 Join Our Team
               </div>
-              <h1 className="text-4xl md:text-5xl font-bold mb-4">Grow Your Career With Us</h1>
-              <p className="text-xl text-muted-foreground max-w-xl mb-6">
-                Discover meaningful work in a collaborative environment where your passion for food and service can thrive.
+              <h1 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">Careers at Tasty Hub</h1>
+              <p className="text-muted-foreground max-w-xl">
+                Join our passionate team dedicated to providing exceptional dining experiences in Virginia.
               </p>
-              <Button size="lg" className="font-medium">
-                View Open Positions
-              </Button>
             </div>
           </div>
         </section>
         
-        {/* Why Work With Us */}
-        <section className="py-20 bg-secondary/50">
+        {/* Why Join Us Section */}
+        <section className="py-16 bg-secondary/50">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold mb-4">Why Work With Us</h2>
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold mb-4">Why Join Our Team?</h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
-                We're committed to creating a positive workplace where team members can grow, learn, and feel valued.
+                At Tasty Hub, we believe that our team members are our greatest asset. Here's why you should consider joining us:
               </p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {benefits.map((benefit, idx) => (
-                <div key={idx} className="text-center p-6 rounded-lg bg-card shadow-sm border border-border">
-                  <div className="mx-auto flex items-center justify-center w-14 h-14 rounded-full bg-primary/10 mb-4">
-                    {benefit.icon}
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">{benefit.title}</h3>
-                  <p className="text-muted-foreground">{benefit.description}</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
+              {benefits.map((benefit, index) => (
+                <div key={index} className="bg-card p-6 rounded-xl shadow-sm border border-border/50 hover:shadow-md transition-shadow">
+                  <div className="mb-4">{benefit.icon}</div>
+                  <h3 className="text-lg font-semibold mb-2">{benefit.title}</h3>
+                  <p className="text-muted-foreground text-sm">{benefit.description}</p>
                 </div>
               ))}
-            </div>
-          </div>
-        </section>
-        
-        {/* Our Culture */}
-        <section className="py-20">
-          <div className="container mx-auto px-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-              <div>
-                <div className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4">
-                  Our Culture
-                </div>
-                <h2 className="text-3xl font-bold mb-6">A Place Where You Belong</h2>
-                <p className="text-muted-foreground mb-6">
-                  At Tasty Hub, we believe that our team members are the heart of our success. We foster a culture of respect, 
-                  creativity, and excellence, where everyone's contribution is valued.
-                </p>
-                <p className="text-muted-foreground mb-6">
-                  We celebrate diversity and are committed to creating an inclusive environment where all team members can thrive 
-                  and develop their skills. Our collaborative approach ensures that everyone has a voice in our continuous improvement efforts.
-                </p>
-                <div className="flex space-x-4">
-                  <Users className="h-6 w-6 text-primary" />
-                  <div>
-                    <h4 className="font-semibold">Team-First Approach</h4>
-                    <p className="text-sm text-muted-foreground">We win together and grow together</p>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="rounded-lg overflow-hidden h-64">
-                  <BlurImage
-                    src="https://images.unsplash.com/photo-1577219491135-ce391730fb2c?q=80&w=1954&auto=format&fit=crop"
-                    alt="Team member cooking"
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-                <div className="rounded-lg overflow-hidden h-64">
-                  <BlurImage
-                    src="https://images.unsplash.com/photo-1582192730841-2a682d7375f9?q=80&w=1974&auto=format&fit=crop"
-                    alt="Team members discussing menu"
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-                <div className="rounded-lg overflow-hidden h-64">
-                  <BlurImage
-                    src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=2670&auto=format&fit=crop"
-                    alt="Restaurant interior"
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-                <div className="rounded-lg overflow-hidden h-64">
-                  <BlurImage
-                    src="https://images.unsplash.com/photo-1552566626-52f8b828add9?q=80&w=2670&auto=format&fit=crop"
-                    alt="Team celebrating"
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-              </div>
             </div>
           </div>
         </section>
         
         {/* Open Positions */}
-        <section className="py-20 bg-secondary/50">
+        <section className="py-16">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold mb-4">Open Positions</h2>
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold mb-4">Current Openings</h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
-                We're always looking for talented individuals to join our team. Check out our current openings below.
+                Explore our current job openings and find the perfect role for your skills and passion.
               </p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-              {jobPositions.map((job) => (
-                <Card key={job.id} className="overflow-hidden">
-                  <CardContent className="p-0">
-                    <div className="p-6">
-                      <div className="flex justify-between items-start mb-4">
-                        <div className="flex items-center">
-                          <div className="mr-4">
-                            {job.icon}
-                          </div>
-                          <div>
-                            <h3 className="text-xl font-bold">{job.title}</h3>
-                            <p className="text-muted-foreground text-sm">{job.department} • {job.location}</p>
-                          </div>
-                        </div>
-                        <div className="bg-primary/10 text-primary text-xs font-medium px-2.5 py-1 rounded-full">
-                          {job.type}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+              {positions.map((position) => (
+                <Card key={position.id} className="overflow-hidden hover:shadow-md transition-shadow">
+                  <CardHeader className="bg-secondary/30 pb-4">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <CardTitle className="text-xl">{position.title}</CardTitle>
+                        <div className="flex items-center text-sm text-muted-foreground mt-1">
+                          <MapPin size={14} className="mr-1" /> {position.location}
                         </div>
                       </div>
-                      <p className="text-muted-foreground mb-6">{job.description}</p>
-                      <Button variant="outline" className="w-full">View Details</Button>
+                      <div className="bg-primary/10 p-2 rounded-md text-primary">
+                        {position.icon}
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pt-4">
+                    <div className="space-y-4">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">{position.type}</span>
+                        <span className="font-medium">{position.salary}</span>
+                      </div>
+                      
+                      <p className="text-sm text-muted-foreground">{position.description}</p>
+                      
+                      <div className="flex items-center justify-between pt-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => setActivePosition(activePosition === position.id ? null : position.id)}
+                        >
+                          {activePosition === position.id ? "Less Details" : "More Details"}
+                        </Button>
+                        
+                        <Button 
+                          variant="default" 
+                          size="sm"
+                          onClick={() => handleApply(position.id)}
+                        >
+                          Apply Now
+                        </Button>
+                      </div>
+                      
+                      {activePosition === position.id && (
+                        <div className="pt-4 space-y-4 border-t border-border/50 mt-4">
+                          <div>
+                            <h4 className="text-sm font-medium mb-2">Requirements</h4>
+                            <ul className="text-sm text-muted-foreground space-y-1">
+                              {position.requirements.map((req, index) => (
+                                <li key={index} className="flex items-start">
+                                  <span className="text-primary mr-2">•</span>
+                                  <span>{req}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                          
+                          <div>
+                            <h4 className="text-sm font-medium mb-2">Benefits</h4>
+                            <ul className="text-sm text-muted-foreground space-y-1">
+                              {position.benefits.map((benefit, index) => (
+                                <li key={index} className="flex items-start">
+                                  <span className="text-primary mr-2">•</span>
+                                  <span>{benefit}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
               ))}
             </div>
-            
-            <div className="text-center mt-12">
-              <p className="text-muted-foreground mb-4">Don't see the right fit? We're always interested in meeting talented people.</p>
-              <Button variant="default">
-                Submit General Application
-              </Button>
-            </div>
           </div>
         </section>
         
-        {/* Application Process */}
-        <section className="py-20">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold mb-4">Our Application Process</h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
-                We've designed a straightforward process to help you find your place in our team.
-              </p>
-            </div>
-            
-            <div className="max-w-4xl mx-auto">
-              <div className="relative">
-                <div className="absolute left-4 md:left-1/2 h-full w-0.5 bg-border transform md:-translate-x-1/2"></div>
+        {/* Application Form */}
+        {isApplying && (
+          <section className="py-16 bg-secondary/30" id="application-form">
+            <div className="container mx-auto px-4">
+              <div className="max-w-3xl mx-auto">
+                <h2 className="text-3xl font-bold mb-8 text-center">Apply Now</h2>
                 
-                {[
-                  {
-                    step: 1,
-                    title: "Apply Online",
-                    description: "Submit your application through our careers portal with your resume and cover letter."
-                  },
-                  {
-                    step: 2,
-                    title: "Initial Review",
-                    description: "Our hiring team will review your application and reach out if there's a potential match."
-                  },
-                  {
-                    step: 3,
-                    title: "Interview",
-                    description: "Meet with our team to discuss your experience, skills, and how you might fit with our culture."
-                  },
-                  {
-                    step: 4,
-                    title: "Assessment",
-                    description: "Depending on the role, you might be asked to complete a skills assessment or working interview."
-                  },
-                  {
-                    step: 5,
-                    title: "Offer & Onboarding",
-                    description: "If selected, you'll receive an offer and begin our comprehensive onboarding program."
-                  }
-                ].map((item, index) => (
-                  <div key={index} className="relative flex flex-col md:flex-row items-start mb-12">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground font-bold z-10 mb-4 md:mb-0 md:absolute md:left-1/2 md:transform md:-translate-x-1/2">
-                      {item.step}
-                    </div>
-                    
-                    <div className={`md:w-1/2 ${index % 2 === 0 ? 'md:pr-12 md:text-right ml-12 md:ml-0' : 'md:pl-12 ml-12 md:ml-auto'}`}>
-                      <h3 className="text-xl font-bold mb-2">{item.title}</h3>
-                      <p className="text-muted-foreground">{item.description}</p>
-                    </div>
-                  </div>
-                ))}
+                <Card>
+                  <CardContent className="pt-6">
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <Label htmlFor="name">Full Name</Label>
+                          <Input 
+                            id="name" 
+                            name="name" 
+                            placeholder="John Doe" 
+                            required
+                            value={applicationData.name}
+                            onChange={handleInputChange}
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="email">Email Address</Label>
+                          <Input 
+                            id="email" 
+                            name="email" 
+                            type="email" 
+                            placeholder="john@example.com" 
+                            required
+                            value={applicationData.email}
+                            onChange={handleInputChange}
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="phone">Phone Number</Label>
+                          <Input 
+                            id="phone" 
+                            name="phone" 
+                            placeholder="(703) 555-1234" 
+                            required
+                            value={applicationData.phone}
+                            onChange={handleInputChange}
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="position">Position</Label>
+                          <select 
+                            id="position"
+                            name="position"
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            required
+                            value={applicationData.position}
+                            onChange={e => setApplicationData(prev => ({ ...prev, position: e.target.value }))}
+                          >
+                            <option value="" disabled>Select a position</option>
+                            {positions.map(pos => (
+                              <option key={pos.id} value={pos.id}>{pos.title}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="resume">Resume/CV</Label>
+                        <Input 
+                          id="resume" 
+                          name="resume" 
+                          type="file" 
+                          accept=".pdf,.doc,.docx" 
+                          required
+                          onChange={handleFileChange}
+                        />
+                        <p className="text-xs text-muted-foreground">Upload your resume (PDF, DOC, or DOCX)</p>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="coverLetter">Cover Letter</Label>
+                        <Textarea 
+                          id="coverLetter" 
+                          name="coverLetter" 
+                          placeholder="Tell us why you're a great fit for this position..." 
+                          rows={6}
+                          value={applicationData.coverLetter}
+                          onChange={handleInputChange}
+                        />
+                      </div>
+                      
+                      <div className="flex justify-end space-x-4">
+                        <Button 
+                          type="button" 
+                          variant="outline"
+                          onClick={() => setIsApplying(false)}
+                        >
+                          Cancel
+                        </Button>
+                        <Button type="submit">Submit Application</Button>
+                      </div>
+                    </form>
+                  </CardContent>
+                </Card>
               </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
         
-        {/* CTA Section */}
-        <section className="py-20 bg-primary/5">
+        {/* Call to Action */}
+        <section className="py-16 bg-secondary">
           <div className="container mx-auto px-4 text-center">
-            <h2 className="text-3xl font-bold mb-6">Ready to Join Our Team?</h2>
+            <h2 className="text-3xl font-bold mb-6">Don't See a Position That Fits?</h2>
             <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Take the first step toward a rewarding career with opportunities for growth and development.
+              We're always looking for talented individuals to join our team. Send us your resume and we'll keep it on file for future opportunities.
             </p>
-            <Button size="lg" className="font-medium">
-              Browse Open Positions
-            </Button>
+            <div className="flex flex-col sm:flex-row justify-center gap-4">
+              <Link
+                to="/about"
+                className="inline-block bg-secondary-foreground/10 text-foreground px-8 py-3 rounded-md font-medium hover:bg-secondary-foreground/20 transition-colors"
+              >
+                Learn About Us
+              </Link>
+              <a
+                href="mailto:careers@tastyhub.com" 
+                className="inline-block bg-primary text-primary-foreground px-8 py-3 rounded-md font-medium hover:bg-primary/90 transition-colors"
+              >
+                Email Your Resume
+              </a>
+            </div>
           </div>
         </section>
       </main>

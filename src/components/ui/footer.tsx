@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Coffee, Facebook, Instagram, Twitter, MapPin, Mail, Phone } from 'lucide-react';
@@ -17,16 +18,16 @@ const Footer: React.FC = () => {
             </div>
             <p className="text-muted-foreground">
               A modern dining experience focused on fresh ingredients, sustainability, 
-              and plant-based options.
+              and plant-based options. Serving Virginia since 2009.
             </p>
             <div className="flex space-x-4 pt-2">
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors" aria-label="Facebook">
+              <a href="https://facebook.com/tastyhub" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors" aria-label="Facebook">
                 <Facebook size={20} />
               </a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors" aria-label="Instagram">
+              <a href="https://instagram.com/tastyhub_va" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors" aria-label="Instagram">
                 <Instagram size={20} />
               </a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors" aria-label="Twitter">
+              <a href="https://twitter.com/tastyhub" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors" aria-label="Twitter">
                 <Twitter size={20} />
               </a>
             </div>
@@ -70,15 +71,17 @@ const Footer: React.FC = () => {
             <ul className="space-y-3">
               <li className="flex items-start space-x-3 text-muted-foreground">
                 <MapPin size={18} className="mt-0.5 flex-shrink-0" />
-                <span>123 Healthy Street, Foodville, CA 90210</span>
+                <span>456 Wilson Blvd, Arlington, VA 22203</span>
               </li>
               <li className="flex items-center space-x-3 text-muted-foreground">
                 <Phone size={18} className="flex-shrink-0" />
-                <span>(555) 123-4567</span>
+                <span>(703) 555-1234</span>
               </li>
               <li className="flex items-center space-x-3 text-muted-foreground">
                 <Mail size={18} className="flex-shrink-0" />
-                <span>contact@tastyhub.com</span>
+                <a href="mailto:contact@tastyhub.com" className="hover:text-primary transition-colors">
+                  contact@tastyhub.com
+                </a>
               </li>
             </ul>
           </div>

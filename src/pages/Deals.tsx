@@ -62,7 +62,7 @@ const deals: DealData[] = [
     discountAmount: 10,
     discountType: 'percentage',
     appliesTo: 'all',
-    minimumPurchase: 100,
+    minimumPurchase: 50, // Reduced from 100
     code: 'CATER10'
   },
   {
@@ -85,7 +85,7 @@ const deals: DealData[] = [
   {
     id: 'gift-card',
     title: 'Gift Card Bonus',
-    description: 'Get a $5 bonus when you purchase a $50 gift card.',
+    description: 'Get a $5 bonus when you purchase a $25 gift card.', // Reduced from $50
     discount: '$5 BONUS',
     image: 'https://images.unsplash.com/photo-1612599316791-451087e8f877?q=80&w=2628&auto=format&fit=crop',
     features: [
@@ -97,7 +97,7 @@ const deals: DealData[] = [
     discountAmount: 5,
     discountType: 'fixed',
     appliesTo: 'specific',
-    items: ['gift-card-50'],
+    items: ['gift-card-25'], // Changed from gift-card-50
     code: 'GIFT5'
   }
 ];
@@ -108,7 +108,10 @@ const Deals: React.FC = () => {
   
   // Scroll to top on component mount
   useEffect(() => {
-    window.scrollTo(0, 0);
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   }, []);
   
   // Animation on mount
@@ -136,6 +139,11 @@ const Deals: React.FC = () => {
     return () => {
       observer.disconnect();
     };
+  }, []);
+
+  // Clear any existing active deal when component mounts
+  useEffect(() => {
+    localStorage.removeItem('active_deal');
   }, []);
 
   const handleGetDeal = (deal: DealData) => {
@@ -173,7 +181,7 @@ const Deals: React.FC = () => {
         <section className="relative h-80">
           <div className="absolute inset-0">
             <BlurImage
-              src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=2670&auto=format&fit=crop"
+              src="https://images.unsplash.com/photo-1498837167922-ddd27525d352?q=80&w=2670&auto=format&fit=crop"
               alt="Deals banner"
               className="object-cover"
             />
@@ -188,7 +196,7 @@ const Deals: React.FC = () => {
               <div className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4">
                 Special Offers
               </div>
-              <h1 className="text-4xl md:text-5xl font-bold mb-4">Exclusive Deals</h1>
+              <h1 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">Exclusive Deals</h1>
               <p className="text-muted-foreground max-w-xl">
                 Enjoy our special deals and save on your favorite meals. Sign up to unlock even more exclusive offers.
               </p>

@@ -1,48 +1,157 @@
 
-import React, { useState, useEffect } from 'react';
-import Navbar from '../components/ui/navbar';
-import Footer from '../components/ui/footer';
-import BlurImage from '../components/ui/blur-image';
-import LocationMap from '../components/ui/location-map';
+import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Navbar from '@/components/ui/navbar';
+import Footer from '@/components/ui/footer';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { MapPin, Phone, Clock, Star, Heart, Info, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { MapPin, Clock, Phone, ExternalLink, ChevronRight, Search, Heart, X, ArrowRight } from 'lucide-react';
 import { useFavorites } from '@/context/FavoritesContext';
 import { toast } from '@/components/ui/use-toast';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetClose,
-} from "@/components/ui/sheet";
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
 import { isAuthenticated } from '@/services/auth';
-import { useNavigate } from 'react-router-dom';
-import { locations, filterLocationsBySearch, filterLocationsByZip, locationDeliversToAddress } from '@/data/locations';
+import BlurImage from '@/components/ui/blur-image';
+
+// Free mapbox token for this demo (low usage limits)
+mapboxgl.accessToken = 'pk.eyJ1IjoibG92YWJsZWFpIiwiYSI6ImNsbXo1cTVueTBnbmoya213dDdvcGdjemEifQ.a891N5WH7GE9BTxqmOhROA';
+
+interface Location {
+  id: string;
+  name: string;
+  address: string;
+  city: string;
+  state: string;
+  zip: string;
+  phone: string;
+  rating: number;
+  image: string;
+  coordinates: [number, number]; // [longitude, latitude]
+  hours: {
+    monday: string;
+    tuesday: string;
+    wednesday: string;
+    thursday: string;
+    friday: string;
+    saturday: string;
+    sunday: string;
+  };
+  features: string[];
+}
+
+const locations: Location[] = [
+  {
+    id: 'arlington',
+    name: 'Tasty Hub Arlington',
+    address: '456 Wilson Blvd',
+    city: 'Arlington',
+    state: 'VA',
+    zip: '22203',
+    phone: '(703) 555-1234',
+    rating: 4.8,
+    image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=2174&auto=format&fit=crop',
+    coordinates: [-77.0951, 38.8813], // Arlington, VA
+    hours: {
+      monday: '7:00 AM - 5:00 PM',
+      tuesday: '7:00 AM - 5:00 PM',
+      wednesday: '7:00 AM - 5:00 PM',
+      thursday: '7:00 AM - 5:00 PM',
+      friday: '7:00 AM - 5:00 PM',
+      saturday: '7:00 AM - 5:00 PM',
+      sunday: '8:30 AM - 5:00 PM'
+    },
+    features: ['Dine-in', 'Takeout', 'Outdoor seating', 'Wifi', 'Wheelchair accessible']
+  },
+  {
+    id: 'alexandria',
+    name: 'Tasty Hub Alexandria',
+    address: '123 King Street',
+    city: 'Alexandria',
+    state: 'VA',
+    zip: '22314',
+    phone: '(703) 555-5678',
+    rating: 4.7,
+    image: 'https://images.unsplash.com/photo-1600093463592-8e36ae95ef56?q=80&w=2070&auto=format&fit=crop',
+    coordinates: [-77.0447, 38.8048], // Alexandria, VA
+    hours: {
+      monday: '7:00 AM - 5:00 PM',
+      tuesday: '7:00 AM - 5:00 PM',
+      wednesday: '7:00 AM - 5:00 PM',
+      thursday: '7:00 AM - 5:00 PM',
+      friday: '7:00 AM - 5:00 PM',
+      saturday: '7:00 AM - 5:00 PM',
+      sunday: '8:30 AM - 5:00 PM'
+    },
+    features: ['Dine-in', 'Takeout', 'Delivery', 'Outdoor seating', 'Wifi', 'Wheelchair accessible']
+  },
+  {
+    id: 'fairfax',
+    name: 'Tasty Hub Fairfax',
+    address: '789 Fair Lakes Pkwy',
+    city: 'Fairfax',
+    state: 'VA',
+    zip: '22033',
+    phone: '(703) 555-9012',
+    rating: 4.6,
+    image: 'https://images.unsplash.com/photo-1619474387533-301ed3b5a734?q=80&w=2070&auto=format&fit=crop',
+    coordinates: [-77.3664, 38.8526], // Fairfax, VA
+    hours: {
+      monday: '7:00 AM - 5:00 PM',
+      tuesday: '7:00 AM - 5:00 PM',
+      wednesday: '7:00 AM - 5:00 PM',
+      thursday: '7:00 AM - 5:00 PM',
+      friday: '7:00 AM - 5:00 PM',
+      saturday: '7:00 AM - 5:00 PM',
+      sunday: '8:30 AM - 5:00 PM'
+    },
+    features: ['Dine-in', 'Takeout', 'Drive-thru', 'Wifi', 'Wheelchair accessible']
+  },
+  {
+    id: 'vienna',
+    name: 'Tasty Hub Vienna',
+    address: '321 Maple Ave',
+    city: 'Vienna',
+    state: 'VA',
+    zip: '22180',
+    phone: '(703) 555-3456',
+    rating: 4.9,
+    image: 'https://images.unsplash.com/photo-1554306297-0c86e837d24b?q=80&w=2070&auto=format&fit=crop',
+    coordinates: [-77.2653, 38.8981], // Vienna, VA
+    hours: {
+      monday: '7:00 AM - 5:00 PM',
+      tuesday: '7:00 AM - 5:00 PM',
+      wednesday: '7:00 AM - 5:00 PM',
+      thursday: '7:00 AM - 5:00 PM',
+      friday: '7:00 AM - 5:00 PM',
+      saturday: '7:00 AM - 5:00 PM',
+      sunday: '8:30 AM - 5:00 PM'
+    },
+    features: ['Dine-in', 'Takeout', 'Outdoor seating', 'Wifi', 'Wheelchair accessible', 'Pet-friendly']
+  }
+];
 
 const FindLocation: React.FC = () => {
   const navigate = useNavigate();
-  const [isVisible, setIsVisible] = useState(false);
+  const { favorites, addFavorite, removeFavorite, isFavorite } = useFavorites();
+  const [activeLocation, setActiveLocation] = useState<Location | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeLocation, setActiveLocation] = useState(locations[0]);
-  const [filteredLocations, setFilteredLocations] = useState(locations);
-  const { addFavoriteLocation, removeFavoriteLocation, isFavoriteLocation } = useFavorites();
+  const [isVisible, setIsVisible] = useState(false);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const map = useRef<mapboxgl.Map | null>(null);
+  const markers = useRef<mapboxgl.Marker[]>([]);
+
+  // Scroll to top on component mount with smooth behavior
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  }, []);
   
-  // Carry-out form state
-  const [isCarryOutOpen, setIsCarryOutOpen] = useState(false);
-  const [carryOutSearch, setCarryOutSearch] = useState('');
-  const [carryOutResults, setCarryOutResults] = useState(locations.slice(0, 0));
-  const [hasSearched, setHasSearched] = useState(false);
-  
-  // Delivery form state
-  const [isDeliveryOpen, setIsDeliveryOpen] = useState(false);
-  const [deliveryAddress, setDeliveryAddress] = useState('');
-  const [deliveryCityStateZip, setDeliveryCityStateZip] = useState('');
-  const [deliveryResults, setDeliveryResults] = useState(locations.slice(0, 0));
-  const [hasDeliverySearched, setHasDeliverySearched] = useState(false);
-  
+  // Animation on mount
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsVisible(true);
@@ -50,104 +159,133 @@ const FindLocation: React.FC = () => {
     
     return () => clearTimeout(timer);
   }, []);
-  
+
+  // Initialize map
   useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('is-visible');
-        }
+    if (mapContainerRef.current && !map.current) {
+      map.current = new mapboxgl.Map({
+        container: mapContainerRef.current,
+        style: 'mapbox://styles/mapbox/streets-v12',
+        center: [-77.2, 38.85], // Center of Virginia locations
+        zoom: 9
       });
-    }, { threshold: 0.1 });
-    
-    const elements = document.querySelectorAll('.fade-up, .stagger-item');
-    elements.forEach(el => observer.observe(el));
-    
+
+      // Add navigation controls
+      map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+
+      // Add markers when map loads
+      map.current.on('load', () => {
+        locations.forEach(location => {
+          const marker = new mapboxgl.Marker({ color: '#4B5563' })
+            .setLngLat(location.coordinates)
+            .setPopup(new mapboxgl.Popup().setHTML(`
+              <strong>${location.name}</strong><br>
+              ${location.address}, ${location.city}, ${location.state} ${location.zip}
+            `))
+            .addTo(map.current!);
+          
+          markers.current.push(marker);
+        });
+      });
+    }
+
     return () => {
-      observer.disconnect();
+      if (map.current) {
+        map.current.remove();
+        map.current = null;
+        markers.current = [];
+      }
     };
   }, []);
 
+  // Update marker color when active location changes
   useEffect(() => {
-    if (!searchQuery.trim()) {
-      setFilteredLocations(locations);
-      return;
-    }
-    
-    setFilteredLocations(filterLocationsBySearch(searchQuery));
-  }, [searchQuery]);
+    markers.current.forEach((marker, index) => {
+      marker.remove();
+      
+      const location = locations[index];
+      const isActive = activeLocation?.id === location.id;
+      
+      const newMarker = new mapboxgl.Marker({ 
+        color: isActive ? '#EF4444' : '#4B5563'
+      })
+        .setLngLat(location.coordinates)
+        .setPopup(new mapboxgl.Popup().setHTML(`
+          <strong>${location.name}</strong><br>
+          ${location.address}, ${location.city}, ${location.state} ${location.zip}
+        `))
+        .addTo(map.current!);
+      
+      markers.current[index] = newMarker;
+      
+      if (isActive && map.current) {
+        map.current.flyTo({
+          center: location.coordinates,
+          zoom: 15,
+          essential: true
+        });
+      }
+    });
+  }, [activeLocation]);
 
-  const handleSetFavorite = (location: typeof locations[0]) => {
+  const filteredLocations = locations.filter(location => {
+    const query = searchQuery.toLowerCase();
+    return (
+      location.name.toLowerCase().includes(query) ||
+      location.address.toLowerCase().includes(query) ||
+      location.city.toLowerCase().includes(query) ||
+      location.state.toLowerCase().includes(query) ||
+      location.zip.toLowerCase().includes(query)
+    );
+  });
+
+  const handleToggleFavorite = (locationId: string) => {
     if (!isAuthenticated()) {
       toast({
-        title: "Authentication required",
-        description: "Please sign in to save favorite locations",
-        variant: "destructive",
+        title: "Authentication Required",
+        description: "Please sign in to save favorite locations.",
+        duration: 3000,
       });
-      navigate('/sign-in');
+      navigate('/sign-in', { state: { redirectTo: '/find-location' } });
       return;
     }
-    
-    if (isFavoriteLocation(location.id)) {
-      removeFavoriteLocation(location.id);
+
+    if (isFavorite(locationId)) {
+      removeFavorite(locationId);
       toast({
-        title: "Location removed",
-        description: `${location.name} has been removed from your favorites.`,
+        title: "Removed from Favorites",
+        description: "Location has been removed from your favorites.",
+        duration: 3000,
       });
     } else {
-      addFavoriteLocation({
-        id: location.id,
-        name: location.name
-      });
-      toast({
-        title: "Location added",
-        description: `${location.name} has been added to your favorites.`,
-      });
+      const location = locations.find(loc => loc.id === locationId);
+      if (location) {
+        addFavorite({
+          id: location.id,
+          name: location.name,
+          address: `${location.address}, ${location.city}, ${location.state} ${location.zip}`,
+          image: location.image
+        });
+        toast({
+          title: "Added to Favorites",
+          description: "Location has been added to your favorites.",
+          duration: 3000,
+        });
+      }
     }
   };
 
-  const handleGetDirections = (location: typeof locations[0]) => {
-    window.open(`https://maps.google.com/?q=${encodeURIComponent(location.address)}`, '_blank');
-  };
-  
-  const handleCarryOutSearch = () => {
-    if (!carryOutSearch.trim()) {
-      setCarryOutResults([]);
-      setHasSearched(false);
-      return;
-    }
-    
-    // Determine if searching by ZIP or location name
-    if (/^\d+$/.test(carryOutSearch)) {
-      setCarryOutResults(filterLocationsByZip(carryOutSearch));
-    } else {
-      setCarryOutResults(filterLocationsBySearch(carryOutSearch));
-    }
-    
-    setHasSearched(true);
-  };
-  
-  const handleDeliverySearch = () => {
-    if (!deliveryAddress.trim() || !deliveryCityStateZip.trim()) {
-      setDeliveryResults([]);
-      setHasDeliverySearched(false);
-      return;
-    }
-    
-    setDeliveryResults(locationDeliversToAddress(deliveryAddress, deliveryCityStateZip));
-    setHasDeliverySearched(true);
-  };
-  
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen flex flex-col">
       <Navbar />
       
-      <main>
+      <main className="flex-grow">
+        {/* Hero Section */}
         <section className="relative h-80">
           <div className="absolute inset-0">
             <BlurImage
-              src="https://images.unsplash.com/photo-1577415124269-fc1140a69e91?q=80&w=2574&auto=format&fit=crop"
-              alt="Locations banner"
+              src="https://images.unsplash.com/photo-1471967183320-ee018f6e114a?q=80&w=2070&auto=format&fit=crop"
+              alt="Find a Tasty Hub location"
               className="object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/10"></div>
@@ -161,376 +299,220 @@ const FindLocation: React.FC = () => {
               <div className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4">
                 Our Locations
               </div>
-              <h1 className="text-4xl md:text-5xl font-bold mb-4">Find a Tasty Hub Near You</h1>
+              <h1 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">Find a Tasty Hub Near You</h1>
               <p className="text-muted-foreground max-w-xl">
-                Visit one of our {locations.length} locations across the country and enjoy our fresh, sustainable menu in person.
+                Visit one of our Virginia locations and enjoy our fresh, locally-sourced menu offerings.
               </p>
             </div>
           </div>
         </section>
         
-        <section className="py-8">
-          <div className="container mx-auto px-4 text-center">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-lg mx-auto">
-              <Button
-                onClick={() => setIsCarryOutOpen(true)}
-                variant="default"
-                className="h-auto py-3 px-4 text-sm rounded-full shadow-md hover:shadow-lg transition-all"
-              >
-                Carry Out
-              </Button>
-              
-              <Button
-                onClick={() => setIsDeliveryOpen(true)}
-                variant="outline"
-                className="h-auto py-3 px-4 text-sm rounded-full shadow-sm hover:shadow-md transition-all"
-              >
-                Delivery
-              </Button>
-            </div>
-          </div>
-        </section>
-        
+        {/* Map & Locations Section */}
         <section className="py-16">
           <div className="container mx-auto px-4">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-1">
-                <div className="sticky top-24">
-                  <div className="relative mb-6">
-                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                      <Search size={18} className="text-muted-foreground" />
-                    </div>
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Search by city or address"
-                      className="bg-background py-3 pl-10 pr-4 block w-full rounded-md border border-input focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    />
-                  </div>
-                  
-                  <div className="bg-card rounded-lg shadow-md border border-border overflow-hidden">
-                    <div className="px-4 py-3 border-b border-border">
-                      <h3 className="font-medium">Our Locations ({filteredLocations.length})</h3>
-                    </div>
-                    <div className="max-h-[500px] overflow-y-auto">
-                      {filteredLocations.length > 0 ? (
-                        filteredLocations.map((location) => (
-                          <div 
-                            key={location.id} 
-                            onClick={() => setActiveLocation(location)}
-                            className={cn(
-                              "p-4 border-b border-border cursor-pointer transition-colors",
-                              activeLocation.id === location.id 
-                                ? "bg-primary/10" 
-                                : "hover:bg-muted/50"
-                            )}
-                          >
-                            <div className="flex items-start justify-between">
-                              <div>
-                                <h4 className="font-medium">{location.name}</h4>
-                                <p className="text-sm text-muted-foreground">{location.address}</p>
-                                <div className="flex items-center text-xs text-muted-foreground mt-1">
-                                  <Clock size={12} className="mr-1" />
-                                  <span>Open Today: 7:00 AM - 5:00 PM</span>
-                                </div>
-                              </div>
-                              <ChevronRight size={16} className={cn(
-                                "text-muted-foreground transition-transform",
-                                activeLocation.id === location.id ? "rotate-90" : ""
-                              )} />
-                            </div>
-                            {location.popular && (
-                              <span className="inline-block mt-2 text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">Popular Location</span>
-                            )}
-                          </div>
-                        ))
-                      ) : (
-                        <div className="p-6 text-center">
-                          <p className="text-muted-foreground">No locations found. Try a different search term.</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+            <div className="flex flex-col lg:flex-row gap-8">
+              {/* Left Column - Location List */}
+              <div className="w-full lg:w-2/5 space-y-6">
+                <div className="relative">
+                  <Input
+                    type="search"
+                    placeholder="Search by city, zip code, or location name..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10"
+                  />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 </div>
-              </div>
-              
-              <div className="lg:col-span-2">
-                <div className="bg-card rounded-lg shadow-md border border-border overflow-hidden">
-                  <div className="h-[400px]">
-                    <LocationMap 
-                      locations={locations.map(loc => ({
-                        id: loc.id,
-                        name: loc.name,
-                        coordinates: loc.coordinates
-                      }))} 
-                      activeLocationId={activeLocation.id}
-                      center={activeLocation.coordinates}
-                    />
-                  </div>
-                  
-                  {activeLocation && (
-                    <div className="p-6">
-                      <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                        <div>
-                          <h2 className="text-2xl font-bold mb-2">{activeLocation.name}</h2>
-                          <div className="flex items-start space-x-2 text-muted-foreground mb-1">
-                            <MapPin size={16} className="mt-0.5 flex-shrink-0" />
-                            <span>{activeLocation.address}</span>
+                
+                <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
+                  {filteredLocations.length > 0 ? (
+                    filteredLocations.map((location) => (
+                      <Card 
+                        key={location.id}
+                        className={cn(
+                          "cursor-pointer transition-all duration-200 hover:shadow-md border",
+                          activeLocation?.id === location.id ? "border-primary" : "border-border"
+                        )}
+                        onClick={() => setActiveLocation(location)}
+                      >
+                        <div className="flex">
+                          <div className="w-1/3">
+                            <img 
+                              src={location.image} 
+                              alt={location.name}
+                              className="h-full w-full object-cover aspect-square"
+                            />
                           </div>
-                          <div className="flex items-center space-x-2 text-muted-foreground mb-1">
-                            <Phone size={16} className="flex-shrink-0" />
-                            <span>{activeLocation.phone}</span>
-                          </div>
-                          <div className="flex items-center space-x-2 text-muted-foreground">
-                            <Clock size={16} className="flex-shrink-0" />
-                            <span>{activeLocation.hours}</span>
+                          <div className="w-2/3 p-4">
+                            <div className="flex justify-between items-start">
+                              <h3 className="font-semibold text-lg">{location.name}</h3>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleToggleFavorite(location.id);
+                                }}
+                                aria-label={isFavorite(location.id) ? "Remove from favorites" : "Add to favorites"}
+                                className="text-muted-foreground hover:text-primary transition-colors"
+                              >
+                                <Heart 
+                                  size={18} 
+                                  className={isFavorite(location.id) ? "fill-primary text-primary" : ""} 
+                                />
+                              </button>
+                            </div>
+                            <div className="flex items-center space-x-1 mb-2 text-muted-foreground text-sm">
+                              <div className="flex">
+                                {[...Array(5)].map((_, i) => (
+                                  <Star 
+                                    key={i}
+                                    size={12}
+                                    className={i < Math.floor(location.rating) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}
+                                  />
+                                ))}
+                              </div>
+                              <span>{location.rating}</span>
+                            </div>
+                            <p className="text-sm text-muted-foreground mb-1 flex items-start">
+                              <MapPin size={14} className="mr-1 mt-0.5 flex-shrink-0" />
+                              {location.address}, {location.city}, {location.state} {location.zip}
+                            </p>
+                            <p className="text-sm text-muted-foreground flex items-center">
+                              <Phone size={14} className="mr-1 flex-shrink-0" />
+                              {location.phone}
+                            </p>
                           </div>
                         </div>
-                        
-                        <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
-                          <button
-                            onClick={() => handleSetFavorite(activeLocation)}
-                            className={cn(
-                              "button-outline flex items-center justify-center py-2",
-                              isFavoriteLocation(activeLocation.id) && "bg-primary/10"
-                            )}
-                          >
-                            <Heart size={16} className={cn(
-                              "mr-2",
-                              isFavoriteLocation(activeLocation.id) ? "fill-primary text-primary" : ""
-                            )} />
-                            <span>
-                              {isFavoriteLocation(activeLocation.id) 
-                                ? "Favorited" 
-                                : "Add to Favorites"}
-                            </span>
-                          </button>
-                          <button
-                            onClick={() => handleGetDirections(activeLocation)}
-                            className="button-primary flex items-center justify-center py-2"
-                          >
-                            <span className="mr-1">Get Directions</span>
-                            <ExternalLink size={14} />
-                          </button>
-                        </div>
-                      </div>
+                      </Card>
+                    ))
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-muted-foreground">No locations found matching your search.</p>
                     </div>
                   )}
                 </div>
-                
-                <div className="mt-8 bg-secondary rounded-lg p-6">
-                  <h3 className="text-xl font-bold mb-4">Available at {activeLocation.name}</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div className="bg-card p-4 rounded-md border border-border shadow-sm">
-                      <div className="font-medium">Dine-In Services</div>
-                      <p className="text-sm text-muted-foreground">Comfortable indoor and outdoor seating available</p>
-                    </div>
-                    <div className="bg-card p-4 rounded-md border border-border shadow-sm">
-                      <div className="font-medium">Carry-Out</div>
-                      <p className="text-sm text-muted-foreground">Convenient pick-up options with online ordering</p>
-                    </div>
-                    <div className="bg-card p-4 rounded-md border border-border shadow-sm">
-                      <div className="font-medium">Delivery Radius</div>
-                      <p className="text-sm text-muted-foreground">Available within 3 miles of this location</p>
-                    </div>
-                    <div className="bg-card p-4 rounded-md border border-border shadow-sm">
-                      <div className="font-medium">Catering</div>
-                      <p className="text-sm text-muted-foreground">Available for events and group orders</p>
-                    </div>
-                    <div className="bg-card p-4 rounded-md border border-border shadow-sm">
-                      <div className="font-medium">WiFi</div>
-                      <p className="text-sm text-muted-foreground">Free high-speed internet for customers</p>
-                    </div>
-                    <div className="bg-card p-4 rounded-md border border-border shadow-sm">
-                      <div className="font-medium">Parking</div>
-                      <p className="text-sm text-muted-foreground">Street parking and nearby garages available</p>
-                    </div>
-                  </div>
+              </div>
+              
+              {/* Right Column - Map */}
+              <div className="w-full lg:w-3/5">
+                <div className="rounded-xl overflow-hidden border border-border h-[600px] shadow-sm">
+                  <div ref={mapContainerRef} className="w-full h-full" />
                 </div>
               </div>
             </div>
           </div>
         </section>
         
-        <section className="py-16 bg-primary/10">
-          <div className="container mx-auto px-4 text-center">
-            <h2 className="text-3xl font-bold mb-6">Ready to Visit?</h2>
-            <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Make a reservation at any of our locations and get a 10% discount on your first visit.
-            </p>
-            <a
-              href="/reservations"
-              className="inline-block bg-primary text-primary-foreground px-8 py-3 rounded-md font-medium text-lg hover:bg-primary/90 transition-colors"
-            >
-              Make a Reservation
-            </a>
-          </div>
-        </section>
+        {/* Location Details */}
+        {activeLocation && (
+          <section className="py-8 bg-secondary/30">
+            <div className="container mx-auto px-4">
+              <div className="max-w-5xl mx-auto">
+                <Card>
+                  <CardHeader>
+                    <div className="flex justify-between items-center">
+                      <CardTitle>{activeLocation.name}</CardTitle>
+                      <Button
+                        variant={isFavorite(activeLocation.id) ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => handleToggleFavorite(activeLocation.id)}
+                        className="flex items-center gap-1"
+                      >
+                        <Heart size={16} className={isFavorite(activeLocation.id) ? "fill-primary-foreground" : ""} />
+                        {isFavorite(activeLocation.id) ? "Saved" : "Save"}
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <div>
+                        <img 
+                          src={activeLocation.image}
+                          alt={activeLocation.name}
+                          className="w-full h-60 object-cover rounded-lg mb-4"
+                        />
+                        
+                        <div className="space-y-2">
+                          <div className="flex items-start space-x-2">
+                            <MapPin size={18} className="text-primary mt-0.5 flex-shrink-0" />
+                            <p>{activeLocation.address}, {activeLocation.city}, {activeLocation.state} {activeLocation.zip}</p>
+                          </div>
+                          
+                          <div className="flex items-center space-x-2">
+                            <Phone size={18} className="text-primary flex-shrink-0" />
+                            <p>{activeLocation.phone}</p>
+                          </div>
+                          
+                          <div className="flex items-start space-x-2">
+                            <Info size={18} className="text-primary mt-0.5 flex-shrink-0" />
+                            <div>
+                              <p className="font-medium mb-1">Features</p>
+                              <div className="flex flex-wrap gap-2">
+                                {activeLocation.features.map((feature, index) => (
+                                  <span key={index} className="text-xs bg-secondary px-2 py-1 rounded">
+                                    {feature}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <div className="flex items-start space-x-2 mb-4">
+                          <Clock size={18} className="text-primary mt-0.5 flex-shrink-0" />
+                          <div className="flex-grow">
+                            <p className="font-medium mb-2">Hours of Operation</p>
+                            <div className="space-y-1">
+                              <div className="flex justify-between text-sm">
+                                <span>Monday</span>
+                                <span>{activeLocation.hours.monday}</span>
+                              </div>
+                              <div className="flex justify-between text-sm">
+                                <span>Tuesday</span>
+                                <span>{activeLocation.hours.tuesday}</span>
+                              </div>
+                              <div className="flex justify-between text-sm">
+                                <span>Wednesday</span>
+                                <span>{activeLocation.hours.wednesday}</span>
+                              </div>
+                              <div className="flex justify-between text-sm">
+                                <span>Thursday</span>
+                                <span>{activeLocation.hours.thursday}</span>
+                              </div>
+                              <div className="flex justify-between text-sm">
+                                <span>Friday</span>
+                                <span>{activeLocation.hours.friday}</span>
+                              </div>
+                              <div className="flex justify-between text-sm">
+                                <span>Saturday</span>
+                                <span>{activeLocation.hours.saturday}</span>
+                              </div>
+                              <div className="flex justify-between text-sm">
+                                <span>Sunday</span>
+                                <span>{activeLocation.hours.sunday}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex justify-end space-x-3">
+                          <Button variant="outline" onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${activeLocation.coordinates[1]},${activeLocation.coordinates[0]}`, '_blank')}>
+                            Get Directions
+                          </Button>
+                          <Button onClick={() => navigate('/reservations', { state: { locationId: activeLocation.id } })}>
+                            Make a Reservation
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </section>
+        )}
       </main>
-      
-      {/* Carry Out Sheet */}
-      <Sheet open={isCarryOutOpen} onOpenChange={setIsCarryOutOpen}>
-        <SheetContent side="right" className="sm:max-w-md md:max-w-lg">
-          <SheetHeader>
-            <SheetTitle>Find a Location for Carry Out</SheetTitle>
-            <SheetDescription>
-              Enter your ZIP code or city to find nearby locations for pickup
-            </SheetDescription>
-          </SheetHeader>
-          
-          <div className="mt-8 space-y-6">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">City, State or ZIP Code</label>
-              <div className="flex gap-2">
-                <Input 
-                  placeholder="e.g., Richmond, VA or 23219" 
-                  value={carryOutSearch}
-                  onChange={(e) => setCarryOutSearch(e.target.value)}
-                />
-                <Button onClick={handleCarryOutSearch}>Search</Button>
-              </div>
-            </div>
-            
-            <div className="mt-6">
-              {hasSearched && (
-                <h3 className="text-lg font-medium mb-4">
-                  {carryOutResults.length > 0 
-                    ? `${carryOutResults.length} Locations Found` 
-                    : "No Locations Found"}
-                </h3>
-              )}
-              
-              {hasSearched && carryOutResults.length === 0 && (
-                <div className="text-center py-8 bg-muted/30 rounded-lg">
-                  <p className="text-muted-foreground mb-2">
-                    We couldn't find any locations near that address.
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Try a different ZIP code or city.
-                  </p>
-                </div>
-              )}
-              
-              <div className="space-y-4 mt-4">
-                {carryOutResults.map(location => (
-                  <div 
-                    key={location.id}
-                    className="p-4 border border-border rounded-lg hover:border-primary/50 transition-colors"
-                  >
-                    <h4 className="font-medium">{location.name}</h4>
-                    <p className="text-sm text-muted-foreground mb-2">{location.address}</p>
-                    <div className="flex items-center justify-between mt-4">
-                      <div className="text-sm text-muted-foreground">
-                        <Clock size={14} className="inline mr-1" /> 
-                        Ready in 15-20 min
-                      </div>
-                      <SheetClose asChild>
-                        <Button size="sm" onClick={() => {
-                          setActiveLocation(location);
-                          toast({
-                            title: "Location Selected",
-                            description: `You've selected ${location.name} for carry out.`,
-                          });
-                        }}>
-                          <span>Select</span>
-                          <ArrowRight size={14} className="ml-1" />
-                        </Button>
-                      </SheetClose>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </SheetContent>
-      </Sheet>
-      
-      {/* Delivery Sheet */}
-      <Sheet open={isDeliveryOpen} onOpenChange={setIsDeliveryOpen}>
-        <SheetContent side="right" className="sm:max-w-md md:max-w-lg">
-          <SheetHeader>
-            <SheetTitle>Delivery Address</SheetTitle>
-            <SheetDescription>
-              Enter your address to find out if we deliver to your location
-            </SheetDescription>
-          </SheetHeader>
-          
-          <div className="mt-8 space-y-6">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Street Address</label>
-              <Input 
-                placeholder="e.g., 123 Main St" 
-                value={deliveryAddress}
-                onChange={(e) => setDeliveryAddress(e.target.value)}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <label className="text-sm font-medium">City, State, ZIP</label>
-              <Input 
-                placeholder="e.g., Richmond, VA 23219" 
-                value={deliveryCityStateZip}
-                onChange={(e) => setDeliveryCityStateZip(e.target.value)}
-              />
-            </div>
-            
-            <Button onClick={handleDeliverySearch} className="w-full">Check Delivery Availability</Button>
-            
-            <div className="mt-6">
-              {hasDeliverySearched && (
-                <h3 className="text-lg font-medium mb-4">
-                  {deliveryResults.length > 0 
-                    ? "Delivery Available!" 
-                    : "Delivery Not Available"}
-                </h3>
-              )}
-              
-              {hasDeliverySearched && deliveryResults.length === 0 && (
-                <div className="text-center py-8 bg-muted/30 rounded-lg">
-                  <p className="text-muted-foreground mb-2">
-                    We're sorry, but we don't currently deliver to your address.
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Try our carry out service instead.
-                  </p>
-                </div>
-              )}
-              
-              <div className="space-y-4 mt-4">
-                {deliveryResults.map(location => (
-                  <div 
-                    key={location.id}
-                    className="p-4 border border-border rounded-lg hover:border-primary/50 transition-colors"
-                  >
-                    <h4 className="font-medium">Delivery from {location.name}</h4>
-                    <p className="text-sm text-muted-foreground mb-2">to {deliveryAddress}, {deliveryCityStateZip}</p>
-                    <div className="flex items-center justify-between mt-4">
-                      <div className="text-sm text-muted-foreground">
-                        <Clock size={14} className="inline mr-1" /> 
-                        Delivery in 30-45 min
-                      </div>
-                      <SheetClose asChild>
-                        <Button size="sm" onClick={() => {
-                          setActiveLocation(location);
-                          toast({
-                            title: "Delivery Location Selected",
-                            description: `You've selected ${location.name} for delivery to your address.`,
-                          });
-                          navigate('/menu');
-                        }}>
-                          <span>Order Now</span>
-                          <ArrowRight size={14} className="ml-1" />
-                        </Button>
-                      </SheetClose>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </SheetContent>
-      </Sheet>
       
       <Footer />
     </div>

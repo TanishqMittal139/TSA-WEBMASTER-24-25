@@ -3,6 +3,7 @@
 // For this demo, we're using localStorage to simulate persistence.
 
 import { v4 as uuidv4 } from 'uuid';
+import { getCurrentUser } from './auth';
 
 export interface ReservationData {
   id: string;
@@ -40,6 +41,39 @@ const saveReservations = (reservations: ReservationData[]): void => {
   localStorage.setItem('reservations', JSON.stringify(reservations));
 };
 
+// Send confirmation email (mock function)
+const sendConfirmationEmail = async (reservation: ReservationData): Promise<boolean> => {
+  // In a real app, this would call a backend API to send an email
+  console.log('Sending confirmation email to:', reservation.email);
+  console.log('Reservation details:', reservation);
+  
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 500));
+  
+  // Simulate email content that would be sent
+  const emailContent = `
+    <h1>Reservation Confirmation</h1>
+    <p>Dear ${reservation.name},</p>
+    <p>Your reservation at Tasty Hub has been confirmed!</p>
+    <p><strong>Reservation Details:</strong></p>
+    <ul>
+      <li>Date: ${new Date(reservation.date).toLocaleDateString()}</li>
+      <li>Time: ${reservation.time}</li>
+      <li>Number of Guests: ${reservation.guests}</li>
+      ${reservation.specialRequests ? `<li>Special Requests: ${reservation.specialRequests}</li>` : ''}
+    </ul>
+    <p>We look forward to seeing you soon!</p>
+    <p>Tasty Hub Team<br>
+    <a href="mailto:contact@tastyhub.com">contact@tastyhub.com</a><br>
+    (703) 555-1234</p>
+  `;
+  
+  console.log('Email content:', emailContent);
+  
+  // Return true to indicate successful sending (in a real app this would be based on API response)
+  return true;
+};
+
 // Create a new reservation
 const createReservation = async (data: Omit<ReservationData, 'id'>): Promise<ReservationResponse> => {
   // Simulate API delay
@@ -67,12 +101,16 @@ const createReservation = async (data: Omit<ReservationData, 'id'>): Promise<Res
     reservations.push(newReservation);
     saveReservations(reservations);
 
-    // Simulate sending confirmation email
-    console.log(`Confirmation email sent to ${data.email} for reservation on ${data.date} at ${data.time}`);
+    // Send confirmation email
+    const emailSent = await sendConfirmationEmail(newReservation);
+    
+    if (!emailSent) {
+      console.warn('Failed to send confirmation email, but reservation was created');
+    }
 
     return {
       success: true,
-      message: 'Your reservation has been confirmed!',
+      message: 'Your reservation has been confirmed! A confirmation email has been sent.',
       reservation: newReservation
     };
   } catch (error) {
@@ -88,6 +126,18 @@ const createReservation = async (data: Omit<ReservationData, 'id'>): Promise<Res
 const getReservationsByEmail = (email: string): ReservationData[] => {
   const reservations = getReservations();
   return reservations.filter(res => res.email.toLowerCase() === email.toLowerCase());
+};
+
+// Get all reservations for the current user
+const getReservationsForCurrentUser = (): ReservationData[] => {
+  const user = getCurrentUser();
+  if (!user) return [];
+  
+  const reservations = getReservations();
+  return reservations.filter(res => 
+    res.userId === user.id || 
+    res.email.toLowerCase() === user.email.toLowerCase()
+  );
 };
 
 // Get a reservation by id
@@ -134,5 +184,6 @@ export {
   createReservation,
   getReservationById,
   getReservationsByEmail,
+  getReservationsForCurrentUser,
   cancelReservation
 };

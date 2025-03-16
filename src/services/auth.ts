@@ -10,8 +10,8 @@ const users = [
     email: 'john@example.com',
     password: 'password123',
     avatar: 'https://i.pravatar.cc/150?img=68',
-    phone: '+1 (555) 123-4567',
-    address: '123 Main St, Anytown, USA',
+    phone: '+1 (703) 123-4567',
+    address: '123 Main St, Alexandria, VA 22314',
     bio: 'Food enthusiast and regular customer.',
     birthdate: '1990-01-01'
   }
@@ -157,4 +157,49 @@ export const updateUserProfile = (profileData: any) => {
   currentUser = safeUser;
   
   return { success: true, user: safeUser };
+};
+
+// Change password function
+export const changePassword = (currentPassword: string, newPassword: string) => {
+  if (!isAuthenticated()) {
+    return { success: false, message: 'User not authenticated' };
+  }
+  
+  // Get current user
+  const user = getCurrentUser();
+  
+  // Find user in array
+  const userIndex = users.findIndex(u => u.id === user.id);
+  if (userIndex === -1) {
+    return { success: false, message: 'User not found' };
+  }
+  
+  // Check if current password matches
+  if (users[userIndex].password !== currentPassword) {
+    return { success: false, message: 'Current password is incorrect' };
+  }
+  
+  // Update password
+  users[userIndex].password = newPassword;
+  
+  return { success: true, message: 'Password updated successfully' };
+};
+
+// Reset password function (normally would send email with reset link)
+export const resetPassword = (email: string) => {
+  // Find the user with matching email
+  const userIndex = users.findIndex(u => u.email === email);
+  
+  if (userIndex === -1) {
+    return { success: false, message: 'No account found with that email' };
+  }
+  
+  // In a real app, this would send a reset link to the user's email
+  // For this mock version, we'll just reset to a default password
+  users[userIndex].password = 'resetpassword123';
+  
+  return { 
+    success: true, 
+    message: 'Password has been reset. In a real app, we would send an email with instructions.' 
+  };
 };
