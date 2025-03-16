@@ -143,6 +143,20 @@
   .dark .hours-section-title {
     @apply text-white font-bold;
   }
+  
+  /* Fix for dark mode text visibility issues */
+  .dark .text-muted-foreground {
+    @apply text-gray-300/80;
+  }
+  
+  .dark .hours-section {
+    @apply bg-gray-900;
+  }
+  
+  .dark .hours-section h2,
+  .dark .hours-section h3 {
+    @apply text-white;
+  }
 }
 
 /* Custom animations and scroll behavior */

@@ -16,8 +16,42 @@ interface ImageSliderProps {
   className?: string;
 }
 
+// Updated slider images with high-quality food photos
+const defaultImages = [
+  {
+    src: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=2670&auto=format&fit=crop",
+    alt: "Featured dish - Grilled salmon with vegetables",
+    title: "Fresh Seasonal Cuisine",
+    description: "Our menu changes with the seasons to bring you the freshest ingredients"
+  },
+  {
+    src: "https://images.unsplash.com/photo-1543339308-43e59d6b73a6?q=80&w=2670&auto=format&fit=crop",
+    alt: "Pasta dish with tomato sauce",
+    title: "Handcrafted Pasta",
+    description: "Every pasta dish is made fresh daily by our expert chefs"
+  },
+  {
+    src: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?q=80&w=2681&auto=format&fit=crop",
+    alt: "Artisan pizza",
+    title: "Wood-Fired Pizzas",
+    description: "Traditional recipes with locally sourced toppings"
+  },
+  {
+    src: "https://images.unsplash.com/photo-1559847844-5315695dadae?q=80&w=2940&auto=format&fit=crop",
+    alt: "Plant-based bowl",
+    title: "Plant-Based Options",
+    description: "Delicious and creative vegetarian and vegan dishes"
+  },
+  {
+    src: "https://images.unsplash.com/photo-1482049016688-2d3e1b311543?q=80&w=2910&auto=format&fit=crop",
+    alt: "Breakfast spread",
+    title: "Weekend Brunch",
+    description: "Join us for our famous weekend brunch menu"
+  }
+];
+
 const ImageSlider: React.FC<ImageSliderProps> = ({
-  images,
+  images = defaultImages,
   autoPlay = true,
   interval = 5000,
   className

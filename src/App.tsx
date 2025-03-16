@@ -29,15 +29,20 @@ import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import Careers from "./pages/Careers";
 
-// Scroll to top component
+// Scroll to top component with animation
 const ScrollToTop = () => {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
+    // Add a small delay to ensure smooth scrolling after route change
+    const timeoutId = setTimeout(() => {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }, 100);
+    
+    return () => clearTimeout(timeoutId);
   }, [pathname]);
 
   return null;
@@ -59,6 +64,9 @@ const App = () => {
   useEffect(() => {
     // This would be where you might initialize external services
     console.log("Initializing app and services...");
+    
+    // Clear any lingering active deals on app start
+    localStorage.removeItem('active_deal');
   }, []);
 
   return (

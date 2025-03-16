@@ -29,7 +29,7 @@ const About = () => {
               </div>
               <h1 className="text-4xl md:text-5xl font-bold mb-4">About Tasty Hub</h1>
               <p className="text-muted-foreground max-w-xl">
-                Serving delicious food with sustainable practices since 2010.
+                Serving delicious food with sustainable practices since 2008.
               </p>
             </div>
           </div>
@@ -44,7 +44,7 @@ const About = () => {
                   At Tasty Hub, we believe that food should be both delicious and responsible. Our mission is to create exceptional dining experiences while maintaining a commitment to sustainability, ethical sourcing, and community support.
                 </p>
                 <p className="text-lg mb-6">
-                  Founded in 2010, we've grown from a small coffee shop to multiple locations across the country, but our core values remain the same: quality ingredients, exceptional service, and a positive impact on our world.
+                  Founded in 2008, we've grown from a small coffee shop to multiple locations across Virginia, but our core values remain the same: quality ingredients, exceptional service, and a positive impact on our world.
                 </p>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-8">
@@ -98,69 +98,11 @@ const About = () => {
                     className="w-full h-auto"
                   />
                 </div>
-                <div className="absolute -bottom-6 -left-6 bg-white p-4 rounded-lg shadow-lg w-32 h-32 flex items-center justify-center">
+                <div className="absolute -bottom-6 -left-6 bg-white p-4 rounded-lg shadow-lg w-32 h-32 flex items-center justify-center dark:bg-gray-800 dark:text-white">
                   <div className="text-center">
-                    <div className="text-3xl font-bold text-primary">13</div>
+                    <div className="text-3xl font-bold text-primary">15+</div>
                     <div className="text-sm text-muted-foreground">Years of Excellence</div>
                   </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-        
-        <section className="py-16 bg-secondary">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold">Our Team</h2>
-              <p className="text-lg text-muted-foreground mt-2">
-                Meet the talented individuals behind Tasty Hub's success
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="bg-card rounded-lg overflow-hidden shadow-md">
-                <img 
-                  src="https://images.unsplash.com/photo-1566554273541-37a9ca77b91f?q=80&w=2080&auto=format&fit=crop" 
-                  alt="Chef Maria Rodriguez" 
-                  className="w-full h-64 object-cover object-center"
-                />
-                <div className="p-6">
-                  <h3 className="text-xl font-bold mb-1">Maria Rodriguez</h3>
-                  <p className="text-primary mb-3">Executive Chef</p>
-                  <p className="text-muted-foreground">
-                    With over 15 years of culinary experience, Maria brings creativity and passion to every dish at Tasty Hub.
-                  </p>
-                </div>
-              </div>
-              
-              <div className="bg-card rounded-lg overflow-hidden shadow-md">
-                <img 
-                  src="https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=2069&auto=format&fit=crop" 
-                  alt="James Wilson" 
-                  className="w-full h-64 object-cover object-center"
-                />
-                <div className="p-6">
-                  <h3 className="text-xl font-bold mb-1">James Wilson</h3>
-                  <p className="text-primary mb-3">Founder & CEO</p>
-                  <p className="text-muted-foreground">
-                    James founded Tasty Hub with a vision to combine gourmet food with sustainable business practices.
-                  </p>
-                </div>
-              </div>
-              
-              <div className="bg-card rounded-lg overflow-hidden shadow-md">
-                <img 
-                  src="https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?q=80&w=2146&auto=format&fit=crop" 
-                  alt="Sarah Chen" 
-                  className="w-full h-64 object-cover object-center"
-                />
-                <div className="p-6">
-                  <h3 className="text-xl font-bold mb-1">Sarah Chen</h3>
-                  <p className="text-primary mb-3">Sustainability Director</p>
-                  <p className="text-muted-foreground">
-                    Sarah ensures that our operations remain environmentally responsible and community-focused.
-                  </p>
                 </div>
               </div>
             </div>
@@ -181,7 +123,7 @@ const About = () => {
                     <MapPin className="h-5 w-5 text-primary mr-3 mt-0.5" />
                     <div>
                       <p className="font-medium">Headquarters</p>
-                      <p className="text-muted-foreground">123 Market Street, San Francisco, CA 94105</p>
+                      <p className="text-muted-foreground">456 Wilson Blvd, Arlington, VA 22203</p>
                     </div>
                   </div>
                   
@@ -189,7 +131,7 @@ const About = () => {
                     <Phone className="h-5 w-5 text-primary mr-3 mt-0.5" />
                     <div>
                       <p className="font-medium">Phone</p>
-                      <p className="text-muted-foreground">(415) 555-1234</p>
+                      <p className="text-muted-foreground">(703) 555-1234</p>
                     </div>
                   </div>
                   
@@ -197,7 +139,7 @@ const About = () => {
                     <Mail className="h-5 w-5 text-primary mr-3 mt-0.5" />
                     <div>
                       <p className="font-medium">Email</p>
-                      <p className="text-muted-foreground">info@tastyhub.com</p>
+                      <p className="text-muted-foreground">contact@tastyhub-va.com</p>
                     </div>
                   </div>
                   

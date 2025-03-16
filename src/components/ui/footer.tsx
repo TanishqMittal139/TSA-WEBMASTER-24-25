@@ -18,7 +18,7 @@ const Footer: React.FC = () => {
             </div>
             <p className="text-muted-foreground">
               A modern dining experience focused on fresh ingredients, sustainability, 
-              and plant-based options. Serving Virginia since 2009.
+              and plant-based options. Serving Virginia since 2008.
             </p>
             <div className="flex space-x-4 pt-2">
               <a href="https://facebook.com/tastyhub_va" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors" aria-label="Facebook">

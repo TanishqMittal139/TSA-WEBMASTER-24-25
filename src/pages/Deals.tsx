@@ -177,11 +177,11 @@ const Deals: React.FC = () => {
       <Navbar />
       
       <main>
-        {/* Hero Banner - Updated image */}
+        {/* Hero Banner with updated background image */}
         <section className="relative h-80">
           <div className="absolute inset-0">
             <BlurImage
-              src="https://images.unsplash.com/photo-1498837167922-ddd27525d352?q=80&w=2670&auto=format&fit=crop"
+              src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=2669&auto=format&fit=crop"
               alt="Deals banner"
               className="object-cover"
             />
