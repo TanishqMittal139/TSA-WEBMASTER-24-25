@@ -1,6 +1,7 @@
 
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { toast } from '@/components/ui/use-toast';
+import { useAuth } from '@/context/AuthContext';
 
 type CartItem = {
   id: string;
@@ -21,6 +22,7 @@ type CartContextType = {
   itemCount: number;
   hasDiscountedItems: boolean;
   totalAmount: number;
+  checkAuthBeforeCheckout: () => boolean;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -28,6 +30,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [items, setItems] = useState<CartItem[]>([]);
   const [hasDiscountedItems, setHasDiscountedItems] = useState<boolean>(false);
+  const { user } = useAuth();
   
   // Load cart from localStorage on initial render
   useEffect(() => {
@@ -125,6 +128,20 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
   
+  // New function to check auth before checkout
+  const checkAuthBeforeCheckout = (): boolean => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to proceed to checkout.",
+        variant: "destructive",
+        duration: 5000,
+      });
+      return false;
+    }
+    return true;
+  };
+  
   const itemCount = items.reduce((count, item) => count + item.quantity, 0);
   
   // Calculate total amount
@@ -142,7 +159,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       clearCart,
       itemCount,
       hasDiscountedItems,
-      totalAmount
+      totalAmount,
+      checkAuthBeforeCheckout
     }}>
       {children}
     </CartContext.Provider>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -166,16 +165,16 @@ const Reservations = () => {
         name: values.name,
         email: values.email,
         phone: values.phone,
-        date: values.date.toISOString().split('T')[0], // Convert Date to string format
+        date: format(values.date, 'yyyy-MM-dd'), // Convert Date to string format
         time: values.time,
         guests: values.guests,
         specialRequests: values.specialRequests || null,
         status: 'confirmed',
       };
       
-      const result = await createReservation(reservationData);
+      const { data, error } = await createReservation(reservationData);
       
-      if (result.data) {
+      if (data) {
         toast({
           title: "Reservation Confirmed!",
           description: `Your table for ${values.guests} is booked for ${format(values.date, 'MMMM d, yyyy')} at ${values.time}.`,
@@ -187,7 +186,7 @@ const Reservations = () => {
       } else {
         toast({
           title: "Reservation Failed",
-          description: result.error?.message || "An error occurred while creating your reservation.",
+          description: error?.message || "An error occurred while creating your reservation.",
           variant: "destructive",
         });
       }
@@ -497,9 +496,9 @@ const Reservations = () => {
                                   </div>
                                 </div>
                                 
-                                {reservation.special_requests && (
+                                {reservation.specialRequests && (
                                   <p className="text-sm text-muted-foreground mt-2 border-t border-border pt-2">
-                                    <span className="font-medium">Special Requests:</span> {reservation.special_requests}
+                                    <span className="font-medium">Special Requests:</span> {reservation.specialRequests}
                                   </p>
                                 )}
                               </div>

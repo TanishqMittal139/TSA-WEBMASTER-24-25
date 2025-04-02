@@ -135,10 +135,12 @@ export const saveUserPreferences = async (preferences: Record<string, any>): Pro
       return false;
     }
     
+    // Store preferences as a JSON string in the "bio" field as a workaround
+    // since there's no dedicated preferences column
     const { error } = await supabase
       .from('profiles')
       .update({
-        preferences: preferences
+        bio: JSON.stringify(preferences)
       })
       .eq('id', session.user.id);
     

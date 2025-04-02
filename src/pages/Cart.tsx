@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Navbar from '../components/ui/navbar';
 import Footer from '../components/ui/footer';
@@ -30,6 +29,13 @@ const Cart: React.FC = () => {
   };
   
   const navigate = useNavigate();
+
+  // Find the "Proceed to Checkout" button and update the onClick handler
+  const handleProceedToCheckout = () => {
+    if (useCart().checkAuthBeforeCheckout()) {
+      navigate('/checkout');
+    }
+  };
 
   return (
     <div className="min-h-screen">
@@ -153,9 +159,8 @@ const Cart: React.FC = () => {
                     </div>
                     
                     <Button 
+                      onClick={handleProceedToCheckout}
                       className="w-full mt-4"
-                      size="lg"
-                      onClick={() => navigate('/checkout')}
                       disabled={items.length === 0}
                     >
                       <ShoppingCart className="mr-2 h-5 w-5" />
