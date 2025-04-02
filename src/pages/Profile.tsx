@@ -11,11 +11,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
 import { toast } from '@/components/ui/use-toast';
-import { isAuthenticated, getCurrentUser, updateUserProfile } from '@/services/auth';
+import { useAuth } from '@/context/AuthContext';
+import { updateUserProfile, changePassword } from '@/services/supabase-auth';
 import { 
   User, Mail, Phone, MapPin, Calendar, Edit2, Save, Key, LogOut,
-  ShoppingBag, Settings, AlertCircle, Camera
+  ShoppingBag, Settings, AlertCircle, Camera, Bell, ShieldCheck, Hash,
+  CreditCard, Trash2
 } from 'lucide-react';
 
 // List of avatar options for profile customization
@@ -30,45 +33,60 @@ const avatarOptions = [
   { id: 'avatar8', src: 'https://api.dicebear.com/7.x/bottts/svg?seed=food3', alt: 'Food Avatar 3' },
 ];
 
-// Mock function for updating profile (replace with actual implementation)
-const saveProfile = async (profileData: any) => {
-  // Simulate API call
-  await new Promise(resolve => setTimeout(resolve, 800));
-  
-  try {
-    const result = await updateUserProfile(profileData);
-    return result;
-  } catch (error) {
-    console.error('Error updating profile:', error);
-    return { success: false, message: 'An error occurred while updating your profile.' };
+// User preferences with default values
+const defaultPreferences = {
+  notifications: {
+    email: true,
+    promotions: true,
+    updates: false,
+    orderStatus: true
+  },
+  privacy: {
+    shareHistory: false,
+    savePaymentInfo: true,
+    locationTracking: false
+  },
+  appearance: {
+    compactMode: false,
+    highContrast: false
   }
 };
 
 const Profile: React.FC = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState(getCurrentUser());
+  const { user, profile, refreshProfile } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showAvatarSelector, setShowAvatarSelector] = useState(false);
-  const [selectedAvatar, setSelectedAvatar] = useState(user?.avatar || avatarOptions[0].src);
+  const [selectedAvatar, setSelectedAvatar] = useState(profile?.avatar || avatarOptions[0].src);
+  const [preferences, setPreferences] = useState(defaultPreferences);
   
   // Profile form state
   const [formData, setFormData] = useState({
-    name: user?.name || '',
-    email: user?.email || '',
-    phone: user?.phone || '',
-    address: user?.address || '',
-    bio: user?.bio || '',
-    birthdate: user?.birthdate || '',
-    avatar: user?.avatar || avatarOptions[0].src
+    name: profile?.name || '',
+    email: profile?.email || '',
+    phone: profile?.phone || '',
+    address: profile?.address || '',
+    bio: profile?.bio || '',
+    birthdate: profile?.birthdate || '',
+    avatar: profile?.avatar || avatarOptions[0].src
   });
   
-  // Check if user is authenticated
+  // Update form when profile changes
   useEffect(() => {
-    if (!isAuthenticated()) {
-      navigate('/sign-in', { replace: true });
+    if (profile) {
+      setFormData({
+        name: profile.name || '',
+        email: profile.email || '',
+        phone: profile.phone || '',
+        address: profile.address || '',
+        bio: profile.bio || '',
+        birthdate: profile.birthdate || '',
+        avatar: profile.avatar || avatarOptions[0].src
+      });
+      setSelectedAvatar(profile.avatar || avatarOptions[0].src);
     }
-  }, [navigate]);
+  }, [profile]);
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -81,21 +99,44 @@ const Profile: React.FC = () => {
     setShowAvatarSelector(false);
   };
   
+  const handlePreferenceChange = (category: string, setting: string, value: boolean) => {
+    setPreferences(prev => ({
+      ...prev,
+      [category]: {
+        ...prev[category as keyof typeof prev],
+        [setting]: value
+      }
+    }));
+  };
+  
   const handleSaveProfile = async () => {
     setIsSaving(true);
     
     try {
-      const result = await saveProfile({...formData, avatar: selectedAvatar});
+      // Validate phone format if provided
+      if (formData.phone && !/^\+?[0-9\s\-()]+$/.test(formData.phone)) {
+        toast({
+          title: "Invalid Phone Format",
+          description: "Please enter a valid phone number.",
+          variant: "destructive"
+        });
+        setIsSaving(false);
+        return;
+      }
+      
+      const result = await updateUserProfile({
+        ...formData,
+        avatar: selectedAvatar,
+      });
       
       if (result.success) {
+        await refreshProfile();
         toast({
           title: "Profile Updated",
           description: "Your profile information has been updated successfully.",
           duration: 3000,
         });
         setIsEditing(false);
-        // Update local user data
-        setUser({...user, ...formData, avatar: selectedAvatar});
       } else {
         toast({
           title: "Update Failed",
@@ -105,6 +146,7 @@ const Profile: React.FC = () => {
         });
       }
     } catch (error) {
+      console.error("Profile update error:", error);
       toast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",
@@ -116,6 +158,13 @@ const Profile: React.FC = () => {
     }
   };
   
+  const handleSavePreferences = () => {
+    toast({
+      title: "Preferences Saved",
+      description: "Your preferences have been updated successfully.",
+    });
+  };
+  
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -125,18 +174,18 @@ const Profile: React.FC = () => {
           <div className="max-w-5xl mx-auto">
             <div className="flex flex-col md:flex-row items-start gap-6">
               {/* Left sidebar with avatar and basics */}
-              <div className="w-full md:w-1/3 sticky top-24">
+              <div className="w-full md:w-1/3 sticky top-24 mb-6 md:mb-0">
                 <Card>
                   <CardContent className="pt-6">
                     <div className="flex flex-col items-center">
                       <div className="relative">
-                        <Avatar className="h-24 w-24 mb-4">
+                        <Avatar className="h-24 w-24 mb-4 border-2 border-primary/20">
                           <AvatarImage 
                             src={selectedAvatar} 
-                            alt={user?.name || 'User'} 
+                            alt={profile?.name || 'User'} 
                           />
                           <AvatarFallback className="text-xl">
-                            {user?.name?.split(' ').map(n => n[0]).join('') || 'U'}
+                            {profile?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
                           </AvatarFallback>
                         </Avatar>
                         <Button 
@@ -150,7 +199,7 @@ const Profile: React.FC = () => {
                       </div>
                       
                       {showAvatarSelector && (
-                        <div className="mt-2 mb-4 p-3 bg-card border border-border rounded-lg">
+                        <div className="mt-2 mb-4 p-3 bg-card border border-border rounded-lg w-full">
                           <h4 className="text-sm font-medium mb-2">Select an Avatar</h4>
                           <div className="grid grid-cols-4 gap-2">
                             {avatarOptions.map((avatar) => (
@@ -170,8 +219,8 @@ const Profile: React.FC = () => {
                         </div>
                       )}
                       
-                      <h2 className="text-xl font-semibold">{user?.name}</h2>
-                      <p className="text-sm text-muted-foreground mb-4">{user?.email}</p>
+                      <h2 className="text-xl font-semibold">{profile?.name || 'User'}</h2>
+                      <p className="text-sm text-muted-foreground mb-4">{profile?.email || user?.email}</p>
                       
                       <Button 
                         variant="outline" 
@@ -180,7 +229,7 @@ const Profile: React.FC = () => {
                       >
                         {isEditing ? (
                           <>
-                            <Edit2 className="mr-2 h-4 w-4" /> Cancel Editing
+                            <X className="mr-2 h-4 w-4" /> Cancel Editing
                           </>
                         ) : (
                           <>
@@ -195,27 +244,27 @@ const Profile: React.FC = () => {
                     <div className="space-y-3">
                       <div className="flex items-center text-sm">
                         <Mail className="mr-2 h-4 w-4 text-muted-foreground" />
-                        <span>{user?.email}</span>
+                        <span>{profile?.email || user?.email}</span>
                       </div>
                       
-                      {user?.phone && (
+                      {profile?.phone && (
                         <div className="flex items-center text-sm">
                           <Phone className="mr-2 h-4 w-4 text-muted-foreground" />
-                          <span>{user.phone}</span>
+                          <span>{profile.phone}</span>
                         </div>
                       )}
                       
-                      {user?.address && (
+                      {profile?.address && (
                         <div className="flex items-center text-sm">
                           <MapPin className="mr-2 h-4 w-4 text-muted-foreground" />
-                          <span>{user.address}</span>
+                          <span>{profile.address}</span>
                         </div>
                       )}
                       
-                      {user?.birthdate && (
+                      {profile?.birthdate && (
                         <div className="flex items-center text-sm">
                           <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
-                          <span>{user.birthdate}</span>
+                          <span>{profile.birthdate}</span>
                         </div>
                       )}
                     </div>
@@ -281,6 +330,8 @@ const Profile: React.FC = () => {
                                   placeholder="Your email address" 
                                   value={formData.email}
                                   onChange={handleInputChange}
+                                  readOnly
+                                  disabled
                                 />
                               ) : (
                                 <div className="p-2 border border-input rounded-md bg-background">
@@ -367,7 +418,10 @@ const Profile: React.FC = () => {
                                 disabled={isSaving}
                               >
                                 {isSaving ? (
-                                  <>Saving Changes...</>
+                                  <>
+                                    <div className="h-4 w-4 mr-2 rounded-full border-2 border-current border-t-transparent animate-spin"></div>
+                                    Saving...
+                                  </>
                                 ) : (
                                   <>
                                     <Save className="mr-2 h-4 w-4" />
@@ -407,39 +461,141 @@ const Profile: React.FC = () => {
                     </Card>
                   </TabsContent>
                   
-                  <TabsContent value="settings">
+                  <TabsContent value="settings" className="space-y-6">
                     <Card>
                       <CardHeader>
-                        <CardTitle>Account Settings</CardTitle>
+                        <CardTitle className="flex items-center">
+                          <Bell className="mr-2 h-5 w-5" />
+                          Notification Preferences
+                        </CardTitle>
                         <CardDescription>
-                          Manage your account preferences and security
+                          Control how we communicate with you
                         </CardDescription>
                       </CardHeader>
-                      <CardContent className="space-y-6">
-                        <div className="space-y-4">
-                          <h3 className="text-lg font-medium flex items-center">
-                            <Key className="mr-2 h-5 w-5" />
-                            Password & Security
-                          </h3>
-                          <Button variant="outline" className="w-full sm:w-auto">
-                            Change Password
-                          </Button>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Email Notifications</p>
+                            <p className="text-sm text-muted-foreground">Receive important updates via email</p>
+                          </div>
+                          <Switch
+                            checked={preferences.notifications.email}
+                            onCheckedChange={(checked) => handlePreferenceChange('notifications', 'email', checked)}
+                          />
                         </div>
-                        
                         <Separator />
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Promotional Emails</p>
+                            <p className="text-sm text-muted-foreground">Get notified about deals and offers</p>
+                          </div>
+                          <Switch 
+                            checked={preferences.notifications.promotions}
+                            onCheckedChange={(checked) => handlePreferenceChange('notifications', 'promotions', checked)}
+                          />
+                        </div>
+                        <Separator />
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Order Status Updates</p>
+                            <p className="text-sm text-muted-foreground">Receive notifications about your orders</p>
+                          </div>
+                          <Switch 
+                            checked={preferences.notifications.orderStatus}
+                            onCheckedChange={(checked) => handlePreferenceChange('notifications', 'orderStatus', checked)}
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center">
+                          <ShieldCheck className="mr-2 h-5 w-5" />
+                          Privacy Settings
+                        </CardTitle>
+                        <CardDescription>
+                          Control your data and privacy preferences
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Share Order History</p>
+                            <p className="text-sm text-muted-foreground">Allow us to use your orders to improve recommendations</p>
+                          </div>
+                          <Switch 
+                            checked={preferences.privacy.shareHistory}
+                            onCheckedChange={(checked) => handlePreferenceChange('privacy', 'shareHistory', checked)}
+                          />
+                        </div>
+                        <Separator />
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Save Payment Information</p>
+                            <p className="text-sm text-muted-foreground">Securely store your payment details for future orders</p>
+                          </div>
+                          <Switch 
+                            checked={preferences.privacy.savePaymentInfo}
+                            onCheckedChange={(checked) => handlePreferenceChange('privacy', 'savePaymentInfo', checked)}
+                          />
+                        </div>
+                        <Separator />
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Location Tracking</p>
+                            <p className="text-sm text-muted-foreground">Allow location tracking for better service</p>
+                          </div>
+                          <Switch 
+                            checked={preferences.privacy.locationTracking}
+                            onCheckedChange={(checked) => handlePreferenceChange('privacy', 'locationTracking', checked)}
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center">
+                          <Key className="mr-2 h-5 w-5" />
+                          Security
+                        </CardTitle>
+                        <CardDescription>
+                          Manage your account security and password
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <Button
+                          variant="outline"
+                          onClick={() => navigate('/reset-password')}
+                          className="w-full sm:w-auto"
+                        >
+                          <Key className="mr-2 h-4 w-4" />
+                          Change Password
+                        </Button>
                         
-                        <div className="space-y-4">
-                          <h3 className="text-lg font-medium flex items-center">
+                        <Separator className="mt-6 mb-6" />
+                        
+                        <div>
+                          <h3 className="text-lg font-medium flex items-center text-destructive">
                             <AlertCircle className="mr-2 h-5 w-5" />
                             Danger Zone
                           </h3>
-                          <Button variant="destructive" className="w-full sm:w-auto">
-                            <LogOut className="mr-2 h-4 w-4" />
+                          <p className="text-sm text-muted-foreground mt-1 mb-4">
+                            These actions cannot be easily reversed
+                          </p>
+                          
+                          <Button variant="destructive" className="w-full sm:w-auto mt-2">
+                            <Trash2 className="mr-2 h-4 w-4" />
                             Delete Account
                           </Button>
                         </div>
                       </CardContent>
                     </Card>
+                    
+                    <div className="flex justify-end">
+                      <Button onClick={handleSavePreferences}>Save Preferences</Button>
+                    </div>
                   </TabsContent>
                 </Tabs>
               </div>

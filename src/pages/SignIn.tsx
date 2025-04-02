@@ -3,8 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Link, useNavigate } from 'react-router-dom';
-import { Coffee, ArrowRight } from 'lucide-react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Coffee, ArrowRight, AlertCircle } from 'lucide-react';
 import Navbar from '@/components/ui/navbar';
 import Footer from '@/components/ui/footer';
 import {
@@ -17,8 +17,10 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { toast } from '@/components/ui/use-toast';
-import { signIn, isAuthenticated } from '@/services/auth';
+import { signIn } from '@/services/supabase-auth';
+import { useAuth } from '@/context/AuthContext';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address.' }),
@@ -27,7 +29,13 @@ const formSchema = z.object({
 
 const SignIn = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const { user } = useAuth();
+  
+  // Get the return URL from location state or default to home
+  const from = (location.state as { from?: string })?.from || '/';
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -39,13 +47,14 @@ const SignIn = () => {
 
   // Check if user is already authenticated
   useEffect(() => {
-    if (isAuthenticated()) {
-      navigate('/');
+    if (user) {
+      navigate(from, { replace: true });
     }
-  }, [navigate]);
+  }, [user, navigate, from]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
+    setAuthError(null);
     
     try {
       const result = await signIn(values.email, values.password);
@@ -55,21 +64,13 @@ const SignIn = () => {
           title: "Welcome back!",
           description: "You have successfully signed in.",
         });
-        navigate('/');
+        navigate(from, { replace: true });
       } else {
-        toast({
-          title: "Sign in failed",
-          description: result.message,
-          variant: "destructive",
-        });
+        setAuthError(result.message);
       }
     } catch (error) {
       console.error("Sign in error:", error);
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred. Please try again.",
-        variant: "destructive",
-      });
+      setAuthError("An unexpected error occurred. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -97,6 +98,14 @@ const SignIn = () => {
             </div>
             
             <div className="bg-card rounded-xl shadow-lg p-6 md:p-8">
+              {authError && (
+                <Alert variant="destructive" className="mb-6">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Authentication Error</AlertTitle>
+                  <AlertDescription>{authError}</AlertDescription>
+                </Alert>
+              )}
+              
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                   <FormField

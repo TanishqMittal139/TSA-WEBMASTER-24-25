@@ -8,9 +8,8 @@ import { CartProvider } from "./context/CartContext";
 import { FavoritesProvider } from "./context/FavoritesContext";
 import { FavoriteMealsProvider } from "./context/FavoriteMealsContext";
 import { ThemeProvider } from "./context/ThemeContext";
-import { AuthProvider } from "./context/AuthContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 import { useEffect, useState } from "react";
-import { isAuthenticated } from "./services/supabase-auth";
 import Index from "./pages/Index";
 import Menu from "./pages/Menu";
 import Deals from "./pages/Deals";
@@ -22,11 +21,14 @@ import Reservations from "./pages/Reservations";
 import ReservationConfirmation from "./pages/ReservationConfirmation";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import Checkout from "./pages/Checkout";
 import CheckoutConfirmation from "./pages/CheckoutConfirmation";
 import FavoriteLocations from "./pages/FavoriteLocations";
 import DishDetails from "./pages/DishDetails";
 import Profile from "./pages/Profile";
+import History from "./pages/History";
 import NotFound from "./pages/NotFound";
 import Careers from "./pages/Careers";
 
@@ -51,30 +53,37 @@ const ScrollToTop = () => {
 
 // Protected route wrapper
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
-  const [authenticated, setAuthenticated] = useState<boolean | null>(null);
+  const { isLoading, user } = useAuth();
+  const navigate = useLocation();
   
-  useEffect(() => {
-    const checkAuth = async () => {
-      const isAuth = await isAuthenticated();
-      setAuthenticated(isAuth);
-    };
-    
-    checkAuth();
-  }, []);
-  
-  if (authenticated === null) {
-    // Still loading, return loading state or nothing
-    return <div className="flex items-center justify-center p-8">Loading...</div>;
+  if (isLoading) {
+    // Loading state with a nice spinner
+    return (
+      <div className="flex items-center justify-center min-h-screen p-8">
+        <div className="flex flex-col items-center gap-2">
+          <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin"></div>
+          <p className="text-sm text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
   }
   
-  if (!authenticated) {
-    return <Navigate to="/sign-in" replace />;
+  if (!user) {
+    return <Navigate to="/sign-in" state={{ from: navigate.pathname }} replace />;
   }
   
   return children;
 };
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  }
+});
 
 const App = () => {
   // Initialize auth and other services
@@ -119,6 +128,8 @@ const App = () => {
                       } />
                       <Route path="/sign-in" element={<SignIn />} />
                       <Route path="/sign-up" element={<SignUp />} />
+                      <Route path="/forgot-password" element={<ForgotPassword />} />
+                      <Route path="/reset-password" element={<ResetPassword />} />
                       <Route path="/checkout" element={<Checkout />} />
                       <Route path="/checkout-confirmation" element={<CheckoutConfirmation />} />
                       <Route path="/favorite-locations" element={
@@ -130,6 +141,11 @@ const App = () => {
                       <Route path="/profile" element={
                         <ProtectedRoute>
                           <Profile />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/history" element={
+                        <ProtectedRoute>
+                          <History />
                         </ProtectedRoute>
                       } />
                       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

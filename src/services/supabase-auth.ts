@@ -1,6 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
+import { toast } from "@/components/ui/use-toast";
 
 export type UserProfile = {
   id: string;
@@ -26,7 +27,7 @@ export const initializeProfile = async (user: User): Promise<boolean> => {
     // If profile already exists, return success
     if (existingProfile) return true;
 
-    // Create new profile
+    // Create new profile with basic user info
     const { error } = await supabase
       .from('profiles')
       .insert({
@@ -53,6 +54,7 @@ export const getUserProfile = async (): Promise<UserProfile | null> => {
     const { data: { session } } = await supabase.auth.getSession();
     
     if (!session?.user) {
+      console.log("No active session found when fetching profile");
       return null;
     }
     
@@ -62,8 +64,17 @@ export const getUserProfile = async (): Promise<UserProfile | null> => {
       .eq('id', session.user.id)
       .single();
     
-    if (error || !data) {
+    if (error) {
       console.error("Error fetching user profile:", error);
+      return null;
+    }
+    
+    if (!data) {
+      console.log("No profile found, attempting to initialize");
+      const created = await initializeProfile(session.user);
+      if (created) {
+        return getUserProfile();
+      }
       return null;
     }
     
@@ -112,6 +123,34 @@ export const updateUserProfile = async (profileData: Partial<UserProfile>): Prom
       success: false,
       message: 'An unexpected error occurred'
     };
+  }
+};
+
+// Save user preferences
+export const saveUserPreferences = async (preferences: Record<string, any>): Promise<boolean> => {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session?.user) {
+      return false;
+    }
+    
+    const { error } = await supabase
+      .from('profiles')
+      .update({
+        preferences: preferences
+      })
+      .eq('id', session.user.id);
+    
+    if (error) {
+      console.error("Error saving preferences:", error);
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error("Error saving preferences:", error);
+    return false;
   }
 };
 

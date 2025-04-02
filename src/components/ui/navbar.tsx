@@ -1,11 +1,13 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useCart } from '@/context/CartContext';
-import { getCurrentUser, signOut, isAuthenticated } from '@/services/auth';
+import { useAuth } from '@/context/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { 
-  Menu, X, ShoppingBag, User, Coffee, Navigation, Info, Percent, CalendarRange, Utensils, LogOut
+  Menu, X, ShoppingBag, User, Coffee, Navigation, Info, Percent, CalendarRange, Utensils, LogOut,
+  Settings, Heart, Lock, History
 } from 'lucide-react';
 import { 
   DropdownMenu,
@@ -13,18 +15,21 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuGroup,
+  DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from '@/components/ui/use-toast';
 import ThemeToggle from '@/components/ui/theme-toggle';
 
 const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [user, setUser] = useState(getCurrentUser());
   const location = useLocation();
   const navigate = useNavigate();
   const { itemCount } = useCart();
   const isMobile = useIsMobile();
+  const { user, profile, signOut } = useAuth();
   
   useEffect(() => {
     const handleScroll = () => {
@@ -39,10 +44,6 @@ const Navbar: React.FC = () => {
     setIsMobileMenuOpen(false);
   }, [location.pathname]);
   
-  useEffect(() => {
-    setUser(getCurrentUser());
-  }, [location.pathname]);
-  
   const navLinks = [
     { name: 'Home', path: '/', icon: <Coffee size={18} /> },
     { name: 'Menu', path: '/menu', icon: <Utensils size={18} /> },
@@ -52,17 +53,20 @@ const Navbar: React.FC = () => {
     { name: 'Reservations', path: '/reservations', icon: <CalendarRange size={18} /> }
   ];
 
-  const handleSignOut = () => {
-    signOut();
-    setUser(null);
-    toast({
-      title: "Signed out",
-      description: "You have been successfully signed out",
-    });
+  const handleSignOut = async () => {
+    await signOut();
     navigate('/');
   };
   
-  const showNavbarBackground = true;
+  const getInitials = () => {
+    if (profile?.name) {
+      return profile.name.split(' ').map(n => n[0]).join('').toUpperCase();
+    }
+    if (user?.email) {
+      return user.email[0].toUpperCase();
+    }
+    return 'U';
+  };
   
   return (
     <header className={cn(
@@ -71,7 +75,7 @@ const Navbar: React.FC = () => {
       <div className="container mx-auto px-4 flex items-center justify-between">
         <Link 
           to="/" 
-          className="flex items-center space-x-2 font-bold text-2xl transition-all hover-scale text-primary"
+          className="flex items-center space-x-2 font-bold text-2xl transition-all hover:scale-105 text-primary"
         >
           <Coffee size={28} strokeWidth={2.5} />
           <span>Tasty Hub</span>
@@ -105,7 +109,7 @@ const Navbar: React.FC = () => {
           >
             <ShoppingBag size={20} />
             {itemCount > 0 && (
-              <span className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs rounded-full h-4 w-4 flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
                 {itemCount}
               </span>
             )}
@@ -113,35 +117,73 @@ const Navbar: React.FC = () => {
           
           {user ? (
             <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center space-x-2">
-                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <User size={16} className="text-primary" />
-                </div>
+              <DropdownMenuTrigger className="flex items-center space-x-2 outline-none">
+                <Avatar className="h-8 w-8 border border-border">
+                  <AvatarImage src={profile?.avatar} alt={profile?.name || user.email || 'User'} />
+                  <AvatarFallback className="bg-primary/10 text-primary text-sm">
+                    {getInitials()}
+                  </AvatarFallback>
+                </Avatar>
                 <span className="text-sm font-medium hidden sm:block text-foreground">
-                  {user.name}
+                  {profile?.name || user.email?.split('@')[0] || 'User'}
                 </span>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => navigate('/profile')}>
-                  My Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/reservations')}>
-                  My Reservations
-                </DropdownMenuItem>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut} className="text-destructive flex items-center gap-2">
-                  <LogOut size={16} />
+                
+                <DropdownMenuGroup>
+                  <DropdownMenuItem onClick={() => navigate('/profile')}>
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Profile</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/reservations')}>
+                    <CalendarRange className="mr-2 h-4 w-4" />
+                    <span>Reservations</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/favorite-locations')}>
+                    <Heart className="mr-2 h-4 w-4" />
+                    <span>Favorites</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/history')}>
+                    <History className="mr-2 h-4 w-4" />
+                    <span>Order History</span>
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+                
+                <DropdownMenuSeparator />
+                
+                <DropdownMenuGroup>
+                  <DropdownMenuItem onClick={() => navigate('/settings')}>
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Settings</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/reset-password')}>
+                    <Lock className="mr-2 h-4 w-4" />
+                    <span>Change Password</span>
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+                
+                <DropdownMenuSeparator />
+                
+                <DropdownMenuItem 
+                  onClick={handleSignOut}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
                   <span>Sign Out</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Link 
-              to="/sign-in" 
-              className="button-outline py-2 text-sm"
+            <Button 
+              onClick={() => navigate('/sign-in')} 
+              variant="outline"
+              className="ml-1"
+              size="sm"
             >
               Sign In
-            </Link>
+            </Button>
           )}
         </div>
         
@@ -155,7 +197,7 @@ const Navbar: React.FC = () => {
           >
             <ShoppingBag size={20} />
             {itemCount > 0 && (
-              <span className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs rounded-full h-4 w-4 flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
                 {itemCount}
               </span>
             )}
@@ -180,11 +222,14 @@ const Navbar: React.FC = () => {
           {user && (
             <div className="py-4 mb-4 border-b border-border">
               <div className="flex items-center space-x-3">
-                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <User size={20} className="text-primary" />
-                </div>
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src={profile?.avatar} alt={profile?.name || 'User'} />
+                  <AvatarFallback className="bg-primary/10 text-primary">
+                    {getInitials()}
+                  </AvatarFallback>
+                </Avatar>
                 <div>
-                  <p className="font-medium">{user.name}</p>
+                  <p className="font-medium">{profile?.name || user.email?.split('@')[0]}</p>
                   <p className="text-sm text-muted-foreground">{user.email}</p>
                 </div>
               </div>
@@ -207,22 +252,32 @@ const Navbar: React.FC = () => {
             </Link>
           ))}
           
-          <Link 
-            to="/profile" 
-            className="flex items-center space-x-3 py-4 text-lg border-b border-border"
-          >
-            <User size={18} />
-            <span>Profile</span>
-          </Link>
-          
           {user ? (
-            <button 
-              onClick={handleSignOut}
-              className="mt-6 flex items-center space-x-3 py-4 text-lg text-destructive"
-            >
-              <LogOut size={18} />
-              <span>Sign Out</span>
-            </button>
+            <>
+              <Link 
+                to="/profile" 
+                className="flex items-center space-x-3 py-4 text-lg border-b border-border"
+              >
+                <User size={18} />
+                <span>Profile</span>
+              </Link>
+              
+              <Link 
+                to="/favorite-locations" 
+                className="flex items-center space-x-3 py-4 text-lg border-b border-border"
+              >
+                <Heart size={18} />
+                <span>Favorites</span>
+              </Link>
+              
+              <button 
+                onClick={handleSignOut}
+                className="mt-6 flex items-center space-x-3 py-4 text-lg text-destructive"
+              >
+                <LogOut size={18} />
+                <span>Sign Out</span>
+              </button>
+            </>
           ) : (
             <Link 
               to="/sign-in" 

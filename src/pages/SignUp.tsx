@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Link, useNavigate } from 'react-router-dom';
-import { Coffee } from 'lucide-react';
+import { Coffee, AlertCircle } from 'lucide-react';
 import Navbar from '@/components/ui/navbar';
 import Footer from '@/components/ui/footer';
 import {
@@ -18,8 +18,10 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { toast } from '@/components/ui/use-toast';
-import { signUp, isAuthenticated } from '@/services/auth';
+import { signUp } from '@/services/supabase-auth';
+import { useAuth } from '@/context/AuthContext';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -39,6 +41,8 @@ const formSchema = z.object({
 const SignUp = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const { user } = useAuth();
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -53,13 +57,14 @@ const SignUp = () => {
 
   // Check if user is already authenticated
   useEffect(() => {
-    if (isAuthenticated()) {
+    if (user) {
       navigate('/');
     }
-  }, [navigate]);
+  }, [user, navigate]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
+    setAuthError(null);
     
     try {
       const result = await signUp(values.name, values.email, values.password);
@@ -67,23 +72,15 @@ const SignUp = () => {
       if (result.success) {
         toast({
           title: "Account created!",
-          description: "Your account has been successfully created.",
+          description: result.message || "Your account has been successfully created.",
         });
         navigate('/');
       } else {
-        toast({
-          title: "Sign up failed",
-          description: result.message,
-          variant: "destructive",
-        });
+        setAuthError(result.message);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Sign up error:", error);
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred. Please try again.",
-        variant: "destructive",
-      });
+      setAuthError(error.message || "An unexpected error occurred. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -111,6 +108,14 @@ const SignUp = () => {
             </div>
             
             <div className="bg-card rounded-xl shadow-lg p-6 md:p-8">
+              {authError && (
+                <Alert variant="destructive" className="mb-6">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Registration Error</AlertTitle>
+                  <AlertDescription>{authError}</AlertDescription>
+                </Alert>
+              )}
+              
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                   <FormField
@@ -151,6 +156,9 @@ const SignUp = () => {
                           <Input placeholder="••••••••" type="password" {...field} />
                         </FormControl>
                         <FormMessage />
+                        <div className="text-xs text-muted-foreground mt-1">
+                          Password must be at least 8 characters
+                        </div>
                       </FormItem>
                     )}
                   />

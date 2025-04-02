@@ -33,6 +33,14 @@ export const createReservation = async (data: Omit<ReservationData, 'id'>): Prom
       };
     }
 
+    // Check if user is authenticated
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    // If user is authenticated, associate the reservation with their account
+    if (session?.user) {
+      data.user_id = session.user.id;
+    }
+
     // Insert into Supabase
     const { data: reservation, error } = await supabase
       .from('reservations')
@@ -113,6 +121,7 @@ export const getReservationsForCurrentUser = async (): Promise<ReservationData[]
     const { data: { session } } = await supabase.auth.getSession();
     
     if (!session?.user) {
+      console.log("No active user session found when fetching reservations");
       return [];
     }
     
@@ -120,7 +129,8 @@ export const getReservationsForCurrentUser = async (): Promise<ReservationData[]
       .from('reservations')
       .select('*')
       .eq('user_id', session.user.id)
-      .order('created_at', { ascending: false });
+      .order('date', { ascending: true })
+      .order('time', { ascending: true });
     
     if (error) {
       console.error("Error fetching user reservations:", error);
@@ -134,9 +144,66 @@ export const getReservationsForCurrentUser = async (): Promise<ReservationData[]
   }
 };
 
+// Get upcoming reservations for the current user
+export const getUpcomingReservationsForCurrentUser = async (): Promise<ReservationData[]> => {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session?.user) {
+      return [];
+    }
+    
+    const today = new Date().toISOString().split('T')[0];
+    
+    const { data, error } = await supabase
+      .from('reservations')
+      .select('*')
+      .eq('user_id', session.user.id)
+      .eq('status', 'confirmed')
+      .gte('date', today)
+      .order('date', { ascending: true });
+    
+    if (error) {
+      console.error("Error fetching upcoming reservations:", error);
+      return [];
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error('Error fetching upcoming reservations:', error);
+    return [];
+  }
+};
+
 // Cancel a reservation
 export const cancelReservation = async (id: string): Promise<ReservationResponse> => {
   try {
+    // Check if user is authenticated
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session?.user) {
+      return {
+        success: false,
+        message: 'You must be signed in to cancel a reservation'
+      };
+    }
+    
+    // Get the reservation to check ownership
+    const { data: reservation } = await supabase
+      .from('reservations')
+      .select('user_id')
+      .eq('id', id)
+      .single();
+    
+    // Verify that the reservation belongs to the current user
+    if (reservation && reservation.user_id && reservation.user_id !== session.user.id) {
+      return {
+        success: false,
+        message: 'You do not have permission to cancel this reservation'
+      };
+    }
+    
+    // Update the reservation status
     const { data, error } = await supabase
       .from('reservations')
       .update({ status: 'cancelled' })
@@ -162,6 +229,62 @@ export const cancelReservation = async (id: string): Promise<ReservationResponse
     return {
       success: false,
       message: 'An unexpected error occurred while cancelling your reservation'
+    };
+  }
+};
+
+// Update a reservation
+export const updateReservation = async (id: string, data: Partial<ReservationData>): Promise<ReservationResponse> => {
+  try {
+    // Check if user is authenticated
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session?.user) {
+      return {
+        success: false,
+        message: 'You must be signed in to update a reservation'
+      };
+    }
+    
+    // Format date if it exists
+    if (data.date && data.date instanceof Date) {
+      data.date = data.date.toISOString().split('T')[0] as any;
+    }
+    
+    // Update the reservation
+    const { data: updatedReservation, error } = await supabase
+      .from('reservations')
+      .update(data)
+      .eq('id', id)
+      .eq('user_id', session.user.id) // Ensure user owns this reservation
+      .select()
+      .single();
+    
+    if (error) {
+      console.error("Error updating reservation:", error);
+      return {
+        success: false,
+        message: error.message || 'Failed to update reservation'
+      };
+    }
+    
+    if (!updatedReservation) {
+      return {
+        success: false,
+        message: 'Reservation not found or you do not have permission to update it'
+      };
+    }
+
+    return {
+      success: true,
+      message: 'Your reservation has been updated',
+      reservation: updatedReservation
+    };
+  } catch (error) {
+    console.error('Error updating reservation:', error);
+    return {
+      success: false,
+      message: 'An unexpected error occurred while updating your reservation'
     };
   }
 };

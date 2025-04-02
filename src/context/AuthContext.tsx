@@ -3,12 +3,14 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { getUserProfile, UserProfile } from '@/services/supabase-auth';
+import { toast } from '@/components/ui/use-toast';
 
 type AuthContextType = {
   session: Session | null;
   user: User | null;
   profile: UserProfile | null;
   isLoading: boolean;
+  refreshProfile: () => Promise<void>;
   signOut: () => Promise<void>;
 };
 
@@ -17,6 +19,7 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   profile: null,
   isLoading: true,
+  refreshProfile: async () => {},
   signOut: async () => {},
 });
 
@@ -28,18 +31,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const fetchUserProfile = async (userId: string) => {
+    try {
+      const userProfile = await getUserProfile();
+      setProfile(userProfile);
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+    }
+  };
+
   useEffect(() => {
     // Set up auth state change listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
+      async (event, currentSession) => {
+        console.log("Auth state changed:", event, currentSession?.user?.id);
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
         
         // Only fetch profile if user is logged in
-        if (session?.user) {
-          setTimeout(async () => {
-            const userProfile = await getUserProfile();
-            setProfile(userProfile);
+        if (currentSession?.user) {
+          setTimeout(() => {
+            fetchUserProfile(currentSession.user.id);
           }, 0);
         } else {
           setProfile(null);
@@ -50,13 +62,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Then check for existing session
     const initializeAuth = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        setSession(session);
-        setUser(session?.user ?? null);
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        console.log("Initial session check:", currentSession?.user?.id);
+        
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
 
-        if (session?.user) {
-          const userProfile = await getUserProfile();
-          setProfile(userProfile);
+        if (currentSession?.user) {
+          await fetchUserProfile(currentSession.user.id);
         }
       } catch (error) {
         console.error('Error initializing auth:', error);
@@ -72,11 +85,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, []);
 
+  const refreshProfile = async () => {
+    if (user) {
+      const userProfile = await getUserProfile();
+      setProfile(userProfile);
+      return userProfile;
+    }
+    return null;
+  };
+
   const signOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setProfile(null);
-    setSession(null);
+    try {
+      await supabase.auth.signOut();
+      setUser(null);
+      setProfile(null);
+      setSession(null);
+      toast({
+        title: "Signed out successfully",
+        description: "You have been logged out of your account.",
+      });
+    } catch (error) {
+      console.error("Sign out error:", error);
+      toast({
+        title: "Sign out failed",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   const value = {
@@ -84,6 +119,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     user,
     profile,
     isLoading,
+    refreshProfile,
     signOut,
   };
 
