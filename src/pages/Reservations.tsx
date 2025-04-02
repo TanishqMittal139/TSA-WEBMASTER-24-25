@@ -161,21 +161,21 @@ const Reservations = () => {
     setIsSubmitting(true);
     
     try {
-      const reservationData: Omit<ReservationData, 'id'> = {
+      const reservationData = {
         user_id: user.id,
         name: values.name,
         email: values.email,
         phone: values.phone,
-        date: values.date,
+        date: values.date.toISOString().split('T')[0], // Convert Date to string format
         time: values.time,
         guests: values.guests,
-        special_requests: values.specialRequests,
+        specialRequests: values.specialRequests || null,
         status: 'confirmed',
       };
       
       const result = await createReservation(reservationData);
       
-      if (result.success) {
+      if (result.data) {
         toast({
           title: "Reservation Confirmed!",
           description: `Your table for ${values.guests} is booked for ${format(values.date, 'MMMM d, yyyy')} at ${values.time}.`,
@@ -187,7 +187,7 @@ const Reservations = () => {
       } else {
         toast({
           title: "Reservation Failed",
-          description: result.message,
+          description: result.error?.message || "An error occurred while creating your reservation.",
           variant: "destructive",
         });
       }

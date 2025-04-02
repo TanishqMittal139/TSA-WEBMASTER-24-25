@@ -1,599 +1,383 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { format } from 'date-fns';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { CalendarIcon, Phone, Mail, MapPin, User, Lock } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import Navbar from '@/components/ui/navbar';
 import Footer from '@/components/ui/footer';
-import { Button } from '@/components/ui/button';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Textarea } from "@/components/ui/textarea"
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/context/AuthContext';
-import { updateUserProfile, changePassword } from '@/services/supabase-auth';
-import { 
-  User, Mail, Phone, MapPin, Calendar, Edit2, Save, Key, LogOut,
-  ShoppingBag, Settings, AlertCircle, Camera, Bell, ShieldCheck, Hash,
-  CreditCard, Trash2
-} from 'lucide-react';
+import { updateUserProfile, getUserProfile, UserProfile } from '@/services/supabase-auth';
+import { supabase } from '@/integrations/supabase/client';
 
-const avatarOptions = [
-  { id: 'avatar1', src: 'https://api.dicebear.com/7.x/bottts/svg?seed=tasty1', alt: 'Robot Avatar 1' },
-  { id: 'avatar2', src: 'https://api.dicebear.com/7.x/bottts/svg?seed=tasty2', alt: 'Robot Avatar 2' },
-  { id: 'avatar3', src: 'https://api.dicebear.com/7.x/bottts/svg?seed=tasty3', alt: 'Robot Avatar 3' },
-  { id: 'avatar4', src: 'https://api.dicebear.com/7.x/bottts/svg?seed=tasty4', alt: 'Robot Avatar 4' },
-  { id: 'avatar5', src: 'https://api.dicebear.com/7.x/bottts/svg?seed=tasty5', alt: 'Robot Avatar 5' },
-  { id: 'avatar6', src: 'https://api.dicebear.com/7.x/bottts/svg?seed=food1', alt: 'Food Avatar 1' },
-  { id: 'avatar7', src: 'https://api.dicebear.com/7.x/bottts/svg?seed=food2', alt: 'Food Avatar 2' },
-  { id: 'avatar8', src: 'https://api.dicebear.com/7.x/bottts/svg?seed=food3', alt: 'Food Avatar 3' },
-];
+const profileFormSchema = z.object({
+  name: z.string().min(2, {
+    message: "Name must be at least 2 characters.",
+  }),
+  email: z.string().email({
+    message: "Please enter a valid email address.",
+  }),
+  phone: z.string().min(10, {
+    message: "Please enter a valid phone number.",
+  }),
+  address: z.string().optional(),
+  birthdate: z.date().optional(),
+  bio: z.string().max(160).optional(),
+  avatar: z.string().url({ message: "Please enter a valid URL." }).optional(),
+});
 
-const defaultPreferences = {
-  notifications: {
-    email: true,
-    promotions: true,
-    updates: false,
-    orderStatus: true
-  },
-  privacy: {
-    shareHistory: false,
-    savePaymentInfo: true,
-    locationTracking: false
-  },
-  appearance: {
-    compactMode: false,
-    highContrast: false
-  }
-};
-
-const Profile: React.FC = () => {
+const Profile = () => {
   const navigate = useNavigate();
   const { user, profile, refreshProfile } = useAuth();
-  const [isEditing, setIsEditing] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [showAvatarSelector, setShowAvatarSelector] = useState(false);
-  const [selectedAvatar, setSelectedAvatar] = useState(profile?.avatar || avatarOptions[0].src);
-  const [preferences, setPreferences] = useState(defaultPreferences);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   
-  const [formData, setFormData] = useState({
-    name: profile?.name || '',
-    email: profile?.email || '',
-    phone: profile?.phone || '',
-    address: profile?.address || '',
-    bio: profile?.bio || '',
-    birthdate: profile?.birthdate || '',
-    avatar: profile?.avatar || avatarOptions[0].src
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (user) {
+        try {
+          const fetchedProfile = await getUserProfile();
+          setUserProfile(fetchedProfile);
+        } catch (error) {
+          console.error("Error fetching profile:", error);
+          toast({
+            title: "Error",
+            description: "Failed to load profile. Please try again.",
+            variant: "destructive",
+          });
+        }
+      } else {
+        navigate('/sign-in');
+      }
+    };
+    
+    loadProfile();
+  }, [user, navigate]);
+
+  const form = useForm<z.infer<typeof profileFormSchema>>({
+    resolver: zodResolver(profileFormSchema),
+    defaultValues: {
+      name: profile?.name || "",
+      email: profile?.email || "",
+      phone: profile?.phone || "",
+      address: profile?.address || "",
+      birthdate: profile?.birthdate ? new Date(profile.birthdate) : undefined,
+      bio: profile?.bio || "",
+      avatar: profile?.avatar || "",
+    },
   });
   
   useEffect(() => {
     if (profile) {
-      setFormData({
-        name: profile.name || '',
-        email: profile.email || '',
-        phone: profile.phone || '',
-        address: profile.address || '',
-        bio: profile.bio || '',
-        birthdate: profile.birthdate || '',
-        avatar: profile.avatar || avatarOptions[0].src
+      form.reset({
+        name: profile.name || "",
+        email: profile.email || "",
+        phone: profile.phone || "",
+        address: profile.address || "",
+        birthdate: profile.birthdate ? new Date(profile.birthdate) : undefined,
+        bio: profile.bio || "",
+        avatar: profile.avatar || "",
       });
-      setSelectedAvatar(profile.avatar || avatarOptions[0].src);
     }
-  }, [profile]);
-  
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-  
-  const handleAvatarSelect = (avatarSrc: string) => {
-    setSelectedAvatar(avatarSrc);
-    setFormData(prev => ({ ...prev, avatar: avatarSrc }));
-    setShowAvatarSelector(false);
-  };
-  
-  const handlePreferenceChange = (category: string, setting: string, value: boolean) => {
-    setPreferences(prev => ({
-      ...prev,
-      [category]: {
-        ...prev[category as keyof typeof prev],
-        [setting]: value
-      }
-    }));
-  };
-  
-  const handleSaveProfile = async () => {
-    setIsSaving(true);
-    
+  }, [profile, form]);
+
+  const onSubmit = async (values: z.infer<typeof profileFormSchema>) => {
+    setIsUpdating(true);
     try {
-      if (formData.phone && !/^\+?[0-9\s\-()]+$/.test(formData.phone)) {
-        toast({
-          title: "Invalid Phone Format",
-          description: "Please enter a valid phone number.",
-          variant: "destructive"
-        });
-        setIsSaving(false);
+      if (!user) {
+        navigate('/sign-in');
         return;
       }
       
-      const result = await updateUserProfile({
-        ...formData,
-        avatar: selectedAvatar,
-      });
+      const profileData = {
+        id: user.id,
+        name: values.name,
+        email: values.email,
+        phone: values.phone,
+        address: values.address,
+        birthdate: values.birthdate ? format(values.birthdate, 'yyyy-MM-dd') : null,
+        bio: values.bio,
+        avatar: values.avatar,
+      };
       
-      if (result.success) {
-        await refreshProfile();
+      const { error } = await updateUserProfile(profileData);
+      
+      if (error) {
+        console.error("Error updating profile:", error);
         toast({
-          title: "Profile Updated",
-          description: "Your profile information has been updated successfully.",
-          duration: 3000,
+          title: "Error",
+          description: "Failed to update profile. Please try again.",
+          variant: "destructive",
         });
-        setIsEditing(false);
       } else {
         toast({
-          title: "Update Failed",
-          description: result.message || "Failed to update profile. Please try again.",
-          variant: "destructive",
-          duration: 4000,
+          title: "Success",
+          description: "Profile updated successfully.",
         });
+        await refreshProfile();
       }
     } catch (error) {
-      console.error("Profile update error:", error);
+      console.error("Unexpected error updating profile:", error);
       toast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
-        duration: 4000,
       });
     } finally {
-      setIsSaving(false);
+      setIsUpdating(false);
     }
   };
   
-  const handleSavePreferences = () => {
-    toast({
-      title: "Preferences Saved",
-      description: "Your preferences have been updated successfully.",
-    });
+  const getInitials = () => {
+    if (profile?.name) {
+      return profile.name.split(' ').map(n => n[0]).join('').toUpperCase();
+    }
+    if (user?.email) {
+      return user.email[0].toUpperCase();
+    }
+    return 'U';
   };
-  
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
       
       <main className="flex-grow pt-20 pb-16">
-        <div className="container mx-auto px-4">
-          <div className="max-w-5xl mx-auto">
-            <div className="flex flex-col md:flex-row items-start gap-6">
-              <div className="w-full md:w-1/3 sticky top-24 mb-6 md:mb-0">
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="flex flex-col items-center">
-                      <div className="relative">
-                        <Avatar className="h-24 w-24 mb-4 border-2 border-primary/20">
-                          <AvatarImage 
-                            src={selectedAvatar} 
-                            alt={profile?.name || 'User'} 
-                          />
-                          <AvatarFallback className="text-xl">
-                            {profile?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
-                          </AvatarFallback>
-                        </Avatar>
-                        <Button 
-                          variant="outline" 
-                          size="icon" 
-                          className="absolute bottom-3 right-0 rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
-                          onClick={() => setShowAvatarSelector(!showAvatarSelector)}
-                        >
-                          <Camera size={14} />
-                        </Button>
+        <section className="container mx-auto px-4 py-12">
+          <div className="max-w-3xl mx-auto">
+            <div className="text-center mb-10">
+              <h1 className="text-3xl md:text-4xl font-bold mb-4">Your Profile</h1>
+              <p className="text-muted-foreground">
+                Manage your personal information and settings
+              </p>
+            </div>
+            
+            <div className="bg-card rounded-xl shadow-lg p-6 md:p-8">
+              <div className="flex flex-col md:flex-row items-center md:items-start mb-8">
+                <Avatar className="h-24 w-24 md:mr-8 mb-4 md:mb-0">
+                  <AvatarImage src={profile?.avatar} alt={profile?.name || 'User'} />
+                  <AvatarFallback className="bg-primary/10 text-primary text-2xl">
+                    {getInitials()}
+                  </AvatarFallback>
+                </Avatar>
+                
+                <div className="md:text-left">
+                  <h2 className="text-2xl font-semibold mb-2">{profile?.name || user?.email}</h2>
+                  <p className="text-muted-foreground mb-4">
+                    {profile?.bio || "No bio available"}
+                  </p>
+                  
+                  <div className="flex items-center space-x-4">
+                    {profile?.address && (
+                      <div className="flex items-center text-muted-foreground">
+                        <MapPin className="mr-2 h-4 w-4" />
+                        <span>{profile.address}</span>
                       </div>
-                      
-                      {showAvatarSelector && (
-                        <div className="mt-2 mb-4 p-3 bg-card border border-border rounded-lg w-full">
-                          <h4 className="text-sm font-medium mb-2">Select an Avatar</h4>
-                          <div className="grid grid-cols-4 gap-2">
-                            {avatarOptions.map((avatar) => (
-                              <div 
-                                key={avatar.id}
-                                className={`cursor-pointer p-1 rounded-md ${selectedAvatar === avatar.src ? 'bg-primary/20 ring-2 ring-primary' : 'hover:bg-secondary'}`}
-                                onClick={() => handleAvatarSelect(avatar.src)}
-                              >
-                                <img 
-                                  src={avatar.src} 
-                                  alt={avatar.alt}
-                                  className="w-10 h-10 rounded-md"
-                                />
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      
-                      <h2 className="text-xl font-semibold">{profile?.name || 'User'}</h2>
-                      <p className="text-sm text-muted-foreground mb-4">{profile?.email || user?.email}</p>
-                      
-                      <Button 
-                        variant="outline" 
-                        className="w-full mb-4"
-                        onClick={() => setIsEditing(!isEditing)}
-                      >
-                        {isEditing ? (
-                          <>
-                            <X className="mr-2 h-4 w-4" /> Cancel Editing
-                          </>
-                        ) : (
-                          <>
-                            <Edit2 className="mr-2 h-4 w-4" /> Edit Profile
-                          </>
-                        )}
-                      </Button>
-                    </div>
+                    )}
                     
-                    <Separator className="my-4" />
-                    
-                    <div className="space-y-3">
-                      <div className="flex items-center text-sm">
-                        <Mail className="mr-2 h-4 w-4 text-muted-foreground" />
-                        <span>{profile?.email || user?.email}</span>
+                    {profile?.phone && (
+                      <div className="flex items-center text-muted-foreground">
+                        <Phone className="mr-2 h-4 w-4" />
+                        <span>{profile.phone}</span>
                       </div>
-                      
-                      {profile?.phone && (
-                        <div className="flex items-center text-sm">
-                          <Phone className="mr-2 h-4 w-4 text-muted-foreground" />
-                          <span>{profile.phone}</span>
-                        </div>
-                      )}
-                      
-                      {profile?.address && (
-                        <div className="flex items-center text-sm">
-                          <MapPin className="mr-2 h-4 w-4 text-muted-foreground" />
-                          <span>{profile.address}</span>
-                        </div>
-                      )}
-                      
-                      {profile?.birthdate && (
-                        <div className="flex items-center text-sm">
-                          <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
-                          <span>{profile.birthdate}</span>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+                    )}
+                  </div>
+                </div>
               </div>
               
-              <div className="w-full md:w-2/3">
-                <Tabs defaultValue="profile">
-                  <TabsList className="mb-6">
-                    <TabsTrigger value="profile" className="flex items-center gap-2">
-                      <User size={16} />
-                      <span>Profile</span>
-                    </TabsTrigger>
-                    <TabsTrigger value="orders" className="flex items-center gap-2">
-                      <ShoppingBag size={16} />
-                      <span>Orders</span>
-                    </TabsTrigger>
-                    <TabsTrigger value="settings" className="flex items-center gap-2">
-                      <Settings size={16} />
-                      <span>Settings</span>
-                    </TabsTrigger>
-                  </TabsList>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Full Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="John Doe" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   
-                  <TabsContent value="profile" className="space-y-6">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Profile Information</CardTitle>
-                        <CardDescription>
-                          {isEditing 
-                            ? "Update your profile information below" 
-                            : "View and manage your account details"}
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="grid gap-6">
-                          <div className="grid md:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <Label htmlFor="name">Full Name</Label>
-                              {isEditing ? (
-                                <Input 
-                                  id="name"
-                                  name="name"
-                                  placeholder="Your full name" 
-                                  value={formData.name}
-                                  onChange={handleInputChange}
-                                />
-                              ) : (
-                                <div className="p-2 border border-input rounded-md bg-background">
-                                  {formData.name || 'Not provided'}
-                                </div>
-                              )}
-                            </div>
-                            
-                            <div className="space-y-2">
-                              <Label htmlFor="email">Email</Label>
-                              {isEditing ? (
-                                <Input 
-                                  id="email"
-                                  name="email"
-                                  type="email"
-                                  placeholder="Your email address" 
-                                  value={formData.email}
-                                  onChange={handleInputChange}
-                                  readOnly
-                                  disabled
-                                />
-                              ) : (
-                                <div className="p-2 border border-input rounded-md bg-background">
-                                  {formData.email || 'Not provided'}
-                                </div>
-                              )}
-                            </div>
-                            
-                            <div className="space-y-2">
-                              <Label htmlFor="phone">Phone Number</Label>
-                              {isEditing ? (
-                                <Input 
-                                  id="phone"
-                                  name="phone"
-                                  placeholder="Your phone number" 
-                                  value={formData.phone}
-                                  onChange={handleInputChange}
-                                />
-                              ) : (
-                                <div className="p-2 border border-input rounded-md bg-background">
-                                  {formData.phone || 'Not provided'}
-                                </div>
-                              )}
-                            </div>
-                            
-                            <div className="space-y-2">
-                              <Label htmlFor="birthdate">Birth Date</Label>
-                              {isEditing ? (
-                                <Input 
-                                  id="birthdate"
-                                  name="birthdate"
-                                  type="date"
-                                  placeholder="Your birth date" 
-                                  value={formData.birthdate}
-                                  onChange={handleInputChange}
-                                />
-                              ) : (
-                                <div className="p-2 border border-input rounded-md bg-background">
-                                  {formData.birthdate || 'Not provided'}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                          
-                          <div className="space-y-2">
-                            <Label htmlFor="address">Address</Label>
-                            {isEditing ? (
-                              <Input 
-                                id="address"
-                                name="address"
-                                placeholder="Your address" 
-                                value={formData.address}
-                                onChange={handleInputChange}
-                              />
-                            ) : (
-                              <div className="p-2 border border-input rounded-md bg-background">
-                                {formData.address || 'Not provided'}
-                              </div>
-                            )}
-                          </div>
-                          
-                          <div className="space-y-2">
-                            <Label htmlFor="bio">Bio</Label>
-                            {isEditing ? (
-                              <Textarea 
-                                id="bio"
-                                name="bio"
-                                placeholder="Tell us about yourself" 
-                                value={formData.bio}
-                                onChange={handleInputChange}
-                                className="min-h-[100px]"
-                              />
-                            ) : (
-                              <div className="p-2 border border-input rounded-md bg-background min-h-[100px]">
-                                {formData.bio || 'No bio provided'}
-                              </div>
-                            )}
-                          </div>
-                          
-                          {isEditing && (
-                            <div className="flex justify-end">
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input placeholder="you@example.com" type="email" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Phone Number</FormLabel>
+                        <FormControl>
+                          <Input placeholder="(555) 123-4567" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="address"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Address</FormLabel>
+                        <FormControl>
+                          <Input placeholder="123 Main St, Anytown" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="birthdate"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel>Birthdate</FormLabel>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
                               <Button
-                                onClick={handleSaveProfile}
-                                disabled={isSaving}
-                              >
-                                {isSaving ? (
-                                  <>
-                                    <div className="h-4 w-4 mr-2 rounded-full border-2 border-current border-t-transparent animate-spin"></div>
-                                    Saving...
-                                  </>
-                                ) : (
-                                  <>
-                                    <Save className="mr-2 h-4 w-4" />
-                                    Save Changes
-                                  </>
+                                variant={"outline"}
+                                className={cn(
+                                  "w-full pl-3 text-left font-normal",
+                                  !field.value && "text-muted-foreground"
                                 )}
+                              >
+                                {field.value ? (
+                                  format(field.value, "PPP")
+                                ) : (
+                                  <span>Pick a date</span>
+                                )}
+                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                               </Button>
-                            </div>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </TabsContent>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={field.value}
+                              onSelect={field.onChange}
+                              disabled={(date) => date > new Date()}
+                              initialFocus
+                              className="p-3 pointer-events-auto"
+                            />
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   
-                  <TabsContent value="orders">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Order History</CardTitle>
-                        <CardDescription>
-                          View your past orders and their status
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex items-center justify-center p-8 text-center">
-                          <div>
-                            <ShoppingBag className="mx-auto h-12 w-12 text-muted-foreground opacity-50 mb-4" />
-                            <h3 className="text-lg font-medium mb-2">No orders yet</h3>
-                            <p className="text-muted-foreground mb-4">
-                              Once you place an order, it will appear here
-                            </p>
-                            <Button onClick={() => navigate('/menu')}>
-                              Browse Menu
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </TabsContent>
+                  <FormField
+                    control={form.control}
+                    name="bio"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Bio</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Tell us a little bit about yourself"
+                            className="resize-none"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   
-                  <TabsContent value="settings" className="space-y-6">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="flex items-center">
-                          <Bell className="mr-2 h-5 w-5" />
-                          Notification Preferences
-                        </CardTitle>
-                        <CardDescription>
-                          Control how we communicate with you
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Email Notifications</p>
-                            <p className="text-sm text-muted-foreground">Receive important updates via email</p>
-                          </div>
-                          <Switch
-                            checked={preferences.notifications.email}
-                            onCheckedChange={(checked) => handlePreferenceChange('notifications', 'email', checked)}
-                          />
-                        </div>
-                        <Separator />
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Promotional Emails</p>
-                            <p className="text-sm text-muted-foreground">Get notified about deals and offers</p>
-                          </div>
-                          <Switch 
-                            checked={preferences.notifications.promotions}
-                            onCheckedChange={(checked) => handlePreferenceChange('notifications', 'promotions', checked)}
-                          />
-                        </div>
-                        <Separator />
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Order Status Updates</p>
-                            <p className="text-sm text-muted-foreground">Receive notifications about your orders</p>
-                          </div>
-                          <Switch 
-                            checked={preferences.notifications.orderStatus}
-                            onCheckedChange={(checked) => handlePreferenceChange('notifications', 'orderStatus', checked)}
-                          />
-                        </div>
-                      </CardContent>
-                    </Card>
-                    
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="flex items-center">
-                          <ShieldCheck className="mr-2 h-5 w-5" />
-                          Privacy Settings
-                        </CardTitle>
-                        <CardDescription>
-                          Control your data and privacy preferences
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Share Order History</p>
-                            <p className="text-sm text-muted-foreground">Allow us to use your orders to improve recommendations</p>
-                          </div>
-                          <Switch 
-                            checked={preferences.privacy.shareHistory}
-                            onCheckedChange={(checked) => handlePreferenceChange('privacy', 'shareHistory', checked)}
-                          />
-                        </div>
-                        <Separator />
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Save Payment Information</p>
-                            <p className="text-sm text-muted-foreground">Securely store your payment details for future orders</p>
-                          </div>
-                          <Switch 
-                            checked={preferences.privacy.savePaymentInfo}
-                            onCheckedChange={(checked) => handlePreferenceChange('privacy', 'savePaymentInfo', checked)}
-                          />
-                        </div>
-                        <Separator />
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Location Tracking</p>
-                            <p className="text-sm text-muted-foreground">Allow location tracking for better service</p>
-                          </div>
-                          <Switch 
-                            checked={preferences.privacy.locationTracking}
-                            onCheckedChange={(checked) => handlePreferenceChange('privacy', 'locationTracking', checked)}
-                          />
-                        </div>
-                      </CardContent>
-                    </Card>
-                    
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="flex items-center">
-                          <Key className="mr-2 h-5 w-5" />
-                          Security
-                        </CardTitle>
-                        <CardDescription>
-                          Manage your account security and password
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <Button
-                          variant="outline"
-                          onClick={() => navigate('/reset-password')}
-                          className="w-full sm:w-auto"
-                        >
-                          <Key className="mr-2 h-4 w-4" />
-                          Change Password
-                        </Button>
-                        
-                        <Separator className="mt-6 mb-6" />
-                        
-                        <div>
-                          <h3 className="text-lg font-medium flex items-center text-destructive">
-                            <AlertCircle className="mr-2 h-5 w-5" />
-                            Danger Zone
-                          </h3>
-                          <p className="text-sm text-muted-foreground mt-1 mb-4">
-                            These actions cannot be easily reversed
-                          </p>
-                          
-                          <Button variant="destructive" className="w-full sm:w-auto mt-2">
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete Account
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                    
-                    <div className="flex justify-end">
-                      <Button onClick={handleSavePreferences}>Save Preferences</Button>
-                    </div>
-                  </TabsContent>
-                </Tabs>
+                  <FormField
+                    control={form.control}
+                    name="avatar"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Avatar URL</FormLabel>
+                        <FormControl>
+                          <Input placeholder="https://example.com/avatar.png" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <Button 
+                    type="submit" 
+                    className="w-full" 
+                    size="lg"
+                    disabled={isUpdating}
+                  >
+                    {isUpdating ? "Updating..." : "Update Profile"}
+                  </Button>
+                </form>
+              </Form>
+            </div>
+            
+            <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="flex flex-col items-center text-center p-6 bg-primary/5 rounded-lg">
+                <Lock className="text-primary mb-4" size={32} />
+                <h3 className="text-lg font-medium mb-2">Change Password</h3>
+                <p className="text-sm text-muted-foreground">
+                  Update your password for enhanced security.
+                </p>
+                <Button 
+                  variant="outline" 
+                  className="mt-4"
+                  onClick={() => navigate('/reset-password')}
+                >
+                  Change Password
+                </Button>
+              </div>
+              
+              <div className="flex flex-col items-center text-center p-6 bg-primary/5 rounded-lg">
+                <User className="text-primary mb-4" size={32} />
+                <h3 className="text-lg font-medium mb-2">Preferences</h3>
+                <p className="text-sm text-muted-foreground">
+                  Manage your notification and communication preferences.
+                </p>
+                <Button variant="outline" className="mt-4">
+                  Edit Preferences
+                </Button>
               </div>
             </div>
           </div>
-        </div>
+        </section>
       </main>
       
       <Footer />

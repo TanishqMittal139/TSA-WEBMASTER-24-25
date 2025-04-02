@@ -125,15 +125,15 @@ const History = () => {
                   </div>
                   
                   <p className="text-muted-foreground">
-                    {formatDate(reservation.date as unknown as string)} at {reservation.time}
+                    {formatDate(reservation.date)} at {reservation.time}
                   </p>
                   
                   <div className="mt-2 space-y-1">
                     <p className="text-sm"><span className="font-medium">Guests:</span> {reservation.guests}</p>
                     <p className="text-sm"><span className="font-medium">Phone:</span> {reservation.phone}</p>
-                    {reservation.special_requests && (
+                    {reservation.specialRequests && (
                       <p className="text-sm mt-2">
-                        <span className="font-medium">Special Requests:</span> {reservation.special_requests}
+                        <span className="font-medium">Special Requests:</span> {reservation.specialRequests}
                       </p>
                     )}
                   </div>
