@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ShoppingBag, CalendarRange, ClipboardList, AlertCircle } from 'lucide-react';
-import { getReservationsForCurrentUser, ReservationData } from '@/services/supabase-reservations';
+import { getUserReservations, ReservationData } from '@/services/supabase-reservations';
 import { useAuth } from '@/context/AuthContext';
 
 const History = () => {
@@ -26,7 +26,7 @@ const History = () => {
     const loadReservations = async () => {
       try {
         setIsLoading(true);
-        const { data, error } = await getReservationsForCurrentUser();
+        const { data, error } = await getUserReservations();
         
         if (error) {
           setError(error.message || 'Failed to load reservations');

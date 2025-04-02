@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -49,9 +50,8 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { toast } from '@/components/ui/use-toast';
-import { createReservation, getReservationsForCurrentUser, cancelReservation, ReservationData } from '@/services/supabase-reservations';
+import { createReservation, getUserReservations, cancelReservation, ReservationData } from '@/services/supabase-reservations';
 import { useAuth } from '@/context/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -74,15 +74,14 @@ const Reservations = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState("new");
   const [myReservations, setMyReservations] = useState<ReservationData[]>([]);
-  const { user, profile } = useAuth();
+  const { user, profile, isLoading, session } = useAuth();
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
   
   useEffect(() => {
     const checkAuth = async () => {
-      const isAuth = await isAuthenticated();
-      setAuthenticated(isAuth);
+      setAuthenticated(!!user);
       
-      if (!isAuth) {
+      if (!user) {
         toast({
           title: "Authentication required",
           description: "Please sign in to make or view reservations",
@@ -92,38 +91,11 @@ const Reservations = () => {
         return;
       }
       
-      const currentUser = await getCurrentUser();
-      const profile = await getUserProfile();
-      
-      setUser(currentUser);
-      setUserProfile(profile);
-      
       loadUserReservations();
     };
     
     checkAuth();
-    
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setAuthenticated(!!session);
-        
-        if (session?.user) {
-          setUser(session.user);
-          const profile = await getUserProfile();
-          setUserProfile(profile);
-          loadUserReservations();
-        } else {
-          setUser(null);
-          setUserProfile(null);
-          setMyReservations([]);
-        }
-      }
-    );
-    
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [navigate]);
+  }, [user, navigate]);
 
   const loadUserReservations = async () => {
     if (!user) {
@@ -132,7 +104,7 @@ const Reservations = () => {
     }
     
     try {
-      const { data, error } = await getReservationsForCurrentUser();
+      const { data, error } = await getUserReservations();
       
       if (error) {
         console.error("Error loading reservations:", error);
@@ -186,20 +158,19 @@ const Reservations = () => {
       const formattedDate = format(values.date, 'yyyy-MM-dd');
       
       const reservationData = {
-        user_id: user.id,
         name: values.name,
         email: values.email,
         phone: values.phone,
         date: formattedDate, 
         time: values.time,
         guests: values.guests,
-        specialRequests: values.specialRequests || null,
+        specialRequests: values.specialRequests || '',
         status: 'confirmed',
       };
       
-      const { success, message, data } = await createReservation(reservationData);
+      const { data, error } = await createReservation(reservationData);
       
-      if (success && data) {
+      if (!error && data) {
         toast({
           title: "Reservation Confirmed!",
           description: `Your table for ${values.guests} is booked for ${format(values.date, 'MMMM d, yyyy')} at ${values.time}.`,
@@ -210,10 +181,10 @@ const Reservations = () => {
       } else {
         toast({
           title: "Reservation Failed",
-          description: message || "An error occurred while creating your reservation.",
+          description: error?.message || "An error occurred while creating your reservation.",
           variant: "destructive",
         });
-        console.error("Reservation creation failed:", message);
+        console.error("Reservation creation failed:", error);
       }
     } catch (error: any) {
       console.error("Reservation error:", error);
@@ -229,9 +200,9 @@ const Reservations = () => {
 
   const handleCancelReservation = async (id: string) => {
     try {
-      const result = await cancelReservation(id);
+      const { data, error } = await cancelReservation(id);
       
-      if (result.success) {
+      if (!error) {
         toast({
           title: "Reservation Cancelled",
           description: "Your reservation has been successfully cancelled.",
@@ -241,11 +212,11 @@ const Reservations = () => {
       } else {
         toast({
           title: "Failed to Cancel",
-          description: result.message,
+          description: error.message || "An error occurred while cancelling your reservation",
           variant: "destructive",
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Cancellation error:", error);
       toast({
         title: "Error",
@@ -255,7 +226,7 @@ const Reservations = () => {
     }
   };
 
-  if (authenticated === null) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
@@ -285,7 +256,7 @@ const Reservations = () => {
               </p>
             </div>
             
-            {!authenticated ? (
+            {!user ? (
               <div className="bg-card rounded-xl shadow-lg p-6 md:p-8 text-center">
                 <ShieldAlert className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <h2 className="text-xl font-semibold mb-2">Authentication Required</h2>

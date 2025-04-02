@@ -1,349 +1,217 @@
-import { supabase } from '@/integrations/supabase/client';
 
-export interface ReservationData {
-  id: string;
-  created_at: string;
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/components/ui/use-toast";
+
+// Define the ReservationData type
+export type ReservationData = {
+  id?: string;
+  user_id?: string;
   name: string;
   email: string;
   phone: string;
   date: string;
   time: string;
   guests: string;
-  specialRequests: string | null;
-  user_id: string | undefined;
+  specialRequests: string;
   status: string;
-}
+  created_at?: string;
+};
 
-export const createReservation = async (
-  data: Omit<ReservationData, 'id' | 'created_at'>
-): Promise<{ data: ReservationData | null; error: any; success?: boolean; message?: string }> => {
+// Type for reservation input - we don't need to include the user_id in the input
+export type ReservationInput = Omit<ReservationData, 'id' | 'user_id' | 'created_at'>;
+
+/**
+ * Create a new reservation
+ */
+export const createReservation = async (reservationData: ReservationInput) => {
   try {
-    // Check if the user exists in the profiles table
-    if (data.user_id) {
-      const { data: profileExists } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('id', data.user_id)
-        .single();
-        
-      if (!profileExists) {
-        console.error("User profile does not exist for ID:", data.user_id);
-        return { 
-          data: null, 
-          error: "User profile not found", 
-          success: false, 
-          message: "Failed to create reservation: User profile not found."
-        };
-      }
+    // Check if the user is authenticated
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      return {
+        error: { message: "User not authenticated" },
+        data: null
+      };
     }
+    
+    // Check if user profile exists and create one if it doesn't
+    await ensureUserProfile(session.user.id, reservationData.email, reservationData.name);
 
-    const { data: result, error } = await supabase
+    const { data, error } = await supabase
       .from('reservations')
-      .insert([{
-        name: data.name,
-        email: data.email,
-        phone: data.phone,
-        date: data.date,
-        time: data.time,
-        guests: data.guests,
-        special_requests: data.specialRequests,
-        user_id: data.user_id,
-        status: data.status || 'confirmed'
-      }])
+      .insert({
+        user_id: session.user.id,
+        name: reservationData.name,
+        email: reservationData.email,
+        phone: reservationData.phone,
+        date: reservationData.date,
+        time: reservationData.time,
+        guests: reservationData.guests,
+        special_requests: reservationData.specialRequests,
+        status: reservationData.status
+      })
       .select()
       .single();
-
+      
     if (error) {
       console.error("Error creating reservation:", error);
-      return { 
-        data: null, 
-        error,
-        success: false,
-        message: error.message || "Failed to create reservation"
-      };
-    }
-
-    // Map from DB format to our interface format
-    const mappedData: ReservationData = {
-      id: result.id,
-      created_at: result.created_at,
-      name: result.name,
-      email: result.email,
-      phone: result.phone,
-      date: result.date,
-      time: result.time,
-      guests: result.guests,
-      specialRequests: result.special_requests,
-      user_id: result.user_id,
-      status: result.status
-    };
-
-    return { 
-      data: mappedData, 
-      error: null,
-      success: true,
-      message: "Reservation created successfully!"
-    };
-  } catch (error: any) {
-    console.error("Unexpected error creating reservation:", error);
-    return { 
-      data: null, 
-      error,
-      success: false,
-      message: error.message || "An unexpected error occurred"
-    };
-  }
-};
-
-export const getAllReservations = async (): Promise<{ data: ReservationData[] | null; error: any }> => {
-  try {
-    const { data: result, error } = await supabase
-      .from('reservations')
-      .select('*');
-
-    if (error) {
-      console.error("Error fetching reservations:", error);
-      return { data: null, error };
-    }
-
-    // Map from DB format to our interface format
-    const mappedData: ReservationData[] = result.map(item => ({
-      id: item.id,
-      created_at: item.created_at,
-      name: item.name,
-      email: item.email,
-      phone: item.phone,
-      date: item.date,
-      time: item.time,
-      guests: item.guests,
-      specialRequests: item.special_requests,
-      user_id: item.user_id,
-      status: item.status
-    }));
-
-    return { data: mappedData, error: null };
-  } catch (error: any) {
-    console.error("Unexpected error fetching reservations:", error);
-    return { data: null, error };
-  }
-};
-
-export const getReservationById = async (id: string): Promise<{ data: ReservationData | null; error: any }> => {
-  try {
-    const { data: result, error } = await supabase
-      .from('reservations')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (error) {
-      console.error("Error fetching reservation by ID:", error);
-      return { data: null, error };
-    }
-
-    // Map from DB format to our interface format
-    const mappedData: ReservationData = {
-      id: result.id,
-      created_at: result.created_at,
-      name: result.name,
-      email: result.email,
-      phone: result.phone,
-      date: result.date,
-      time: result.time,
-      guests: result.guests,
-      specialRequests: result.special_requests,
-      user_id: result.user_id,
-      status: result.status
-    };
-
-    return { data: mappedData, error: null };
-  } catch (error: any) {
-    console.error("Unexpected error fetching reservation by ID:", error);
-    return { data: null, error };
-  }
-};
-
-export const getReservationsByUserId = async (user_id: string): Promise<{ data: ReservationData[] | null; error: any }> => {
-  try {
-    const { data: result, error } = await supabase
-      .from('reservations')
-      .select('*')
-      .eq('user_id', user_id);
-
-    if (error) {
-      console.error("Error fetching reservations by user ID:", error);
-      return { data: null, error };
-    }
-
-    // Map from DB format to our interface format
-    const mappedData: ReservationData[] = result.map(item => ({
-      id: item.id,
-      created_at: item.created_at,
-      name: item.name,
-      email: item.email,
-      phone: item.phone,
-      date: item.date,
-      time: item.time,
-      guests: item.guests,
-      specialRequests: item.special_requests,
-      user_id: item.user_id,
-      status: item.status
-    }));
-
-    return { data: mappedData, error: null };
-  } catch (error: any) {
-    console.error("Unexpected error fetching reservations by user ID:", error);
-    return { data: null, error };
-  }
-};
-
-export const updateReservation = async (
-  id: string,
-  updates: Partial<ReservationData>
-): Promise<{ data: ReservationData | null; error: any }> => {
-  try {
-    // Convert from our interface format to DB format
-    const dbUpdates: any = { ...updates };
-    if (updates.specialRequests !== undefined) {
-      dbUpdates.special_requests = updates.specialRequests;
-      delete dbUpdates.specialRequests;
-    }
-
-    const { data: result, error } = await supabase
-      .from('reservations')
-      .update(dbUpdates)
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) {
-      console.error("Error updating reservation:", error);
-      return { data: null, error };
-    }
-
-    // Map from DB format to our interface format
-    const mappedData: ReservationData = {
-      id: result.id,
-      created_at: result.created_at,
-      name: result.name,
-      email: result.email,
-      phone: result.phone,
-      date: result.date,
-      time: result.time,
-      guests: result.guests,
-      specialRequests: result.special_requests,
-      user_id: result.user_id,
-      status: result.status
-    };
-
-    return { data: mappedData, error: null };
-  } catch (error: any) {
-    console.error("Unexpected error updating reservation:", error);
-    return { data: null, error };
-  }
-};
-
-export const getReservationsForCurrentUser = async (): Promise<{ data: ReservationData[] | null; error: any }> => {
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) {
-      return { data: null, error: "User not authenticated" };
+      return { error, data: null };
     }
     
-    const { data, error } = await supabase
-      .from('reservations')
-      .select('*')
-      .eq('user_id', user.id);
-      
-    if (error) {
-      console.error("Error fetching user reservations:", error);
-      return { data: null, error };
-    }
-    
-    // Map from DB format to our interface format
-    const mappedData: ReservationData[] = data.map(item => ({
-      id: item.id,
-      created_at: item.created_at,
-      name: item.name,
-      email: item.email,
-      phone: item.phone,
-      date: item.date,
-      time: item.time,
-      guests: item.guests,
-      specialRequests: item.special_requests,
-      user_id: item.user_id,
-      status: item.status
-    }));
-    
-    return { data: mappedData, error: null };
-  } catch (error) {
-    console.error("Unexpected error fetching user reservations:", error);
-    return { data: null, error };
-  }
-};
-
-export const cancelReservation = async (id: string): Promise<{ success: boolean; message: string; reservation?: ReservationData }> => {
-  try {
-    const { data, error } = await supabase
-      .from('reservations')
-      .update({ status: 'cancelled' })
-      .eq('id', id)
-      .select()
-      .single();
-      
-    if (error) {
-      console.error("Error cancelling reservation:", error);
-      return { 
-        success: false, 
-        message: `Failed to cancel reservation: ${error.message}` 
-      };
-    }
-    
-    // Map from DB format to our interface format
-    const mappedData: ReservationData = {
+    // Map database column names to our expected format
+    const result: ReservationData = {
       id: data.id,
-      created_at: data.created_at,
+      user_id: data.user_id,
       name: data.name,
       email: data.email,
       phone: data.phone,
       date: data.date,
       time: data.time,
       guests: data.guests,
-      specialRequests: data.special_requests,
-      user_id: data.user_id,
-      status: data.status
+      specialRequests: data.special_requests || '',
+      status: data.status,
+      created_at: data.created_at
     };
     
-    return { 
-      success: true, 
-      message: "Reservation cancelled successfully",
-      reservation: mappedData
-    };
+    return { data: result, error: null };
   } catch (error: any) {
-    console.error("Unexpected error cancelling reservation:", error);
-    return { 
-      success: false, 
-      message: `An unexpected error occurred: ${error.message}` 
+    console.error("Unexpected error in createReservation:", error);
+    return {
+      error: { message: error.message || "An unexpected error occurred" },
+      data: null
     };
   }
 };
 
-export const deleteReservation = async (id: string): Promise<{ success: boolean; error: any }> => {
+// Ensure the user has a profile
+const ensureUserProfile = async (userId: string, email: string, name: string) => {
   try {
-    const { error } = await supabase
-      .from('reservations')
-      .delete()
-      .eq('id', id);
+    // Check if profile exists
+    const { data: existingProfile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', userId)
+      .single();
+    
+    // If profile already exists, return
+    if (existingProfile) return;
 
-    if (error) {
-      console.error("Error deleting reservation:", error);
-      return { success: false, error };
-    }
-
-    return { success: true, error: null };
-  } catch (error: any) {
-    console.error("Unexpected error deleting reservation:", error);
-    return { success: false, error };
+    // Create new profile
+    await supabase
+      .from('profiles')
+      .insert({
+        id: userId,
+        email: email,
+        name: name
+      });
+  } catch (error) {
+    console.error("Error ensuring user profile:", error);
+    // Continue execution - don't block reservation creation if profile creation fails
   }
 };
+
+/**
+ * Get all reservations for the current user
+ */
+export const getUserReservations = async () => {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      return {
+        error: { message: "User not authenticated" },
+        data: []
+      };
+    }
+    
+    const { data, error } = await supabase
+      .from('reservations')
+      .select('*')
+      .eq('user_id', session.user.id)
+      .order('date', { ascending: true });
+      
+    if (error) {
+      console.error("Error fetching reservations:", error);
+      return { error, data: [] };
+    }
+    
+    // Map database column names to our expected format
+    const result: ReservationData[] = data.map(item => ({
+      id: item.id,
+      user_id: item.user_id,
+      name: item.name,
+      email: item.email,
+      phone: item.phone,
+      date: item.date,
+      time: item.time,
+      guests: item.guests,
+      specialRequests: item.special_requests || '',
+      status: item.status,
+      created_at: item.created_at
+    }));
+    
+    return { data: result, error: null };
+  } catch (error: any) {
+    console.error("Unexpected error in getUserReservations:", error);
+    return {
+      error: { message: error.message || "An unexpected error occurred" },
+      data: []
+    };
+  }
+};
+
+/**
+ * Cancel a reservation
+ */
+export const cancelReservation = async (reservationId: string) => {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      return {
+        error: { message: "User not authenticated" },
+        data: null
+      };
+    }
+    
+    const { data, error } = await supabase
+      .from('reservations')
+      .update({ status: 'cancelled' })
+      .eq('id', reservationId)
+      .eq('user_id', session.user.id) // Ensure the user owns the reservation
+      .select()
+      .single();
+      
+    if (error) {
+      console.error("Error cancelling reservation:", error);
+      return { error, data: null };
+    }
+    
+    // Map database column names to our expected format
+    const result: ReservationData = {
+      id: data.id,
+      user_id: data.user_id,
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      date: data.date,
+      time: data.time,
+      guests: data.guests,
+      specialRequests: data.special_requests || '',
+      status: data.status,
+      created_at: data.created_at
+    };
+    
+    return { data: result, error: null };
+  } catch (error: any) {
+    console.error("Unexpected error in cancelReservation:", error);
+    return {
+      error: { message: error.message || "An unexpected error occurred" },
+      data: null
+    };
+  }
+};
+
+// Function to update History.tsx to use
+export const getReservationsForCurrentUser = getUserReservations;

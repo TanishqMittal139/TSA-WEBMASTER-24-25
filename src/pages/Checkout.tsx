@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -6,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { CreditCard, Check, Landmark, AlertCircle, ArrowLeft, Home } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
 import Navbar from '@/components/ui/navbar';
 import Footer from '@/components/ui/footer';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -15,7 +15,6 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { toast } from '@/components/ui/use-toast';
 import { Separator } from '@/components/ui/separator';
-import { isAuthenticated } from '@/services/auth';
 
 const formSchema = z.object({
   fullName: z.string().min(2, 'Full name must be at least 2 characters'),
@@ -31,7 +30,8 @@ const formSchema = z.object({
 });
 
 const Checkout = () => {
-  const { items, totalAmount, clearCart } = useCart();
+  const { items, totalAmount, clearCart, checkAuthBeforeCheckout } = useCart();
+  const { user, profile, isLoading } = useAuth();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -49,22 +49,22 @@ const Checkout = () => {
   
   // Check if user is authenticated
   useEffect(() => {
-    if (!isAuthenticated()) {
+    if (!isLoading && !user) {
       toast({
         title: "Authentication required",
         description: "Please sign in to proceed with checkout",
         variant: "destructive",
       });
-      navigate('/sign-in');
+      navigate('/sign-in', { state: { from: '/checkout' } });
     }
-  }, [navigate]);
-  
+  }, [user, navigate, isLoading]);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      fullName: '',
-      email: '',
-      address: '',
+      fullName: profile?.name || '',
+      email: profile?.email || '',
+      address: profile?.address || '',
       city: '',
       state: '',
       zipCode: '',
@@ -75,7 +75,20 @@ const Checkout = () => {
     }
   });
   
+  // Update form values when profile loads
+  useEffect(() => {
+    if (profile) {
+      form.setValue('fullName', profile.name || '');
+      form.setValue('email', profile.email || '');
+      form.setValue('address', profile.address || '');
+    }
+  }, [profile, form]);
+  
   const onSubmit = (values: z.infer<typeof formSchema>) => {
+    if (!checkAuthBeforeCheckout()) {
+      return;
+    }
+    
     setIsSubmitting(true);
     
     // Simulate payment processing
@@ -84,6 +97,9 @@ const Checkout = () => {
       
       // Success - clear cart and redirect to confirmation
       clearCart();
+      
+      // Store confirmation in session storage
+      sessionStorage.setItem('orderConfirmed', 'true');
       
       toast({
         title: "Order Placed Successfully!",
@@ -106,6 +122,44 @@ const Checkout = () => {
       .replace(/(\d{4})/g, '$1 ')
       .trim();
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen">
+        <Navbar />
+        <main className="pt-28 pb-16">
+          <div className="container mx-auto px-4 max-w-5xl text-center">
+            <h1 className="text-2xl font-bold mb-4">Loading checkout...</h1>
+            <div className="flex justify-center">
+              <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary"></div>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+  
+  // If not authenticated after loading is complete, don't render the form
+  if (!user) {
+    return (
+      <div className="min-h-screen">
+        <Navbar />
+        <main className="pt-28 pb-16">
+          <div className="container mx-auto px-4 max-w-5xl">
+            <div className="text-center">
+              <h1 className="text-2xl font-bold mb-4">Authentication Required</h1>
+              <p className="mb-6">Please sign in to proceed with checkout</p>
+              <Button onClick={() => navigate('/sign-in', { state: { from: '/checkout' } })}>
+                Sign In to Continue
+              </Button>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
   
   return (
     <div className="min-h-screen">

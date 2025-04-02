@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/context/AuthContext';
@@ -29,7 +30,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [items, setItems] = useState<CartItem[]>([]);
   const [hasDiscountedItems, setHasDiscountedItems] = useState<boolean>(false);
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   
   useEffect(() => {
     const savedCart = localStorage.getItem('tastyHubCart');
@@ -122,9 +123,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
   
   const checkAuthBeforeCheckout = (): boolean => {
-    const isAuthenticated = !!user;
-    
-    if (!isAuthenticated) {
+    // Check if the user is logged in using session from useAuth
+    if (!session || !user) {
       toast({
         title: "Authentication Required",
         description: "Please sign in to proceed to checkout.",
