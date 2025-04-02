@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { toast } from "@/components/ui/use-toast";
@@ -135,8 +134,7 @@ export const saveUserPreferences = async (preferences: Record<string, any>): Pro
       return false;
     }
     
-    // Store preferences as a JSON string in the "bio" field as a workaround
-    // since there's no dedicated preferences column
+    // Store preferences as a JSON string in the "bio" field
     const { error } = await supabase
       .from('profiles')
       .update({

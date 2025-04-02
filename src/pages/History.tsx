@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/ui/navbar';
@@ -27,11 +26,17 @@ const History = () => {
     const loadReservations = async () => {
       try {
         setIsLoading(true);
-        const reservationData = await getReservationsForCurrentUser();
-        setReservations(reservationData);
-      } catch (err) {
+        const { data, error } = await getReservationsForCurrentUser();
+        
+        if (error) {
+          setError(error.message || 'Failed to load reservations');
+          return;
+        }
+        
+        setReservations(data || []);
+      } catch (err: any) {
         console.error('Error loading reservations:', err);
-        setError('Failed to load your reservations. Please try again.');
+        setError(err.message || 'Failed to load your reservations. Please try again.');
       } finally {
         setIsLoading(false);
       }

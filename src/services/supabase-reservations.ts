@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export interface ReservationData {
@@ -17,8 +16,27 @@ export interface ReservationData {
 
 export const createReservation = async (
   data: Omit<ReservationData, 'id' | 'created_at'>
-): Promise<{ data: ReservationData | null; error: any }> => {
+): Promise<{ data: ReservationData | null; error: any; success?: boolean; message?: string }> => {
   try {
+    // Check if the user exists in the profiles table
+    if (data.user_id) {
+      const { data: profileExists } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', data.user_id)
+        .single();
+        
+      if (!profileExists) {
+        console.error("User profile does not exist for ID:", data.user_id);
+        return { 
+          data: null, 
+          error: "User profile not found", 
+          success: false, 
+          message: "Failed to create reservation: User profile not found."
+        };
+      }
+    }
+
     const { data: result, error } = await supabase
       .from('reservations')
       .insert([{
@@ -37,7 +55,12 @@ export const createReservation = async (
 
     if (error) {
       console.error("Error creating reservation:", error);
-      return { data: null, error };
+      return { 
+        data: null, 
+        error,
+        success: false,
+        message: error.message || "Failed to create reservation"
+      };
     }
 
     // Map from DB format to our interface format
@@ -55,10 +78,20 @@ export const createReservation = async (
       status: result.status
     };
 
-    return { data: mappedData, error: null };
+    return { 
+      data: mappedData, 
+      error: null,
+      success: true,
+      message: "Reservation created successfully!"
+    };
   } catch (error: any) {
     console.error("Unexpected error creating reservation:", error);
-    return { data: null, error };
+    return { 
+      data: null, 
+      error,
+      success: false,
+      message: error.message || "An unexpected error occurred"
+    };
   }
 };
 
@@ -210,13 +243,12 @@ export const updateReservation = async (
   }
 };
 
-// Add the missing function getReservationsForCurrentUser
-export const getReservationsForCurrentUser = async (): Promise<ReservationData[]> => {
+export const getReservationsForCurrentUser = async (): Promise<{ data: ReservationData[] | null; error: any }> => {
   try {
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
-      return [];
+      return { data: null, error: "User not authenticated" };
     }
     
     const { data, error } = await supabase
@@ -226,11 +258,11 @@ export const getReservationsForCurrentUser = async (): Promise<ReservationData[]
       
     if (error) {
       console.error("Error fetching user reservations:", error);
-      return [];
+      return { data: null, error };
     }
     
     // Map from DB format to our interface format
-    return data.map(item => ({
+    const mappedData: ReservationData[] = data.map(item => ({
       id: item.id,
       created_at: item.created_at,
       name: item.name,
@@ -243,13 +275,14 @@ export const getReservationsForCurrentUser = async (): Promise<ReservationData[]
       user_id: item.user_id,
       status: item.status
     }));
+    
+    return { data: mappedData, error: null };
   } catch (error) {
     console.error("Unexpected error fetching user reservations:", error);
-    return [];
+    return { data: null, error };
   }
 };
 
-// Add the missing function cancelReservation
 export const cancelReservation = async (id: string): Promise<{ success: boolean; message: string; reservation?: ReservationData }> => {
   try {
     const { data, error } = await supabase

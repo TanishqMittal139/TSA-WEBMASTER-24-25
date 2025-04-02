@@ -50,7 +50,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { toast } from '@/components/ui/use-toast';
 import { createReservation, getReservationsForCurrentUser, cancelReservation, ReservationData } from '@/services/supabase-reservations';
-import { getCurrentUser, isAuthenticated, getUserProfile, UserProfile } from '@/services/supabase-auth';
+import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
 const formSchema = z.object({
@@ -74,8 +74,7 @@ const Reservations = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState("new");
   const [myReservations, setMyReservations] = useState<ReservationData[]>([]);
-  const [user, setUser] = useState<any>(null);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const { user, profile } = useAuth();
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
   
   useEffect(() => {
@@ -104,7 +103,6 @@ const Reservations = () => {
     
     checkAuth();
     
-    // Set up auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         setAuthenticated(!!session);
@@ -128,31 +126,56 @@ const Reservations = () => {
   }, [navigate]);
 
   const loadUserReservations = async () => {
-    const reservations = await getReservationsForCurrentUser();
-    setMyReservations(reservations);
+    if (!user) {
+      setMyReservations([]);
+      return;
+    }
+    
+    try {
+      const { data, error } = await getReservationsForCurrentUser();
+      
+      if (error) {
+        console.error("Error loading reservations:", error);
+        toast({
+          title: "Error loading reservations",
+          description: error.message || "Failed to load your reservations",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      setMyReservations(data || []);
+    } catch (error) {
+      console.error("Error in loadUserReservations:", error);
+      setMyReservations([]);
+    }
   };
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: userProfile?.name || '',
-      email: userProfile?.email || '',
-      phone: userProfile?.phone || '',
+      name: profile?.name || '',
+      email: profile?.email || '',
+      phone: profile?.phone || '',
       specialRequests: '',
     },
   });
   
-  // Update form when userProfile is loaded
   useEffect(() => {
-    if (userProfile) {
-      form.setValue('name', userProfile.name || '');
-      form.setValue('email', userProfile.email || '');
-      form.setValue('phone', userProfile.phone || '');
+    if (profile) {
+      form.setValue('name', profile.name || '');
+      form.setValue('email', profile.email || '');
+      form.setValue('phone', profile.phone || '');
     }
-  }, [userProfile, form]);
+  }, [profile, form]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to make a reservation",
+        variant: "destructive",
+      });
       navigate('/sign-in');
       return;
     }
@@ -160,41 +183,43 @@ const Reservations = () => {
     setIsSubmitting(true);
     
     try {
+      const formattedDate = format(values.date, 'yyyy-MM-dd');
+      
       const reservationData = {
         user_id: user.id,
         name: values.name,
         email: values.email,
         phone: values.phone,
-        date: format(values.date, 'yyyy-MM-dd'), // Convert Date to string format
+        date: formattedDate, 
         time: values.time,
         guests: values.guests,
         specialRequests: values.specialRequests || null,
         status: 'confirmed',
       };
       
-      const { data, error } = await createReservation(reservationData);
+      const { success, message, data } = await createReservation(reservationData);
       
-      if (data) {
+      if (success && data) {
         toast({
           title: "Reservation Confirmed!",
           description: `Your table for ${values.guests} is booked for ${format(values.date, 'MMMM d, yyyy')} at ${values.time}.`,
         });
         
         await loadUserReservations();
-        
         setActiveTab("my");
       } else {
         toast({
           title: "Reservation Failed",
-          description: error?.message || "An error occurred while creating your reservation.",
+          description: message || "An error occurred while creating your reservation.",
           variant: "destructive",
         });
+        console.error("Reservation creation failed:", message);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Reservation error:", error);
       toast({
         title: "Error",
-        description: "An unexpected error occurred. Please try again.",
+        description: error.message || "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
     } finally {
