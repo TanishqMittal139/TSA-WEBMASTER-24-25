@@ -10,7 +10,7 @@ type AuthContextType = {
   user: User | null;
   profile: UserProfile | null;
   isLoading: boolean;
-  refreshProfile: () => Promise<void>;
+  refreshProfile: () => Promise<void>; // Changed return type to Promise<void>
   signOut: () => Promise<void>;
 };
 
@@ -89,9 +89,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (user) {
       const userProfile = await getUserProfile();
       setProfile(userProfile);
-      return userProfile;
+      // Return void instead of userProfile
     }
-    return null;
   };
 
   const signOut = async () => {

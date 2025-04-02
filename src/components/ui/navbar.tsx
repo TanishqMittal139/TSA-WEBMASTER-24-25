@@ -21,6 +21,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from '@/components/ui/use-toast';
 import ThemeToggle from '@/components/ui/theme-toggle';
+import { Button } from '@/components/ui/button'; // Added missing Button import
 
 const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/ui/navbar';
@@ -21,7 +20,6 @@ import {
   CreditCard, Trash2
 } from 'lucide-react';
 
-// List of avatar options for profile customization
 const avatarOptions = [
   { id: 'avatar1', src: 'https://api.dicebear.com/7.x/bottts/svg?seed=tasty1', alt: 'Robot Avatar 1' },
   { id: 'avatar2', src: 'https://api.dicebear.com/7.x/bottts/svg?seed=tasty2', alt: 'Robot Avatar 2' },
@@ -33,7 +31,6 @@ const avatarOptions = [
   { id: 'avatar8', src: 'https://api.dicebear.com/7.x/bottts/svg?seed=food3', alt: 'Food Avatar 3' },
 ];
 
-// User preferences with default values
 const defaultPreferences = {
   notifications: {
     email: true,
@@ -61,7 +58,6 @@ const Profile: React.FC = () => {
   const [selectedAvatar, setSelectedAvatar] = useState(profile?.avatar || avatarOptions[0].src);
   const [preferences, setPreferences] = useState(defaultPreferences);
   
-  // Profile form state
   const [formData, setFormData] = useState({
     name: profile?.name || '',
     email: profile?.email || '',
@@ -72,7 +68,6 @@ const Profile: React.FC = () => {
     avatar: profile?.avatar || avatarOptions[0].src
   });
   
-  // Update form when profile changes
   useEffect(() => {
     if (profile) {
       setFormData({
@@ -113,7 +108,6 @@ const Profile: React.FC = () => {
     setIsSaving(true);
     
     try {
-      // Validate phone format if provided
       if (formData.phone && !/^\+?[0-9\s\-()]+$/.test(formData.phone)) {
         toast({
           title: "Invalid Phone Format",
@@ -173,7 +167,6 @@ const Profile: React.FC = () => {
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
             <div className="flex flex-col md:flex-row items-start gap-6">
-              {/* Left sidebar with avatar and basics */}
               <div className="w-full md:w-1/3 sticky top-24 mb-6 md:mb-0">
                 <Card>
                   <CardContent className="pt-6">
@@ -272,7 +265,6 @@ const Profile: React.FC = () => {
                 </Card>
               </div>
               
-              {/* Main content */}
               <div className="w-full md:w-2/3">
                 <Tabs defaultValue="profile">
                   <TabsList className="mb-6">
