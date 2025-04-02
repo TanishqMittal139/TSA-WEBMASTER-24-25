@@ -8,8 +8,9 @@ import { CartProvider } from "./context/CartContext";
 import { FavoritesProvider } from "./context/FavoritesContext";
 import { FavoriteMealsProvider } from "./context/FavoriteMealsContext";
 import { ThemeProvider } from "./context/ThemeContext";
-import { useEffect } from "react";
-import { isAuthenticated } from "./services/auth";
+import { AuthProvider } from "./context/AuthContext";
+import { useEffect, useState } from "react";
+import { isAuthenticated } from "./services/supabase-auth";
 import Index from "./pages/Index";
 import Menu from "./pages/Menu";
 import Deals from "./pages/Deals";
@@ -50,7 +51,23 @@ const ScrollToTop = () => {
 
 // Protected route wrapper
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
-  if (!isAuthenticated()) {
+  const [authenticated, setAuthenticated] = useState<boolean | null>(null);
+  
+  useEffect(() => {
+    const checkAuth = async () => {
+      const isAuth = await isAuthenticated();
+      setAuthenticated(isAuth);
+    };
+    
+    checkAuth();
+  }, []);
+  
+  if (authenticated === null) {
+    // Still loading, return loading state or nothing
+    return <div className="flex items-center justify-center p-8">Loading...</div>;
+  }
+  
+  if (!authenticated) {
     return <Navigate to="/sign-in" replace />;
   }
   
@@ -73,54 +90,56 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <CartProvider>
-            <FavoritesProvider>
-              <FavoriteMealsProvider>
-                <BrowserRouter>
-                  <ScrollToTop />
-                  <Routes>
-                    <Route path="/" element={<Index />} />
-                    <Route path="/menu" element={<Menu />} />
-                    <Route path="/menu/:dishId" element={<DishDetails />} />
-                    <Route path="/deals" element={<Deals />} />
-                    <Route path="/deals/:dealId/use" element={
-                      <ProtectedRoute>
-                        <DealUse />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/find-location" element={<FindLocation />} />
-                    <Route path="/about" element={<About />} />
-                    <Route path="/cart" element={<Cart />} />
-                    <Route path="/reservations" element={<Reservations />} />
-                    <Route path="/reservation-confirmation" element={
-                      <ProtectedRoute>
-                        <ReservationConfirmation />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/sign-in" element={<SignIn />} />
-                    <Route path="/sign-up" element={<SignUp />} />
-                    <Route path="/checkout" element={<Checkout />} />
-                    <Route path="/checkout-confirmation" element={<CheckoutConfirmation />} />
-                    <Route path="/favorite-locations" element={
-                      <ProtectedRoute>
-                        <FavoriteLocations />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/careers" element={<Careers />} />
-                    <Route path="/profile" element={
-                      <ProtectedRoute>
-                        <Profile />
-                      </ProtectedRoute>
-                    } />
-                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </BrowserRouter>
-              </FavoriteMealsProvider>
-            </FavoritesProvider>
-          </CartProvider>
+          <AuthProvider>
+            <Toaster />
+            <Sonner />
+            <CartProvider>
+              <FavoritesProvider>
+                <FavoriteMealsProvider>
+                  <BrowserRouter>
+                    <ScrollToTop />
+                    <Routes>
+                      <Route path="/" element={<Index />} />
+                      <Route path="/menu" element={<Menu />} />
+                      <Route path="/menu/:dishId" element={<DishDetails />} />
+                      <Route path="/deals" element={<Deals />} />
+                      <Route path="/deals/:dealId/use" element={
+                        <ProtectedRoute>
+                          <DealUse />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/find-location" element={<FindLocation />} />
+                      <Route path="/about" element={<About />} />
+                      <Route path="/cart" element={<Cart />} />
+                      <Route path="/reservations" element={<Reservations />} />
+                      <Route path="/reservation-confirmation" element={
+                        <ProtectedRoute>
+                          <ReservationConfirmation />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/sign-in" element={<SignIn />} />
+                      <Route path="/sign-up" element={<SignUp />} />
+                      <Route path="/checkout" element={<Checkout />} />
+                      <Route path="/checkout-confirmation" element={<CheckoutConfirmation />} />
+                      <Route path="/favorite-locations" element={
+                        <ProtectedRoute>
+                          <FavoriteLocations />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/careers" element={<Careers />} />
+                      <Route path="/profile" element={
+                        <ProtectedRoute>
+                          <Profile />
+                        </ProtectedRoute>
+                      } />
+                      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </BrowserRouter>
+                </FavoriteMealsProvider>
+              </FavoritesProvider>
+            </CartProvider>
+          </AuthProvider>
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>

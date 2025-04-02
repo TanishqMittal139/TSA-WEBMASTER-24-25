@@ -9,7 +9,209 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      contact_submissions: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          message: string
+          name: string
+          subject: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          message: string
+          name: string
+          subject?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          subject?: string | null
+        }
+        Relationships: []
+      }
+      locations: {
+        Row: {
+          address: string
+          coordinates: number[]
+          created_at: string | null
+          hours: string
+          id: string
+          name: string
+          phone: string
+          popular: boolean | null
+          region: string
+          state: string
+          updated_at: string | null
+        }
+        Insert: {
+          address: string
+          coordinates: number[]
+          created_at?: string | null
+          hours: string
+          id?: string
+          name: string
+          phone: string
+          popular?: boolean | null
+          region: string
+          state: string
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string
+          coordinates?: number[]
+          created_at?: string | null
+          hours?: string
+          id?: string
+          name?: string
+          phone?: string
+          popular?: boolean | null
+          region?: string
+          state?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      menu_items: {
+        Row: {
+          category: string
+          created_at: string | null
+          description: string | null
+          dietary_info: Json | null
+          id: string
+          image_url: string | null
+          ingredients: string[] | null
+          name: string
+          popular: boolean | null
+          price: number
+          special_tag: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          description?: string | null
+          dietary_info?: Json | null
+          id?: string
+          image_url?: string | null
+          ingredients?: string[] | null
+          name: string
+          popular?: boolean | null
+          price: number
+          special_tag?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          dietary_info?: Json | null
+          id?: string
+          image_url?: string | null
+          ingredients?: string[] | null
+          name?: string
+          popular?: boolean | null
+          price?: number
+          special_tag?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          address: string | null
+          avatar: string | null
+          bio: string | null
+          birthdate: string | null
+          created_at: string | null
+          email: string | null
+          id: string
+          name: string | null
+          phone: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          address?: string | null
+          avatar?: string | null
+          bio?: string | null
+          birthdate?: string | null
+          created_at?: string | null
+          email?: string | null
+          id: string
+          name?: string | null
+          phone?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string | null
+          avatar?: string | null
+          bio?: string | null
+          birthdate?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          name?: string | null
+          phone?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      reservations: {
+        Row: {
+          created_at: string | null
+          date: string
+          email: string
+          guests: string
+          id: string
+          name: string
+          phone: string
+          special_requests: string | null
+          status: string
+          time: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          date: string
+          email: string
+          guests: string
+          id?: string
+          name: string
+          phone: string
+          special_requests?: string | null
+          status?: string
+          time: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          date?: string
+          email?: string
+          guests?: string
+          id?: string
+          name?: string
+          phone?: string
+          special_requests?: string | null
+          status?: string
+          time?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reservations_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

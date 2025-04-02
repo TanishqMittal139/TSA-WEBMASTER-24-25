@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -49,8 +50,9 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { toast } from '@/components/ui/use-toast';
-import { createReservation, getReservationsByEmail, cancelReservation, ReservationData } from '@/services/reservations';
-import { getCurrentUser, isAuthenticated } from '@/services/auth';
+import { createReservation, getReservationsForCurrentUser, cancelReservation, ReservationData } from '@/services/supabase-reservations';
+import { getCurrentUser, isAuthenticated, getUserProfile, UserProfile } from '@/services/supabase-auth';
+import { supabase } from '@/integrations/supabase/client';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -73,37 +75,82 @@ const Reservations = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState("new");
   const [myReservations, setMyReservations] = useState<ReservationData[]>([]);
-  const user = getCurrentUser();
+  const [user, setUser] = useState<any>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [authenticated, setAuthenticated] = useState<boolean | null>(null);
   
   useEffect(() => {
-    if (!isAuthenticated()) {
-      toast({
-        title: "Authentication required",
-        description: "Please sign in to make or view reservations",
-        variant: "destructive",
-      });
-      navigate('/sign-in');
-    } else {
+    const checkAuth = async () => {
+      const isAuth = await isAuthenticated();
+      setAuthenticated(isAuth);
+      
+      if (!isAuth) {
+        toast({
+          title: "Authentication required",
+          description: "Please sign in to make or view reservations",
+          variant: "destructive",
+        });
+        navigate('/sign-in');
+        return;
+      }
+      
+      const currentUser = await getCurrentUser();
+      const profile = await getUserProfile();
+      
+      setUser(currentUser);
+      setUserProfile(profile);
+      
       loadUserReservations();
-    }
+    };
+    
+    checkAuth();
+    
+    // Set up auth state change listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        setAuthenticated(!!session);
+        
+        if (session?.user) {
+          setUser(session.user);
+          const profile = await getUserProfile();
+          setUserProfile(profile);
+          loadUserReservations();
+        } else {
+          setUser(null);
+          setUserProfile(null);
+          setMyReservations([]);
+        }
+      }
+    );
+    
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [navigate]);
 
-  const loadUserReservations = () => {
-    if (user) {
-      const reservations = getReservationsByEmail(user.email);
-      setMyReservations(reservations);
-    }
+  const loadUserReservations = async () => {
+    const reservations = await getReservationsForCurrentUser();
+    setMyReservations(reservations);
   };
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: user?.name || '',
-      email: user?.email || '',
-      phone: '',
+      name: userProfile?.name || '',
+      email: userProfile?.email || '',
+      phone: userProfile?.phone || '',
       specialRequests: '',
     },
   });
+  
+  // Update form when userProfile is loaded
+  useEffect(() => {
+    if (userProfile) {
+      form.setValue('name', userProfile.name || '');
+      form.setValue('email', userProfile.email || '');
+      form.setValue('phone', userProfile.phone || '');
+    }
+  }, [userProfile, form]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!user) {
@@ -115,16 +162,15 @@ const Reservations = () => {
     
     try {
       const reservationData: Omit<ReservationData, 'id'> = {
-        userId: user.id,
+        user_id: user.id,
         name: values.name,
         email: values.email,
         phone: values.phone,
         date: values.date,
         time: values.time,
         guests: values.guests,
-        specialRequests: values.specialRequests,
+        special_requests: values.specialRequests,
         status: 'confirmed',
-        createdAt: new Date()
       };
       
       const result = await createReservation(reservationData);
@@ -135,7 +181,7 @@ const Reservations = () => {
           description: `Your table for ${values.guests} is booked for ${format(values.date, 'MMMM d, yyyy')} at ${values.time}.`,
         });
         
-        loadUserReservations();
+        await loadUserReservations();
         
         setActiveTab("my");
       } else {
@@ -167,7 +213,7 @@ const Reservations = () => {
           description: "Your reservation has been successfully cancelled.",
         });
         
-        loadUserReservations();
+        await loadUserReservations();
       } else {
         toast({
           title: "Failed to Cancel",
@@ -185,6 +231,22 @@ const Reservations = () => {
     }
   };
 
+  if (authenticated === null) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-grow pt-20">
+          <div className="container mx-auto px-4 py-12">
+            <div className="max-w-3xl mx-auto text-center">
+              <p>Loading...</p>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -199,7 +261,7 @@ const Reservations = () => {
               </p>
             </div>
             
-            {!user ? (
+            {!authenticated ? (
               <div className="bg-card rounded-xl shadow-lg p-6 md:p-8 text-center">
                 <ShieldAlert className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <h2 className="text-xl font-semibold mb-2">Authentication Required</h2>
@@ -249,7 +311,7 @@ const Reservations = () => {
                               <FormItem>
                                 <FormLabel>Email</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="you@example.com" type="email" disabled {...field} />
+                                  <Input placeholder="you@example.com" type="email" {...field} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -414,7 +476,7 @@ const Reservations = () => {
                                     reservation.status === 'confirmed' ? 'bg-green-500' : 'bg-red-500'
                                   }`}></span>
                                   <h3 className="font-medium">
-                                    Reservation #{reservation.id.split('-')[1]}
+                                    {reservation.id && `Reservation #${reservation.id.substring(0, 8)}...`}
                                   </h3>
                                 </div>
                                 
@@ -435,9 +497,9 @@ const Reservations = () => {
                                   </div>
                                 </div>
                                 
-                                {reservation.specialRequests && (
+                                {reservation.special_requests && (
                                   <p className="text-sm text-muted-foreground mt-2 border-t border-border pt-2">
-                                    <span className="font-medium">Special Requests:</span> {reservation.specialRequests}
+                                    <span className="font-medium">Special Requests:</span> {reservation.special_requests}
                                   </p>
                                 )}
                               </div>
@@ -459,7 +521,7 @@ const Reservations = () => {
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>
                                       <AlertDialogCancel>Keep Reservation</AlertDialogCancel>
-                                      <AlertDialogAction onClick={() => handleCancelReservation(reservation.id)}
+                                      <AlertDialogAction onClick={() => handleCancelReservation(reservation.id as string)}
                                         className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
                                         Cancel Reservation
                                       </AlertDialogAction>
