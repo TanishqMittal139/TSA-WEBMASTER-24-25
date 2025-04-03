@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { Loader } from 'lucide-react';
 
@@ -41,6 +40,25 @@ const LocationMap: React.FC<LocationMapProps> = ({
     return () => clearTimeout(timer);
   }, [center, zoom]);
 
+  // Calculate marker positions relative to center
+  const getMarkerPosition = (coordinates: [number, number]) => {
+    const lonDiff = coordinates[0] - center[0];
+    const latDiff = coordinates[1] - center[1];
+    
+    // Scale factors - adjust these values to make markers appear in correct positions
+    const lonScale = 10; // degrees longitude per 100% width
+    const latScale = 8;  // degrees latitude per 100% height
+    
+    const left = 50 + (lonDiff / lonScale) * 100;
+    const top = 50 - (latDiff / latScale) * 100;
+    
+    // Keep markers within visible area
+    const clampedLeft = Math.max(5, Math.min(95, left));
+    const clampedTop = Math.max(5, Math.min(95, top));
+    
+    return { left: `${clampedLeft}%`, top: `${clampedTop}%` };
+  };
+
   return (
     <div className={`relative w-full h-full min-h-[300px] rounded-lg overflow-hidden bg-muted/30 ${className}`}>
       {loading ? (
@@ -58,38 +76,48 @@ const LocationMap: React.FC<LocationMapProps> = ({
             ></iframe>
           ) : (
             <img 
-              src={`https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/${center[0]},${center[1]},${zoom},0/600x400@2x?access_token=pk.mapbox_placeholder`}
+              src={`https://tile.openstreetmap.org/${zoom}/53/77.png`}
               alt="Map background"
               className="w-full h-full object-cover"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
-                target.src = "https://maptiler.com/static/img/maps/osm-bright.png";
+                target.src = "https://cdn.mapful.xyz/tiles/osm-bright/map.webp";
               }}
             />
           )}
           
           {/* Store markers */}
-          {locations.map(location => (
-            <div 
-              key={location.id}
-              className={`absolute transform -translate-x-1/2 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 ${activeLocationId === location.id ? 'bg-primary scale-125 z-10' : 'bg-primary/70 hover:scale-110'}`}
-              style={{
-                // These are approximate mappings for demonstration
-                top: `${50 - (location.coordinates[1] - center[1]) * 5}%`,
-                left: `${50 + (location.coordinates[0] - center[0]) * 5}%`,
-              }}
-            >
-              <div className="w-3 h-3 bg-white rounded-full"></div>
-              
-              {/* Tooltip for location details */}
-              <div className={`absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-background text-foreground text-xs font-medium py-1 px-2 rounded shadow-md whitespace-nowrap transition-opacity duration-200 ${activeLocationId === location.id ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-                <div className="font-bold">{location.name}</div>
-                {location.address && <div className="text-xs mt-1">{location.address}</div>}
-                {location.phone && <div className="text-xs">{location.phone}</div>}
-                {location.hours && <div className="text-xs mt-1 text-muted-foreground">{location.hours}</div>}
+          {locations.map(location => {
+            const position = getMarkerPosition(location.coordinates);
+            
+            return (
+              <div 
+                key={location.id}
+                className={`absolute w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 ${
+                  activeLocationId === location.id 
+                    ? 'bg-primary scale-125 z-10' 
+                    : 'bg-primary/70 hover:scale-110'
+                }`}
+                style={{
+                  top: position.top,
+                  left: position.left,
+                  transform: 'translate(-50%, -50%)'
+                }}
+              >
+                <div className="w-3 h-3 bg-white rounded-full"></div>
+                
+                {/* Tooltip for location details */}
+                <div className={`absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-background text-foreground text-xs font-medium py-1 px-2 rounded shadow-md whitespace-nowrap transition-opacity duration-200 ${
+                  activeLocationId === location.id ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                }`}>
+                  <div className="font-bold">{location.name}</div>
+                  {location.address && <div className="text-xs mt-1">{location.address}</div>}
+                  {location.phone && <div className="text-xs">{location.phone}</div>}
+                  {location.hours && <div className="text-xs mt-1 text-muted-foreground">{location.hours}</div>}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

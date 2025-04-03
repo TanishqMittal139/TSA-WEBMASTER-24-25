@@ -28,6 +28,7 @@ import CheckoutConfirmation from "./pages/CheckoutConfirmation";
 import FavoriteLocations from "./pages/FavoriteLocations";
 import DishDetails from "./pages/DishDetails";
 import Profile from "./pages/Profile";
+import Settings from "./pages/Settings";
 import History from "./pages/History";
 import NotFound from "./pages/NotFound";
 import Careers from "./pages/Careers";
@@ -141,6 +142,11 @@ const App = () => {
                       <Route path="/profile" element={
                         <ProtectedRoute>
                           <Profile />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/settings" element={
+                        <ProtectedRoute>
+                          <Settings />
                         </ProtectedRoute>
                       } />
                       <Route path="/history" element={

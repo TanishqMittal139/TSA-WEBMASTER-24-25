@@ -1,174 +1,124 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { Tag, ArrowRight, CalendarDays } from 'lucide-react';
 import Navbar from '../components/ui/navbar';
 import Footer from '../components/ui/footer';
-import BlurImage from '../components/ui/blur-image';
-import { cn } from '@/lib/utils';
-import { Link } from 'react-router-dom';
-import { Check, Coffee, Soup, Sandwich, Gift, Users, Package } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/components/ui/use-toast';
-import { isAuthenticated } from '@/services/auth';
-import { useCart } from '@/context/CartContext';
 
 export interface DealData {
   id: string;
   title: string;
   description: string;
   discount: string;
-  image: string;
-  features: { icon: React.ReactNode; text: string }[];
-  popular: boolean;
-  discountAmount: number;
   discountType: 'percentage' | 'fixed';
+  discountAmount: number;
+  code: string;
+  validUntil: string;
   appliesTo: 'all' | 'category' | 'specific';
   categories?: string[];
   items?: string[];
-  minimumPurchase?: number;
-  code: string;
+  image: string;
+  isPopular?: boolean;
 }
 
 const deals: DealData[] = [
   {
+    id: 'happy-hour',
+    title: 'Happy Hour Special',
+    description: '20% off all beverages between 3pm and 6pm, Monday through Friday',
+    discount: '20% OFF',
+    discountType: 'percentage',
+    discountAmount: 20,
+    code: 'HAPPY20',
+    validUntil: '2025-12-31',
+    appliesTo: 'category',
+    categories: ['beverages', 'drinks'],
+    image: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?q=80&w=1257&auto=format&fit=crop',
+    isPopular: true
+  },
+  {
+    id: 'breakfast-bundle',
+    title: 'Breakfast Bundle',
+    description: 'Any breakfast item with coffee for a special price',
+    discount: '$3 OFF',
+    discountType: 'fixed',
+    discountAmount: 3,
+    code: 'BREKKIE3',
+    validUntil: '2025-12-31',
+    appliesTo: 'category',
+    categories: ['breakfast'],
+    image: 'https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?q=80&w=1470&auto=format&fit=crop'
+  },
+  {
+    id: 'lunch-special',
+    title: 'Lunch Special',
+    description: 'Buy any sandwich and get a free soup or side salad',
+    discount: 'FREE SIDE',
+    discountType: 'fixed',
+    discountAmount: 5.99,
+    code: 'LUNCH599',
+    validUntil: '2025-12-31',
+    appliesTo: 'specific',
+    items: ['sandwich-veggie-deluxe', 'sandwich-mushroom', 'sandwich-mediterranean'],
+    image: 'https://images.unsplash.com/photo-1627309302198-09a50ae1b209?q=80&w=1374&auto=format&fit=crop',
+    isPopular: true
+  },
+  {
     id: 'combo-meal',
     title: 'Combo Meal Deal',
-    description: 'Choose 1 sandwich, 1 coffee, and 1 soup and get 15% off your order.',
+    description: 'Choose one sandwich, one coffee, and one soup for a special combo price',
     discount: '15% OFF',
-    image: 'https://images.unsplash.com/photo-1565895405138-6c3a1555da6a?q=80&w=2670&auto=format&fit=crop',
-    features: [
-      { icon: <Sandwich size={16} />, text: '1 Sandwich of your choice' },
-      { icon: <Coffee size={16} />, text: '1 Coffee of your choice' },
-      { icon: <Soup size={16} />, text: '1 Soup of your choice' }
-    ],
-    popular: true,
+    discountType: 'percentage',
     discountAmount: 15,
-    discountType: 'percentage',
-    appliesTo: 'category',
-    categories: ['sandwiches', 'beverages', 'soups'],
-    code: 'COMBO15'
+    code: 'COMBO15',
+    validUntil: '2025-12-31',
+    appliesTo: 'all',
+    image: 'https://images.unsplash.com/photo-1565299507177-b0ac66763828?q=80&w=1064&auto=format&fit=crop'
   },
   {
-    id: 'catering',
-    title: 'Catering Special',
-    description: 'Get 10% off when catering for events and gatherings.',
+    id: 'new-customer',
+    title: 'New Customer Discount',
+    description: 'First-time customers get 10% off their entire order',
     discount: '10% OFF',
-    image: 'https://images.unsplash.com/photo-1536392706976-e486e2ba97af?q=80&w=2670&auto=format&fit=crop',
-    features: [
-      { icon: <Users size={16} />, text: 'Perfect for events of any size' },
-      { icon: <Package size={16} />, text: 'Custom packaging options' },
-      { icon: <Check size={16} />, text: 'Available for delivery or pickup' }
-    ],
-    popular: false,
+    discountType: 'percentage',
     discountAmount: 10,
-    discountType: 'percentage',
+    code: 'WELCOME10',
+    validUntil: '2025-12-31',
     appliesTo: 'all',
-    minimumPurchase: 50, // Reduced from 100
-    code: 'CATER10'
-  },
-  {
-    id: 'subscription',
-    title: 'Weekly Subscription',
-    description: 'Subscribe to weekly meal plans and save 20% on your favorite items.',
-    discount: '20% OFF',
-    image: 'https://images.unsplash.com/photo-1553025934-296397db4010?q=80&w=2574&auto=format&fit=crop',
-    features: [
-      { icon: <Check size={16} />, text: 'Choose your weekly meal plan' },
-      { icon: <Check size={16} />, text: 'Skip or modify anytime' },
-      { icon: <Check size={16} />, text: 'Convenient billing options' }
-    ],
-    popular: false,
-    discountAmount: 20,
-    discountType: 'percentage',
-    appliesTo: 'all',
-    code: 'WEEKLY20'
-  },
-  {
-    id: 'gift-card',
-    title: 'Gift Card Bonus',
-    description: 'Get a $5 bonus when you purchase a $25 gift card.', // Reduced from $50
-    discount: '$5 BONUS',
-    image: 'https://images.unsplash.com/photo-1612599316791-451087e8f877?q=80&w=2628&auto=format&fit=crop',
-    features: [
-      { icon: <Gift size={16} />, text: 'Perfect gift for food lovers' },
-      { icon: <Check size={16} />, text: 'Digital or physical card options' },
-      { icon: <Check size={16} />, text: 'No expiration date' }
-    ],
-    popular: false,
-    discountAmount: 5,
-    discountType: 'fixed',
-    appliesTo: 'specific',
-    items: ['gift-card-25'], // Changed from gift-card-50
-    code: 'GIFT5'
+    image: 'https://images.unsplash.com/photo-1583608205776-babe6e0bdc25?q=80&w=1470&auto=format&fit=crop'
   }
 ];
 
 const Deals: React.FC = () => {
-  const [isVisible, setIsVisible] = useState(false);
+  const [activeTab, setActiveTab] = useState("current");
   const navigate = useNavigate();
+  const { user } = useAuth();
   
-  // Scroll to top on component mount
-  useEffect(() => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
-  }, []);
+  // Filter deals based on tab
+  const currentDeals = deals;
+  const upcomingDeals: DealData[] = []; // Empty for now, could be populated from API in the future
   
-  // Animation on mount
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsVisible(true);
-    }, 100);
-    
-    return () => clearTimeout(timer);
-  }, []);
-  
-  // Set up intersection observer for animations
-  useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('is-visible');
-        }
-      });
-    }, { threshold: 0.1 });
-    
-    const elements = document.querySelectorAll('.fade-up, .stagger-item');
-    elements.forEach(el => observer.observe(el));
-    
-    return () => {
-      observer.disconnect();
-    };
-  }, []);
-
-  // Clear any existing active deal when component mounts
-  useEffect(() => {
-    localStorage.removeItem('active_deal');
-  }, []);
-
-  const handleGetDeal = (deal: DealData) => {
-    if (!isAuthenticated()) {
+  const handleActivateDeal = (deal: DealData) => {
+    if (!user) {
       toast({
-        title: "Authentication Required",
-        description: `Please sign in to redeem the ${deal.title}.`,
-        duration: 3000,
+        title: "Sign in Required",
+        description: "Please sign in to use this deal",
+        variant: "destructive"
       });
-      navigate('/sign-in', { state: { redirectTo: '/deals', dealId: deal.id } });
+      navigate('/sign-in', { state: { redirectTo: '/deals' } });
       return;
     }
-
-    // Clear any existing active deal before setting a new one
-    localStorage.removeItem('active_deal');
     
-    // Store the active deal in localStorage
+    // Store the selected deal in localStorage to use it on the next page
     localStorage.setItem('active_deal', JSON.stringify(deal));
     
-    toast({
-      title: "Deal Activated",
-      description: `The ${deal.title} has been applied. Select items to use it!`,
-      duration: 3000,
-    });
-    
+    // Navigate to the deal use page
     navigate(`/deals/${deal.id}/use`);
   };
   
@@ -176,124 +126,140 @@ const Deals: React.FC = () => {
     <div className="min-h-screen">
       <Navbar />
       
-      <main>
-        {/* Hero Banner with updated background image */}
-        <section className="relative h-80">
-          <div className="absolute inset-0">
-            <BlurImage
-              src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=2669&auto=format&fit=crop"
-              alt="Deals banner"
-              className="object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/10"></div>
+      <main className="container mx-auto px-4 py-8 pt-24 mb-12">
+        <div className="text-center max-w-3xl mx-auto mb-12">
+          <h1 className="text-4xl font-bold mb-4">Special Deals & Offers</h1>
+          <p className="text-muted-foreground text-lg">
+            Discover our latest promotions and save on your favorite meals
+          </p>
+        </div>
+        
+        <Tabs defaultValue="current" className="mb-8" onValueChange={setActiveTab}>
+          <div className="flex justify-center">
+            <TabsList>
+              <TabsTrigger value="current">Current Deals</TabsTrigger>
+              <TabsTrigger value="upcoming">Upcoming Deals</TabsTrigger>
+            </TabsList>
           </div>
           
-          <div className="relative container mx-auto px-4 flex flex-col justify-center h-full pt-24">
-            <div className={cn(
-              "transition-all duration-1000 transform",
-              isVisible ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"
-            )}>
-              <div className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4">
-                Special Offers
-              </div>
-              <h1 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">Exclusive Deals</h1>
-              <p className="text-muted-foreground max-w-xl">
-                Enjoy our special deals and save on your favorite meals. Sign up to unlock even more exclusive offers.
-              </p>
-            </div>
-          </div>
-        </section>
-        
-        {/* Main Deals Section */}
-        <section className="py-16">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold mb-4">Current Promotions</h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
-                From combo meals to catering discounts, we've got special offers to make your dining experience even better.
-              </p>
-            </div>
-            
-            {/* Deals Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-              {deals.map((deal) => (
-                <div key={deal.id} className={`stagger-item rounded-xl overflow-hidden shadow-lg bg-card transition-all duration-500 transform hover:-translate-y-1 hover:shadow-xl ${deal.popular ? 'border-2 border-primary' : 'border border-border'}`}>
-                  <div className="relative">
-                    <BlurImage
-                      src={deal.image}
-                      alt={deal.title}
-                      className="h-48 w-full object-cover"
-                    />
-                    <div className="absolute top-4 right-4 bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-bold">
-                      {deal.discount}
-                    </div>
-                    {deal.popular && (
-                      <div className="absolute top-4 left-4 bg-background/90 backdrop-blur-sm text-foreground px-3 py-1 rounded-full text-xs font-medium">
-                        Most Popular
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold mb-2">{deal.title}</h3>
-                    <p className="text-muted-foreground mb-4">{deal.description}</p>
-                    
-                    <div className="space-y-2 mb-6">
-                      {deal.features.map((feature, idx) => (
-                        <div key={idx} className="flex items-center space-x-2 text-sm">
-                          <span className="text-primary">{feature.icon}</span>
-                          <span>{feature.text}</span>
-                        </div>
-                      ))}
-                    </div>
-                    
-                    <div className="flex space-x-4">
-                      <button
-                        onClick={() => handleGetDeal(deal)}
-                        className="flex-1 bg-primary text-primary-foreground px-4 py-2 rounded-md font-medium hover:bg-primary/90 transition-colors"
-                      >
-                        {isAuthenticated() ? "Get This Deal" : "Sign In to Redeem"}
-                      </button>
-                      {!isAuthenticated() && (
-                        <Link
-                          to="/sign-in"
-                          className="flex-1 border border-primary text-primary px-4 py-2 rounded-md font-medium hover:bg-primary/10 transition-colors text-center"
-                        >
-                          Sign In
-                        </Link>
+          <TabsContent value="current" className="mt-8">
+            {currentDeals.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {currentDeals.map(deal => (
+                  <Card key={deal.id} className="overflow-hidden h-full flex flex-col">
+                    <div className="relative h-48">
+                      <img 
+                        src={deal.image} 
+                        alt={deal.title}
+                        className="w-full h-full object-cover"
+                      />
+                      {deal.isPopular && (
+                        <Badge className="absolute top-2 right-2 bg-primary text-primary-foreground">
+                          Popular
+                        </Badge>
                       )}
                     </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-        
-        {/* Call to Action */}
-        <section className="py-16 bg-secondary">
-          <div className="container mx-auto px-4 text-center">
-            <h2 className="text-3xl font-bold mb-6">Ready to Save?</h2>
-            <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Sign up today to unlock all our special offers and start saving on your favorite meals.
-            </p>
-            {!isAuthenticated() ? (
-              <Link
-                to="/sign-in"
-                className="inline-block bg-primary text-primary-foreground px-8 py-3 rounded-md font-medium text-lg hover:bg-primary/90 transition-colors"
-              >
-                Get Started
-              </Link>
+                    <CardContent className="flex-1 flex flex-col p-6">
+                      <div className="flex justify-between items-start mb-4">
+                        <h3 className="text-xl font-semibold">{deal.title}</h3>
+                        <Badge variant="outline" className="text-sm font-bold">
+                          {deal.discount}
+                        </Badge>
+                      </div>
+                      <p className="text-muted-foreground mb-4 flex-1">{deal.description}</p>
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center text-sm text-muted-foreground">
+                          <CalendarDays size={16} className="mr-1" />
+                          <span>Valid until {new Date(deal.validUntil).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+                      <Button
+                        className="w-full mt-4"
+                        onClick={() => handleActivateDeal(deal)}
+                      >
+                        <Tag size={16} className="mr-2" />
+                        Use Deal
+                        <ArrowRight size={16} className="ml-2" />
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             ) : (
-              <Link
-                to="/menu"
-                className="inline-block bg-primary text-primary-foreground px-8 py-3 rounded-md font-medium text-lg hover:bg-primary/90 transition-colors"
-              >
-                Browse Menu
-              </Link>
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">No current deals available.</p>
+              </div>
             )}
-          </div>
-        </section>
+          </TabsContent>
+          
+          <TabsContent value="upcoming" className="mt-8">
+            {upcomingDeals.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {upcomingDeals.map(deal => (
+                  <Card key={deal.id} className="overflow-hidden h-full">
+                    {/* Similar structure as current deals but with "Coming Soon" overlay */}
+                    <div className="relative h-48">
+                      <img 
+                        src={deal.image} 
+                        alt={deal.title}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
+                        <Badge className="text-lg py-1 px-4">Coming Soon</Badge>
+                      </div>
+                    </div>
+                    <CardContent className="p-6">
+                      <div className="flex justify-between items-start mb-4">
+                        <h3 className="text-xl font-semibold">{deal.title}</h3>
+                        <Badge variant="outline" className="text-sm font-bold">
+                          {deal.discount}
+                        </Badge>
+                      </div>
+                      <p className="text-muted-foreground mb-4">{deal.description}</p>
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <CalendarDays size={16} className="mr-1" />
+                        <span>Starting {new Date(deal.validUntil).toLocaleDateString()}</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-16">
+                <p className="text-muted-foreground">No upcoming deals at the moment.</p>
+                <p className="text-muted-foreground mt-2">Check back soon for new promotions!</p>
+                
+                {!user && (
+                  <div className="mt-6">
+                    <p className="mb-3">Sign in to get notified about new deals</p>
+                    <Button onClick={() => navigate('/sign-in')}>
+                      Sign In
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
+        
+        <div className="bg-muted p-6 rounded-lg max-w-3xl mx-auto mt-12">
+          <h2 className="text-xl font-semibold mb-2">How to Use Deals</h2>
+          <ol className="list-decimal ml-5 space-y-2">
+            <li>Sign in to your account to access exclusive deals</li>
+            <li>Browse available deals and select the one you want</li>
+            <li>Click "Use Deal" to apply the discount to eligible items</li>
+            <li>Complete your order with the discount applied</li>
+          </ol>
+          
+          {!user && (
+            <div className="mt-6 text-center">
+              <p className="mb-3">Sign in to access exclusive deals</p>
+              <Button onClick={() => navigate('/sign-in')}>
+                Sign In Now
+              </Button>
+            </div>
+          )}
+        </div>
       </main>
       
       <Footer />

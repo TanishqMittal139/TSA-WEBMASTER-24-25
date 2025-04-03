@@ -1,559 +1,716 @@
-
 import React, { useState, useEffect } from 'react';
-import { useLocation, Link } from 'react-router-dom';
-import { Coffee, Sandwich, Soup, Filter, X, ChevronDown, Utensils, Cake, Salad, Croissant, Clock, Phone, Heart } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import Navbar from '../components/ui/navbar';
 import Footer from '../components/ui/footer';
-import { cn } from '@/lib/utils';
-import { useCart } from '@/context/CartContext';
-import { useFavoriteMeals } from '@/context/FavoriteMealsContext';
-import { menuCategories, allMenuItems, dietaryTags, cuisineTypes, MenuItem } from '@/data/menu-data';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Input } from '@/components/ui/input';
-import { motion } from 'framer-motion';
-import BlurImage from '@/components/ui/blur-image';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Separator } from '@/components/ui/separator';
+import { ShoppingCart, Search, Filter, X, Check, Star } from 'lucide-react';
+import { useCart } from '@/context/CartContext';
+import { 
+  menuCategories, 
+  allMenuItems, 
+  getMealsByCategory, 
+  searchMeals,
+  MenuItem, 
+  cuisineTypes, 
+  dietaryTags 
+} from '@/data/menu-data';
 
-const getCategoryIcon = (categoryId: string) => {
-  switch (categoryId) {
-    case 'sandwiches':
-      return <Sandwich size={18} />;
-    case 'soups':
-      return <Soup size={18} />;
-    case 'coffee':
-      return <Coffee size={18} />;
-    case 'salads':
-      return <Salad size={18} />;
-    case 'pastries':
-      return <Croissant size={18} />;
-    case 'desserts':
-      return <Cake size={18} />;
-    default:
-      return <Utensils size={18} />;
-  }
-};
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  SheetFooter,
+  SheetClose,
+} from "@/components/ui/sheet";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+// Define interfaces for our filter states
+interface FilterState {
+  dietary: string[];
+  cuisine: string[];
+  allergenFree: string[];
+  priceRange: string;
+  sortBy: string;
+  rating: number | null;
+}
 
 const Menu: React.FC = () => {
-  const location = useLocation();
   const [activeCategory, setActiveCategory] = useState('all');
-  const [filteredItems, setFilteredItems] = useState<MenuItem[]>(allMenuItems);
-  const [isVisible, setIsVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [displayedItems, setDisplayedItems] = useState<MenuItem[]>(allMenuItems);
+  const [isSearching, setIsSearching] = useState(false);
   const { addItem } = useCart();
-  const { addFavoriteMeal, removeFavoriteMeal, isFavoriteMeal } = useFavoriteMeals();
-  const [filtersOpen, setFiltersOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [activeDietaryTags, setActiveDietaryTags] = useState<string[]>([]);
-  const [activeCuisineTypes, setActiveCuisineTypes] = useState<string[]>([]);
-  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   
+  // More refined filtering
+  const [filters, setFilters] = useState<FilterState>({
+    dietary: [],
+    cuisine: [],
+    allergenFree: [],
+    priceRange: 'all',
+    sortBy: 'default',
+    rating: null
+  });
+  
+  const [activeFiltersCount, setActiveFiltersCount] = useState(0);
+  
+  // Filter and search the menu items whenever filters or search query changes
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const category = params.get('category');
+    let filteredItems: MenuItem[] = [];
     
-    if (category && menuCategories.some(c => c.id === category)) {
-      setActiveCategory(category);
+    if (isSearching && searchQuery) {
+      // If searching, use search results across all categories
+      filteredItems = searchMeals(searchQuery);
     } else {
-      setActiveCategory('all');
-    }
-  }, [location.search]);
-  
-  useEffect(() => {
-    let items = allMenuItems;
-    
-    if (activeCategory !== 'all') {
-      items = items.filter(item => item.category === activeCategory);
+      // Otherwise filter by active category
+      filteredItems = getMealsByCategory(activeCategory);
     }
     
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      items = items.filter(item => 
-        item.name.toLowerCase().includes(term) || 
-        item.description.toLowerCase().includes(term) ||
-        item.tags?.some(tag => tag.toLowerCase().includes(term))
-      );
-    }
-    
-    if (activeDietaryTags.length > 0) {
-      items = items.filter(item => {
-        return activeDietaryTags.every(tag => {
-          switch (tag) {
-            case 'vegetarian':
-              return item.vegetarian;
-            case 'vegan':
-              return item.vegan;
-            case 'gluten-free':
-              return item.glutenFree;
-            default:
-              return item.tags?.includes(tag);
-          }
+    // Apply dietary filters
+    if (filters.dietary.length > 0) {
+      filteredItems = filteredItems.filter(item => {
+        return filters.dietary.every(diet => {
+          if (diet === 'vegetarian') return item.vegetarian;
+          if (diet === 'vegan') return item.vegan;
+          if (diet === 'gluten-free') return item.glutenFree;
+          return true;
         });
       });
     }
     
-    if (activeCuisineTypes.length > 0) {
-      items = items.filter(item => 
-        item.cuisineType && activeCuisineTypes.includes(item.cuisineType.toLowerCase())
+    // Apply cuisine filters
+    if (filters.cuisine.length > 0) {
+      filteredItems = filteredItems.filter(item => 
+        item.cuisineType && filters.cuisine.includes(item.cuisineType)
       );
     }
     
-    setFilteredItems(items);
-  }, [activeCategory, searchTerm, activeDietaryTags, activeCuisineTypes]);
-  
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsVisible(true);
-    }, 100);
+    // Apply allergen filters
+    if (filters.allergenFree.length > 0) {
+      filteredItems = filteredItems.filter(item => {
+        if (!item.allergens) return true;
+        return !item.allergens.some(allergen => 
+          filters.allergenFree.includes(allergen.toLowerCase())
+        );
+      });
+    }
     
-    return () => clearTimeout(timer);
-  }, []);
-  
-  useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('is-visible');
+    // Apply price range filter
+    if (filters.priceRange !== 'all') {
+      filteredItems = filteredItems.filter(item => {
+        const price = parseFloat(item.price.replace('$', ''));
+        
+        switch (filters.priceRange) {
+          case 'under-10':
+            return price < 10;
+          case '10-15':
+            return price >= 10 && price <= 15;
+          case '15-20':
+            return price > 15 && price <= 20;
+          case 'over-20':
+            return price > 20;
+          default:
+            return true;
         }
       });
-    }, { threshold: 0.1 });
+    }
     
-    const elements = document.querySelectorAll('.fade-up, .stagger-item');
-    elements.forEach(el => observer.observe(el));
+    // Apply rating filter
+    if (filters.rating) {
+      filteredItems = filteredItems.filter(item => 
+        item.rating && item.rating >= filters.rating
+      );
+    }
     
-    return () => {
-      observer.disconnect();
-    };
-  }, [filteredItems]);
-
-  const handleAddToOrder = (item: MenuItem) => {
-    addItem({
-      id: item.id,
-      name: item.name,
-      price: item.price,
-      image: item.image,
-      category: menuCategories.find(c => c.id === item.category)?.name
-    });
-  };
-
-  const handleFavoriteToggle = (item: MenuItem) => {
-    if (isFavoriteMeal(item.id)) {
-      removeFavoriteMeal(item.id);
-    } else {
-      addFavoriteMeal({
-        id: item.id,
-        name: item.name,
-        price: item.price,
-        image: item.image,
-        category: menuCategories.find(c => c.id === item.category)?.name
+    // Apply sorting
+    if (filters.sortBy !== 'default') {
+      filteredItems.sort((a, b) => {
+        switch (filters.sortBy) {
+          case 'price-low-high':
+            return parseFloat(a.price.replace('$', '')) - parseFloat(b.price.replace('$', ''));
+          case 'price-high-low':
+            return parseFloat(b.price.replace('$', '')) - parseFloat(a.price.replace('$', ''));
+          case 'name-a-z':
+            return a.name.localeCompare(b.name);
+          case 'name-z-a':
+            return b.name.localeCompare(a.name);
+          case 'rating-high-low':
+            return (b.rating || 0) - (a.rating || 0);
+          default:
+            return 0;
+        }
       });
+    }
+    
+    setDisplayedItems(filteredItems);
+    
+    // Calculate active filters count
+    let count = 0;
+    count += filters.dietary.length;
+    count += filters.cuisine.length;
+    count += filters.allergenFree.length;
+    if (filters.priceRange !== 'all') count++;
+    if (filters.rating) count++;
+    if (filters.sortBy !== 'default') count++;
+    
+    setActiveFiltersCount(count);
+  }, [activeCategory, searchQuery, isSearching, filters]);
+  
+  // Handle search form submission
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSearching(!!searchQuery);
+    
+    if (!searchQuery) {
+      // If search is cleared, reset to the active category
+      setDisplayedItems(getMealsByCategory(activeCategory));
     }
   };
   
-  const toggleDietaryTag = (tagId: string) => {
-    setActiveDietaryTags(prev => 
-      prev.includes(tagId) 
-        ? prev.filter(t => t !== tagId) 
-        : [...prev, tagId]
-    );
+  // Reset all filters
+  const resetFilters = () => {
+    setFilters({
+      dietary: [],
+      cuisine: [],
+      allergenFree: [],
+      priceRange: 'all',
+      sortBy: 'default',
+      rating: null
+    });
+    setSearchQuery('');
+    setIsSearching(false);
   };
   
-  const toggleCuisineType = (cuisineId: string) => {
-    setActiveCuisineTypes(prev => 
-      prev.includes(cuisineId) 
-        ? prev.filter(t => t !== cuisineId) 
-        : [...prev, cuisineId]
-    );
+  // Toggle filters for multi-select options
+  const toggleFilter = (type: 'dietary' | 'cuisine' | 'allergenFree', value: string) => {
+    setFilters(prevFilters => {
+      const current = prevFilters[type];
+      const updated = current.includes(value)
+        ? current.filter(item => item !== value)
+        : [...current, value];
+      
+      return { ...prevFilters, [type]: updated };
+    });
   };
   
-  const clearAllFilters = () => {
-    setSearchTerm('');
-    setActiveDietaryTags([]);
-    setActiveCuisineTypes([]);
+  // Check if a filter is active
+  const isFilterActive = (type: 'dietary' | 'cuisine' | 'allergenFree', value: string) => {
+    return filters[type].includes(value);
   };
   
   return (
     <div className="min-h-screen">
       <Navbar />
       
-      <main>
-        <section className="relative h-80">
-          <div className="absolute inset-0">
-            <BlurImage
-              src="https://images.unsplash.com/photo-1515003197210-e0cd71810b5f?q=80&w=2670&auto=format&fit=crop"
-              alt="Menu banner"
-              className="object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/10"></div>
+      <main className="container mx-auto px-4 py-8 pt-24">
+        <div className="flex flex-col md:flex-row justify-between items-start mb-8 gap-4">
+          <div>
+            <h1 className="text-4xl font-bold mb-2">Our Menu</h1>
+            <p className="text-muted-foreground">
+              Explore our selection of fresh, plant-forward dishes
+            </p>
           </div>
           
-          <div className="relative container mx-auto px-4 flex flex-col justify-center h-full pt-24">
-            <div className={cn(
-              "transition-all duration-1000 transform",
-              isVisible ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"
-            )}>
-              <div className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4">
-                Our Menu
-              </div>
-              <h3 className="text-3xl md:text-4xl font-bold mb-3">Explore Our Offerings</h3>
-              <p className="text-muted-foreground max-w-xl text-sm">
-                Fresh, sustainable ingredients prepared with care. All items are made to order.
-              </p>
-            </div>
+          {/* Search and Filter Controls */}
+          <div className="flex items-center gap-3 w-full md:w-auto">
+            <form onSubmit={handleSearch} className="relative w-full md:w-auto flex-1">
+              <Input
+                type="search"
+                placeholder="Search menu..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pr-10"
+              />
+              <Button 
+                type="submit" 
+                size="icon" 
+                variant="ghost" 
+                className="absolute right-0 top-0 h-full"
+              >
+                <Search className="h-4 w-4" />
+              </Button>
+            </form>
+            
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline" className="flex items-center gap-2 whitespace-nowrap">
+                  <Filter className="h-4 w-4" />
+                  <span>Filters</span>
+                  {activeFiltersCount > 0 && (
+                    <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 flex items-center justify-center rounded-full">
+                      {activeFiltersCount}
+                    </Badge>
+                  )}
+                </Button>
+              </SheetTrigger>
+              <SheetContent className="sm:max-w-md">
+                <SheetHeader>
+                  <SheetTitle>Filter Menu</SheetTitle>
+                  <SheetDescription>
+                    Customize your menu view with these filters.
+                  </SheetDescription>
+                </SheetHeader>
+                
+                <div className="mt-6">
+                  <ScrollArea className="h-[calc(100vh-200px)] pr-4">
+                    <Accordion type="multiple" defaultValue={['dietary', 'sort']}>
+                      {/* Dietary Preferences */}
+                      <AccordionItem value="dietary">
+                        <AccordionTrigger>Dietary Preferences</AccordionTrigger>
+                        <AccordionContent>
+                          <div className="space-y-3">
+                            {dietaryTags.map((diet) => (
+                              <div key={diet.id} className="flex items-center gap-2">
+                                <Checkbox 
+                                  id={`diet-${diet.id}`}
+                                  checked={isFilterActive('dietary', diet.id)}
+                                  onCheckedChange={() => toggleFilter('dietary', diet.id)}
+                                />
+                                <Label htmlFor={`diet-${diet.id}`}>{diet.name}</Label>
+                              </div>
+                            ))}
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                      
+                      {/* Cuisine Type */}
+                      <AccordionItem value="cuisine">
+                        <AccordionTrigger>Cuisine Type</AccordionTrigger>
+                        <AccordionContent>
+                          <div className="grid grid-cols-2 gap-2">
+                            {cuisineTypes.map((cuisine) => (
+                              <div key={cuisine.id} className="flex items-center gap-2">
+                                <Checkbox 
+                                  id={`cuisine-${cuisine.id}`}
+                                  checked={isFilterActive('cuisine', cuisine.id)}
+                                  onCheckedChange={() => toggleFilter('cuisine', cuisine.id)}
+                                />
+                                <Label htmlFor={`cuisine-${cuisine.id}`}>{cuisine.name}</Label>
+                              </div>
+                            ))}
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                      
+                      {/* Allergen Free */}
+                      <AccordionItem value="allergens">
+                        <AccordionTrigger>Allergen Free</AccordionTrigger>
+                        <AccordionContent>
+                          <div className="space-y-3">
+                            {['gluten', 'dairy', 'nuts', 'soy', 'eggs', 'fish', 'sesame'].map((allergen) => (
+                              <div key={allergen} className="flex items-center gap-2">
+                                <Checkbox 
+                                  id={`allergen-${allergen}`}
+                                  checked={isFilterActive('allergenFree', allergen)}
+                                  onCheckedChange={() => toggleFilter('allergenFree', allergen)}
+                                />
+                                <Label htmlFor={`allergen-${allergen}`}>No {allergen.charAt(0).toUpperCase() + allergen.slice(1)}</Label>
+                              </div>
+                            ))}
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                      
+                      {/* Price Range */}
+                      <AccordionItem value="price">
+                        <AccordionTrigger>Price Range</AccordionTrigger>
+                        <AccordionContent>
+                          <RadioGroup 
+                            value={filters.priceRange} 
+                            onValueChange={(value) => setFilters({...filters, priceRange: value})}
+                          >
+                            <div className="flex items-center gap-2">
+                              <RadioGroupItem value="all" id="price-all" />
+                              <Label htmlFor="price-all">All Prices</Label>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <RadioGroupItem value="under-10" id="price-under-10" />
+                              <Label htmlFor="price-under-10">Under $10</Label>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <RadioGroupItem value="10-15" id="price-10-15" />
+                              <Label htmlFor="price-10-15">$10 - $15</Label>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <RadioGroupItem value="15-20" id="price-15-20" />
+                              <Label htmlFor="price-15-20">$15 - $20</Label>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <RadioGroupItem value="over-20" id="price-over-20" />
+                              <Label htmlFor="price-over-20">Over $20</Label>
+                            </div>
+                          </RadioGroup>
+                        </AccordionContent>
+                      </AccordionItem>
+                      
+                      {/* Rating */}
+                      <AccordionItem value="rating">
+                        <AccordionTrigger>Minimum Rating</AccordionTrigger>
+                        <AccordionContent>
+                          <RadioGroup 
+                            value={filters.rating?.toString() || ''} 
+                            onValueChange={(value) => setFilters({...filters, rating: value ? parseInt(value) : null})}
+                          >
+                            <div className="flex items-center gap-2">
+                              <RadioGroupItem value="" id="rating-any" />
+                              <Label htmlFor="rating-any">Any Rating</Label>
+                            </div>
+                            {[3, 3.5, 4, 4.5].map((rating) => (
+                              <div key={rating} className="flex items-center gap-2">
+                                <RadioGroupItem value={rating.toString()} id={`rating-${rating}`} />
+                                <Label htmlFor={`rating-${rating}`} className="flex items-center">
+                                  {rating}+ <Star className="h-3 w-3 fill-current text-yellow-500 ml-1" />
+                                </Label>
+                              </div>
+                            ))}
+                          </RadioGroup>
+                        </AccordionContent>
+                      </AccordionItem>
+                      
+                      {/* Sort Options */}
+                      <AccordionItem value="sort">
+                        <AccordionTrigger>Sort By</AccordionTrigger>
+                        <AccordionContent>
+                          <Select 
+                            value={filters.sortBy} 
+                            onValueChange={(value) => setFilters({...filters, sortBy: value})}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select sort order" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="default">Default</SelectItem>
+                              <SelectItem value="price-low-high">Price: Low to High</SelectItem>
+                              <SelectItem value="price-high-low">Price: High to Low</SelectItem>
+                              <SelectItem value="name-a-z">Name: A to Z</SelectItem>
+                              <SelectItem value="name-z-a">Name: Z to A</SelectItem>
+                              <SelectItem value="rating-high-low">Rating: High to Low</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
+                  </ScrollArea>
+                </div>
+                
+                <SheetFooter className="absolute bottom-0 left-0 right-0 p-6 bg-background border-t">
+                  <div className="flex w-full gap-2">
+                    <Button variant="outline" onClick={resetFilters} className="flex-1">Reset All</Button>
+                    <SheetClose asChild>
+                      <Button className="flex-1">
+                        Apply Filters
+                      </Button>
+                    </SheetClose>
+                  </div>
+                </SheetFooter>
+              </SheetContent>
+            </Sheet>
           </div>
-        </section>
+        </div>
         
-        <section className="py-6">
-          <div className="container mx-auto px-4">
-            <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0 mb-6">
-              <div className="relative">
-                <Input
-                  type="search"
-                  placeholder="Search menu items..."
-                  className="w-full md:w-64 pl-10"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-                <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                {searchTerm && (
-                  <button 
-                    className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground hover:text-foreground"
-                    onClick={() => setSearchTerm('')}
+        {/* Status Bar with active filters */}
+        {(isSearching || activeFiltersCount > 0) && (
+          <div className="bg-muted/40 rounded-lg p-3 mb-6 flex items-center justify-between">
+            <div className="flex items-center flex-wrap gap-2">
+              {isSearching && (
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  <span>Search: {searchQuery}</span>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-4 w-4 p-0 ml-1" 
+                    onClick={() => {
+                      setSearchQuery('');
+                      setIsSearching(false);
+                    }}
                   >
-                    <X size={16} />
-                  </button>
-                )}
-              </div>
-
-              <div className="flex items-center space-x-3">
-                <Sheet>
-                  <SheetTrigger asChild>
-                    <Button variant="outline" size="sm" className="flex items-center gap-1.5 h-9">
-                      <Filter size={14} />
-                      <span className="text-sm">Filters</span>
-                      {(activeDietaryTags.length > 0 || activeCuisineTypes.length > 0) && (
-                        <Badge variant="secondary" className="ml-1 h-5 min-w-5 flex items-center justify-center text-xs">
-                          {activeDietaryTags.length + activeCuisineTypes.length}
+                    <X className="h-3 w-3" />
+                  </Button>
+                </Badge>
+              )}
+              
+              {filters.dietary.map(diet => (
+                <Badge key={diet} variant="secondary" className="flex items-center gap-1">
+                  <span>{diet}</span>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-4 w-4 p-0 ml-1" 
+                    onClick={() => toggleFilter('dietary', diet)}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </Badge>
+              ))}
+              
+              {filters.cuisine.length > 0 && (
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  <span>Cuisines: {filters.cuisine.length}</span>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-4 w-4 p-0 ml-1" 
+                    onClick={() => setFilters({...filters, cuisine: []})}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </Badge>
+              )}
+              
+              {filters.allergenFree.length > 0 && (
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  <span>Allergen-free: {filters.allergenFree.length}</span>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-4 w-4 p-0 ml-1" 
+                    onClick={() => setFilters({...filters, allergenFree: []})}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </Badge>
+              )}
+              
+              {filters.priceRange !== 'all' && (
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  <span>
+                    {filters.priceRange === 'under-10' ? 'Under $10' : 
+                     filters.priceRange === '10-15' ? '$10-$15' :
+                     filters.priceRange === '15-20' ? '$15-$20' : 'Over $20'}
+                  </span>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-4 w-4 p-0 ml-1" 
+                    onClick={() => setFilters({...filters, priceRange: 'all'})}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </Badge>
+              )}
+              
+              {filters.rating && (
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  <span>{filters.rating}+ Stars</span>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-4 w-4 p-0 ml-1" 
+                    onClick={() => setFilters({...filters, rating: null})}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </Badge>
+              )}
+              
+              {filters.sortBy !== 'default' && (
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  <span>
+                    {filters.sortBy === 'price-low-high' ? 'Price: Low-High' :
+                     filters.sortBy === 'price-high-low' ? 'Price: High-Low' :
+                     filters.sortBy === 'name-a-z' ? 'Name: A-Z' :
+                     filters.sortBy === 'name-z-a' ? 'Name: Z-A' : 'Rating: High-Low'}
+                  </span>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-4 w-4 p-0 ml-1" 
+                    onClick={() => setFilters({...filters, sortBy: 'default'})}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </Badge>
+              )}
+            </div>
+            
+            <Button variant="ghost" size="sm" onClick={resetFilters}>Clear All</Button>
+          </div>
+        )}
+        
+        {/* Menu Categories */}
+        {!isSearching && (
+          <Tabs 
+            defaultValue="all" 
+            value={activeCategory} 
+            onValueChange={setActiveCategory} 
+            className="mb-8"
+          >
+            <ScrollArea className="w-full whitespace-nowrap">
+              <TabsList className="mb-4">
+                {menuCategories.map((category) => (
+                  <TabsTrigger key={category.id} value={category.id}>
+                    {category.name}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </ScrollArea>
+            
+            {menuCategories.map((category) => (
+              <TabsContent key={category.id} value={category.id} className="mt-0">
+                {/* Category content is handled by the displayedItems state */}
+              </TabsContent>
+            ))}
+          </Tabs>
+        )}
+        
+        {/* Menu Items Grid */}
+        {displayedItems.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {displayedItems.map((item) => (
+              <Card key={item.id} className="overflow-hidden h-full flex flex-col">
+                <Link to={`/menu/${item.id}`} className="group">
+                  <div className="relative h-48 overflow-hidden">
+                    <img 
+                      src={item.image} 
+                      alt={item.name} 
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                    {item.popular && (
+                      <Badge className="absolute top-2 right-2 bg-primary text-primary-foreground">
+                        Popular
+                      </Badge>
+                    )}
+                    
+                    {/* Show dietary badges */}
+                    <div className="absolute bottom-2 left-2 flex gap-1">
+                      {item.vegetarian && (
+                        <Badge variant="outline" className="bg-background/80 border-green-500 text-green-600 text-xs">
+                          Vegetarian
                         </Badge>
                       )}
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent side="right" className="w-[300px] sm:w-[350px] p-4">
-                    <div className="flex flex-col h-full">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-base font-medium">Filter Menu</h3>
-                        {(activeDietaryTags.length > 0 || activeCuisineTypes.length > 0) && (
-                          <Button variant="ghost" size="sm" className="h-7 text-xs px-2" onClick={clearAllFilters}>
-                            Clear All
-                          </Button>
-                        )}
-                      </div>
-                      
-                      <div className="flex-1 overflow-auto space-y-5">
-                        <div>
-                          <h4 className="text-sm font-medium mb-2 flex items-center gap-1.5">
-                            <Utensils size={14} />
-                            Dietary Preferences
-                          </h4>
-                          <div className="flex flex-wrap gap-1.5 mt-1.5">
-                            {dietaryTags.map(tag => (
-                              <Badge 
-                                key={tag.id}
-                                variant={activeDietaryTags.includes(tag.id) ? "default" : "outline"}
-                                className="cursor-pointer text-xs"
-                                onClick={() => toggleDietaryTag(tag.id)}
-                              >
-                                {tag.name}
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-                        
-                        <div>
-                          <h4 className="text-sm font-medium mb-2 flex items-center gap-1.5">
-                            <Utensils size={14} />
-                            Cuisine Types
-                          </h4>
-                          <div className="flex flex-wrap gap-1.5 mt-1.5">
-                            {cuisineTypes.map(cuisine => (
-                              <Badge 
-                                key={cuisine.id}
-                                variant={activeCuisineTypes.includes(cuisine.id) ? "default" : "outline"}
-                                className="cursor-pointer text-xs"
-                                onClick={() => toggleCuisineType(cuisine.id)}
-                              >
-                                {cuisine.name}
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <SheetClose asChild>
-                        <Button className="mt-4" size="sm">Apply Filters</Button>
-                      </SheetClose>
-                    </div>
-                  </SheetContent>
-                </Sheet>
-
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="flex items-center gap-1.5 h-9">
-                      <span className="text-sm">Sort</span>
-                      <ChevronDown size={14} />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
-                    <DropdownMenuLabel className="text-xs">Sort Options</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem className="text-sm">Price: Low to High</DropdownMenuItem>
-                    <DropdownMenuItem className="text-sm">Price: High to Low</DropdownMenuItem>
-                    <DropdownMenuItem className="text-sm">Name: A to Z</DropdownMenuItem>
-                    <DropdownMenuItem className="text-sm">Popularity</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </div>
-            
-            <div className="mb-6 overflow-x-auto scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent pb-1">
-              <div className="flex space-x-2 min-w-max">
-                <button
-                  onClick={() => setActiveCategory('all')}
-                  className={cn(
-                    "px-3 py-1.5 rounded-full flex items-center space-x-1.5 transition-all text-sm",
-                    activeCategory === 'all'
-                      ? "bg-primary text-primary-foreground shadow-sm"
-                      : "bg-secondary hover:bg-secondary/70 text-secondary-foreground"
-                  )}
-                >
-                  <Utensils size={14} />
-                  <span>All Items</span>
-                </button>
-                {menuCategories.filter(c => c.id !== 'all').map((category) => (
-                  <button
-                    key={category.id}
-                    onClick={() => setActiveCategory(category.id)}
-                    className={cn(
-                      "px-3 py-1.5 rounded-full flex items-center space-x-1.5 transition-all text-sm",
-                      activeCategory === category.id
-                        ? "bg-primary text-primary-foreground shadow-sm"
-                        : "bg-secondary hover:bg-secondary/70 text-secondary-foreground"
-                    )}
-                  >
-                    {getCategoryIcon(category.id)}
-                    <span>{category.name}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-            
-            {(activeDietaryTags.length > 0 || activeCuisineTypes.length > 0) && (
-              <div className="flex flex-wrap items-center gap-1.5 mb-4">
-                <span className="text-xs text-muted-foreground">Active filters:</span>
-                {activeDietaryTags.map(tag => (
-                  <Badge 
-                    key={tag}
-                    variant="secondary"
-                    className="flex items-center gap-1 text-xs py-0.5 px-2"
-                  >
-                    {dietaryTags.find(t => t.id === tag)?.name}
-                    <X 
-                      size={12} 
-                      className="cursor-pointer" 
-                      onClick={() => toggleDietaryTag(tag)}
-                    />
-                  </Badge>
-                ))}
-                {activeCuisineTypes.map(cuisine => (
-                  <Badge 
-                    key={cuisine}
-                    variant="secondary"
-                    className="flex items-center gap-1 text-xs py-0.5 px-2"
-                  >
-                    {cuisineTypes.find(c => c.id === cuisine)?.name}
-                    <X 
-                      size={12} 
-                      className="cursor-pointer" 
-                      onClick={() => toggleCuisineType(cuisine)}
-                    />
-                  </Badge>
-                ))}
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="text-xs h-6 px-2" 
-                  onClick={clearAllFilters}
-                >
-                  Clear All
-                </Button>
-              </div>
-            )}
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {filteredItems.map((item, index) => (
-                <motion.div 
-                  key={item.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: index * 0.05 }}
-                  className="bg-card rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 relative border border-border/30"
-                  onMouseEnter={() => setHoveredItem(item.id)}
-                  onMouseLeave={() => setHoveredItem(null)}
-                >
-                  <Link to={`/menu/${item.id}`} className="block">
-                    <div className="relative h-48">
-                      <BlurImage 
-                        src={item.image} 
-                        alt={item.name}
-                        className="object-cover"
-                      />
-                      <div className="absolute top-4 right-4 flex flex-col items-end gap-2">
-                        <div className="px-3 py-1 bg-primary text-primary-foreground text-xs font-medium rounded-full">
-                          {menuCategories.find(c => c.id === item.category)?.name}
-                        </div>
-                        
-                        {item.vegetarian && (
-                          <div className="px-2 py-1 bg-green-500/90 text-white text-xs font-medium rounded-full">
-                            Vegetarian
-                          </div>
-                        )}
-                        
-                        {item.vegan && (
-                          <div className="px-2 py-1 bg-green-600/90 text-white text-xs font-medium rounded-full">
-                            Vegan
-                          </div>
-                        )}
-                        
-                        {item.glutenFree && (
-                          <div className="px-2 py-1 bg-yellow-500/90 text-white text-xs font-medium rounded-full">
-                            Gluten-Free
-                          </div>
-                        )}
-                      </div>
-                      
-                      <div 
-                        className={cn(
-                          "absolute inset-0 bg-background/90 p-4 flex flex-col justify-center transition-opacity duration-300",
-                          hoveredItem === item.id ? "opacity-100" : "opacity-0 pointer-events-none"
-                        )}
-                      >
-                        <h4 className="font-bold text-lg mb-2">Nutrition Facts</h4>
-                        <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                          <div>
-                            <span className="font-medium">Calories:</span> {item.nutrition?.calories || "N/A"}
-                          </div>
-                          <div>
-                            <span className="font-medium">Protein:</span> {item.nutrition?.protein || "N/A"}
-                          </div>
-                          <div>
-                            <span className="font-medium">Carbs:</span> {item.nutrition?.carbs || "N/A"}
-                          </div>
-                          <div>
-                            <span className="font-medium">Fat:</span> {item.nutrition?.fat || "N/A"}
-                          </div>
-                        </div>
-                        
-                        {item.allergens && item.allergens.length > 0 && (
-                          <div className="mt-2 text-sm">
-                            <span className="font-medium text-yellow-600">Allergens:</span>{' '}
-                            {item.allergens.join(', ')}
-                          </div>
-                        )}
-                        
-                        <div className="mt-auto text-xs text-muted-foreground italic">
-                          Click for full details
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                  
-                  <div className="p-5">
-                    <div className="flex justify-between items-start mb-2">
-                      <Link to={`/menu/${item.id}`} className="block">
-                        <h3 className="font-bold text-lg hover:text-primary transition-colors">{item.name}</h3>
-                      </Link>
-                      <span className="font-semibold text-primary">{item.price}</span>
-                    </div>
-                    
-                    <p className="text-sm text-muted-foreground mb-3">{item.description}</p>
-                    
-                    <div className="flex items-center justify-between mb-4">
-                      {item.preparationTime && (
-                        <div className="flex items-center text-xs text-muted-foreground">
-                          <Clock size={14} className="mr-1" />
-                          <span>{item.preparationTime}</span>
-                        </div>
+                      {item.vegan && (
+                        <Badge variant="outline" className="bg-background/80 border-green-600 text-green-700 text-xs">
+                          Vegan
+                        </Badge>
                       )}
-                      
-                      {item.rating && (
-                        <div className="flex items-center">
-                          <div className="flex">
-                            {[...Array(5)].map((_, i) => (
-                              <svg 
-                                key={i} 
-                                className={`w-3.5 h-3.5 ${i < Math.floor(item.rating as number) ? 'text-yellow-400' : 'text-gray-300'}`} 
-                                aria-hidden="true" 
-                                xmlns="http://www.w3.org/2000/svg" 
-                                fill="currentColor" 
-                                viewBox="0 0 22 20"
-                              >
-                                <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z"/>
-                              </svg>
-                            ))}
-                          </div>
-                          <span className="text-xs ml-1 text-muted-foreground">{item.rating}</span>
-                        </div>
+                      {item.glutenFree && (
+                        <Badge variant="outline" className="bg-background/80 border-amber-500 text-amber-600 text-xs">
+                          GF
+                        </Badge>
                       )}
-                    </div>
-                    
-                    <div className="flex space-x-2">
-                      <button 
-                        onClick={() => handleAddToOrder(item)}
-                        className="flex-1 px-4 py-2 border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-colors duration-200 rounded-md text-sm font-medium"
-                      >
-                        Add to Order
-                      </button>
-                      <button
-                        onClick={() => handleFavoriteToggle(item)}
-                        className={cn(
-                          "p-2 rounded-md border",
-                          isFavoriteMeal(item.id)
-                            ? "bg-primary/10 border-primary text-primary"
-                            : "border-muted-foreground/30 text-muted-foreground hover:border-primary hover:text-primary"
-                        )}
-                        aria-label={isFavoriteMeal(item.id) ? "Remove from favorites" : "Add to favorites"}
-                      >
-                        <Heart size={16} className={isFavoriteMeal(item.id) ? "fill-primary" : ""} />
-                      </button>
                     </div>
                   </div>
-                </motion.div>
-              ))}
-            </div>
-            
-            {filteredItems.length === 0 && (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">No menu items found matching your criteria.</p>
-                <Button 
-                  variant="outline" 
-                  className="mt-4"
-                  onClick={clearAllFilters}
-                >
-                  Clear All Filters
-                </Button>
-              </div>
-            )}
+                </Link>
+                
+                <CardContent className="flex-1 flex flex-col p-4">
+                  <div className="mb-1 flex justify-between items-start">
+                    <Link to={`/menu/${item.id}`} className="group">
+                      <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">
+                        {item.name}
+                      </h3>
+                    </Link>
+                    
+                    {/* Show rating if available */}
+                    {item.rating && (
+                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                        <Star className="h-3.5 w-3.5 fill-yellow-500 text-yellow-500" />
+                        <span>{item.rating}</span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <p className="text-sm text-muted-foreground line-clamp-2 mb-2 flex-grow">
+                    {item.description}
+                  </p>
+                  
+                  {/* Tags row */}
+                  {item.tags && item.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-3">
+                      {item.tags.slice(0, 2).map((tag) => (
+                        <Badge key={tag} variant="outline" className="text-xs">
+                          {tag}
+                        </Badge>
+                      ))}
+                      {item.tags.length > 2 && (
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Badge variant="outline" className="text-xs cursor-pointer">
+                              +{item.tags.length - 2}
+                            </Badge>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-2">
+                            <div className="flex flex-wrap gap-1">
+                              {item.tags.slice(2).map((tag) => (
+                                <Badge key={tag} variant="outline" className="text-xs">
+                                  {tag}
+                                </Badge>
+                              ))}
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* Price and Add button */}
+                  <div className="flex items-center justify-between mt-auto pt-3 border-t border-border">
+                    <div>
+                      {item.hasDiscount && item.discountPrice ? (
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg font-semibold">{item.discountPrice}</span>
+                          <span className="text-sm text-muted-foreground line-through">
+                            {item.price}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-lg font-semibold">{item.price}</span>
+                      )}
+                    </div>
+                    
+                    <Button
+                      size="sm"
+                      onClick={() => addItem({
+                        id: item.id,
+                        name: item.name,
+                        price: item.hasDiscount && item.discountPrice ? item.discountPrice : item.price,
+                        image: item.image,
+                        category: item.category,
+                        hasDiscount: item.hasDiscount
+                      })}
+                    >
+                      <ShoppingCart className="h-4 w-4 mr-1" />
+                      Add
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
-        </section>
+        ) : (
+          <div className="text-center py-16">
+            <h3 className="text-lg font-medium mb-2">No matching items found</h3>
+            <p className="text-muted-foreground mb-6">Try adjusting your filters or search criteria</p>
+            <Button onClick={resetFilters}>Reset Filters</Button>
+          </div>
+        )}
       </main>
       
       <Footer />

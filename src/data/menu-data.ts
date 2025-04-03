@@ -1,4 +1,3 @@
-
 // Menu data for the restaurant application
 
 export interface MenuItem {
@@ -30,6 +29,9 @@ export interface MenuItem {
   hasDiscount?: boolean;
   discountPrice?: string;
 }
+
+// Import additional menu items
+import { additionalMenuItems } from './additional-menu-items';
 
 export const menuItems: MenuItem[] = [
   // Breakfast
@@ -1014,7 +1016,6 @@ export const menuItems: MenuItem[] = [
     cuisineType: "american",
     vegetarian: true,
     vegan: true,
-    glutenFree: true,
     nutrition: {
       calories: 340,
       protein: "4g",
@@ -1268,6 +1269,9 @@ export const menuItems: MenuItem[] = [
   }
 ];
 
+// Add additional menu items
+export const allMenuItems = [...menuItems, ...additionalMenuItems];
+
 // New category definitions
 export const menuCategories = [
   { id: 'all', name: 'All Items' },
@@ -1308,12 +1312,12 @@ export const cuisineTypes = [
   { id: 'international', name: 'International' }
 ];
 
-// All menu items for easier access
-export const allMenuItems = menuItems;
-
 // Function to get meals by category
 export const getMealsByCategory = (category: string) => {
-  return menuItems.filter(item => item.category === category);
+  if (category === 'all') {
+    return allMenuItems;
+  }
+  return allMenuItems.filter(item => item.category === category);
 };
 
 // Function to get all categories
@@ -1323,33 +1327,33 @@ export const getAllCategories = () => {
 
 // Function to get popular meals
 export const getPopularMeals = () => {
-  return menuItems.filter(item => item.popular);
+  return allMenuItems.filter(item => item.popular);
 };
 
 // Function to get meal by ID
 export const getMealById = (id: string) => {
-  return menuItems.find(item => item.id === id);
+  return allMenuItems.find(item => item.id === id);
 };
 
 // Function explicitly for DishDetails.tsx
 export const getMenuItemById = (id: string) => {
-  return menuItems.find(item => item.id === id);
+  return allMenuItems.find(item => item.id === id);
 };
 
 // Function to get all meals
 export const getAllMeals = () => {
-  return menuItems;
+  return allMenuItems;
 };
 
 // Function to get deals
 export const getDeals = () => {
-  return menuItems.filter(item => item.hasDiscount);
+  return allMenuItems.filter(item => item.hasDiscount);
 };
 
 // Function to search meals by name or description
 export const searchMeals = (query: string) => {
   const lowerQuery = query.toLowerCase();
-  return menuItems.filter(
+  return allMenuItems.filter(
     item => 
       item.name.toLowerCase().includes(lowerQuery) || 
       item.description.toLowerCase().includes(lowerQuery) ||
