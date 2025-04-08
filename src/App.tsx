@@ -55,7 +55,7 @@ const ScrollToTop = () => {
 // Protected route wrapper
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   const { isLoading, user } = useAuth();
-  const navigate = useLocation();
+  const location = useLocation();
   
   if (isLoading) {
     // Loading state with a nice spinner
@@ -70,7 +70,7 @@ const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   }
   
   if (!user) {
-    return <Navigate to="/sign-in" state={{ from: navigate.pathname }} replace />;
+    return <Navigate to="/sign-in" state={{ from: location.pathname }} replace />;
   }
   
   return children;
@@ -131,8 +131,16 @@ const App = () => {
                       <Route path="/sign-up" element={<SignUp />} />
                       <Route path="/forgot-password" element={<ForgotPassword />} />
                       <Route path="/reset-password" element={<ResetPassword />} />
-                      <Route path="/checkout" element={<Checkout />} />
-                      <Route path="/checkout-confirmation" element={<CheckoutConfirmation />} />
+                      <Route path="/checkout" element={
+                        <ProtectedRoute>
+                          <Checkout />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/checkout-confirmation" element={
+                        <ProtectedRoute>
+                          <CheckoutConfirmation />
+                        </ProtectedRoute>
+                      } />
                       <Route path="/favorite-locations" element={
                         <ProtectedRoute>
                           <FavoriteLocations />

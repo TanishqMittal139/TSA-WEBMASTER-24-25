@@ -74,28 +74,20 @@ const Reservations = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState("new");
   const [myReservations, setMyReservations] = useState<ReservationData[]>([]);
-  const { user, profile, isLoading, session } = useAuth();
-  const [authenticated, setAuthenticated] = useState<boolean | null>(null);
+  const { user, profile, isLoading } = useAuth();
   
+  // Load user reservations when component mounts or when auth state changes
   useEffect(() => {
     const checkAuth = async () => {
-      setAuthenticated(!!user);
-      
-      if (!user) {
-        toast({
-          title: "Authentication required",
-          description: "Please sign in to make or view reservations",
-          variant: "destructive",
-        });
-        navigate('/sign-in');
-        return;
+      if (!isLoading) {
+        if (user) {
+          await loadUserReservations();
+        }
       }
-      
-      loadUserReservations();
     };
     
     checkAuth();
-  }, [user, navigate]);
+  }, [user, isLoading]);
 
   const loadUserReservations = async () => {
     if (!user) {
@@ -133,6 +125,7 @@ const Reservations = () => {
     },
   });
   
+  // Update form values when profile loads or changes
   useEffect(() => {
     if (profile) {
       form.setValue('name', profile.name || '');
@@ -148,7 +141,7 @@ const Reservations = () => {
         description: "Please sign in to make a reservation",
         variant: "destructive",
       });
-      navigate('/sign-in');
+      navigate('/sign-in', { state: { from: '/reservations' } });
       return;
     }
     
@@ -176,6 +169,7 @@ const Reservations = () => {
           description: `Your table for ${values.guests} is booked for ${format(values.date, 'MMMM d, yyyy')} at ${values.time}.`,
         });
         
+        // Refresh the list of reservations
         await loadUserReservations();
         setActiveTab("my");
       } else {
@@ -208,6 +202,7 @@ const Reservations = () => {
           description: "Your reservation has been successfully cancelled.",
         });
         
+        // Refresh the list of reservations
         await loadUserReservations();
       } else {
         toast({
@@ -226,6 +221,7 @@ const Reservations = () => {
     }
   };
 
+  // Show loading state while authentication is being checked
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -233,7 +229,10 @@ const Reservations = () => {
         <main className="flex-grow pt-20">
           <div className="container mx-auto px-4 py-12">
             <div className="max-w-3xl mx-auto text-center">
-              <p>Loading...</p>
+              <div className="flex justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+              </div>
+              <p className="mt-4">Loading...</p>
             </div>
           </div>
         </main>
@@ -261,7 +260,7 @@ const Reservations = () => {
                 <ShieldAlert className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <h2 className="text-xl font-semibold mb-2">Authentication Required</h2>
                 <p className="mb-6">Please sign in to make or view reservations.</p>
-                <Button onClick={() => navigate('/sign-in')} className="flex items-center mx-auto gap-2">
+                <Button onClick={() => navigate('/sign-in', { state: { from: '/reservations' } })} className="flex items-center mx-auto gap-2">
                   <Lock size={16} />
                   Sign In
                 </Button>

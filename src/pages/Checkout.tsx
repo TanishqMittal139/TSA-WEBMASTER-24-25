@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -30,7 +31,7 @@ const formSchema = z.object({
 });
 
 const Checkout = () => {
-  const { items, totalAmount, clearCart, checkAuthBeforeCheckout } = useCart();
+  const { items, totalAmount, clearCart } = useCart();
   const { user, profile, isLoading } = useAuth();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -62,9 +63,9 @@ const Checkout = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      fullName: profile?.name || '',
-      email: profile?.email || '',
-      address: profile?.address || '',
+      fullName: '',
+      email: '',
+      address: '',
       city: '',
       state: '',
       zipCode: '',
@@ -85,7 +86,13 @@ const Checkout = () => {
   }, [profile, form]);
   
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    if (!checkAuthBeforeCheckout()) {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to proceed with checkout.",
+        variant: "destructive",
+      });
+      navigate('/sign-in', { state: { from: '/checkout' } });
       return;
     }
     
@@ -100,6 +107,15 @@ const Checkout = () => {
       
       // Store confirmation in session storage
       sessionStorage.setItem('orderConfirmed', 'true');
+      sessionStorage.setItem('orderDetails', JSON.stringify({
+        date: new Date().toISOString(),
+        total: (subtotal + tax + deliveryFee).toFixed(2),
+        items: items.map(item => ({
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price
+        }))
+      }));
       
       toast({
         title: "Order Placed Successfully!",
@@ -459,7 +475,7 @@ const Checkout = () => {
                       <span>${subtotal.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Tax</span>
+                      <span className="text-muted-foreground">Tax (8%)</span>
                       <span>${tax.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">

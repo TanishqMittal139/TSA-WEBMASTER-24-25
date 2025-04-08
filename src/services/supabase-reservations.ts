@@ -20,6 +20,43 @@ export type ReservationData = {
 // Type for reservation input - we don't need to include the user_id in the input
 export type ReservationInput = Omit<ReservationData, 'id' | 'user_id' | 'created_at'>;
 
+// Ensure user profile exists before creating a reservation
+const ensureUserProfile = async (userId: string, email: string, name: string) => {
+  try {
+    // Check if profile exists
+    const { data: existingProfile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', userId)
+      .single();
+    
+    // If profile already exists, return
+    if (existingProfile) return true;
+
+    console.log("Creating new profile for user:", userId);
+    
+    // Create new profile
+    const { error } = await supabase
+      .from('profiles')
+      .insert({
+        id: userId,
+        email: email,
+        name: name
+      });
+      
+    if (error) {
+      console.error("Error creating user profile:", error);
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error("Error ensuring user profile:", error);
+    // Continue execution - don't block reservation creation if profile creation fails
+    return false;
+  }
+};
+
 /**
  * Create a new reservation
  */
@@ -35,9 +72,18 @@ export const createReservation = async (reservationData: ReservationInput) => {
       };
     }
     
-    // Check if user profile exists and create one if it doesn't
-    await ensureUserProfile(session.user.id, reservationData.email, reservationData.name);
+    // Ensure user profile exists
+    const profileCreated = await ensureUserProfile(
+      session.user.id, 
+      reservationData.email, 
+      reservationData.name
+    );
+    
+    if (!profileCreated) {
+      console.log("Creating profile for reservation");
+    }
 
+    // Create the reservation
     const { data, error } = await supabase
       .from('reservations')
       .insert({
@@ -81,33 +127,6 @@ export const createReservation = async (reservationData: ReservationInput) => {
       error: { message: error.message || "An unexpected error occurred" },
       data: null
     };
-  }
-};
-
-// Ensure the user has a profile
-const ensureUserProfile = async (userId: string, email: string, name: string) => {
-  try {
-    // Check if profile exists
-    const { data: existingProfile } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('id', userId)
-      .single();
-    
-    // If profile already exists, return
-    if (existingProfile) return;
-
-    // Create new profile
-    await supabase
-      .from('profiles')
-      .insert({
-        id: userId,
-        email: email,
-        name: name
-      });
-  } catch (error) {
-    console.error("Error ensuring user profile:", error);
-    // Continue execution - don't block reservation creation if profile creation fails
   }
 };
 

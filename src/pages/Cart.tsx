@@ -1,39 +1,41 @@
+
 import React from 'react';
 import Navbar from '../components/ui/navbar';
 import Footer from '../components/ui/footer';
 import { useCart } from '../context/CartContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { X, Minus, Plus, ShoppingBag, ArrowLeft, ShoppingCart } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import BlurImage from '../components/ui/blur-image';
 import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
 
 const Cart: React.FC = () => {
-  const { items, removeItem, updateQuantity, clearCart, itemCount } = useCart();
+  const { items, removeItem, updateQuantity, clearCart, itemCount, totalAmount, checkAuthBeforeCheckout } = useCart();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   
-  // Calculate subtotal
-  const subtotal = items.reduce((sum, item) => {
-    const price = parseFloat(item.price.replace('$', ''));
-    return sum + (price * item.quantity);
-  }, 0);
+  // Calculate tax and delivery fee
+  const tax = totalAmount * 0.08;
+  const deliveryFee = 3.99;
+  const finalTotal = totalAmount + tax + deliveryFee;
   
   // Handle checkout
-  const handleCheckout = () => {
-    toast({
-      title: "Order Placed",
-      description: "Your order has been placed successfully. Thank you for your purchase!",
-      duration: 3000,
-    });
-    clearCart();
-  };
-  
-  const navigate = useNavigate();
-
-  // Find the "Proceed to Checkout" button and update the onClick handler
   const handleProceedToCheckout = () => {
-    if (useCart().checkAuthBeforeCheckout()) {
+    if (items.length === 0) {
+      toast({
+        title: "Empty Cart",
+        description: "Add some items to your cart before checking out.",
+        variant: "destructive",
+        duration: 3000,
+      });
+      return;
+    }
+    
+    if (checkAuthBeforeCheckout()) {
       navigate('/checkout');
+    } else {
+      navigate('/sign-in', { state: { from: '/checkout' } });
     }
   };
 
@@ -92,6 +94,7 @@ const Cart: React.FC = () => {
                               <button
                                 onClick={() => updateQuantity(item.id, item.quantity - 1)}
                                 className="p-1 rounded-md border border-input hover:bg-muted transition-colors"
+                                aria-label="Decrease quantity"
                               >
                                 <Minus size={14} />
                               </button>
@@ -99,6 +102,7 @@ const Cart: React.FC = () => {
                               <button
                                 onClick={() => updateQuantity(item.id, item.quantity + 1)}
                                 className="p-1 rounded-md border border-input hover:bg-muted transition-colors"
+                                aria-label="Increase quantity"
                               >
                                 <Plus size={14} />
                               </button>
@@ -107,6 +111,7 @@ const Cart: React.FC = () => {
                             <button
                               onClick={() => removeItem(item.id)}
                               className="text-muted-foreground hover:text-destructive transition-colors"
+                              aria-label="Remove item"
                             >
                               <X size={16} />
                             </button>
@@ -139,21 +144,21 @@ const Cart: React.FC = () => {
                     <div className="space-y-3">
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Subtotal</span>
-                        <span>${subtotal.toFixed(2)}</span>
+                        <span>${totalAmount.toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">Tax</span>
-                        <span>${(subtotal * 0.08).toFixed(2)}</span>
+                        <span className="text-muted-foreground">Tax (8%)</span>
+                        <span>${tax.toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Delivery</span>
-                        <span>$3.99</span>
+                        <span>${deliveryFee.toFixed(2)}</span>
                       </div>
                       
                       <div className="border-t border-border my-3 pt-3">
-                        <div className="flex justify-between font-semibold">
+                        <div className="flex justify-between font-semibold text-lg">
                           <span>Total</span>
-                          <span>${(subtotal + (subtotal * 0.08) + 3.99).toFixed(2)}</span>
+                          <span>${finalTotal.toFixed(2)}</span>
                         </div>
                       </div>
                     </div>
@@ -166,6 +171,14 @@ const Cart: React.FC = () => {
                       <ShoppingCart className="mr-2 h-5 w-5" />
                       Proceed to Checkout
                     </Button>
+                    
+                    {!user && (
+                      <div className="mt-4 text-sm text-center">
+                        <Link to="/sign-in" className="text-primary hover:underline">
+                          Sign in
+                        </Link> to earn rewards points with your purchase!
+                      </div>
+                    )}
                     
                     <div className="mt-4 text-xs text-muted-foreground text-center">
                       By proceeding, you agree to our Terms of Service and Privacy Policy.

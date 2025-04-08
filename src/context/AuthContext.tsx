@@ -1,7 +1,8 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { getUserProfile, UserProfile } from '@/services/supabase-auth';
+import { getUserProfile, UserProfile, updateUserProfile } from '@/services/supabase-auth';
 import { toast } from '@/components/ui/use-toast';
 
 type AuthContextType = {
@@ -11,6 +12,7 @@ type AuthContextType = {
   isLoading: boolean;
   refreshProfile: () => Promise<void>;
   signOut: () => Promise<void>;
+  updateProfile: (data: Partial<UserProfile>) => Promise<{success: boolean; message: string; user?: UserProfile}>;
 };
 
 const AuthContext = createContext<AuthContextType>({
@@ -20,6 +22,7 @@ const AuthContext = createContext<AuthContextType>({
   isLoading: true,
   refreshProfile: async () => {},
   signOut: async () => {},
+  updateProfile: async () => ({ success: false, message: 'Not implemented' }),
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -88,6 +91,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const updateProfile = async (profileData: Partial<UserProfile>) => {
+    const result = await updateUserProfile(profileData);
+    if (result.success && result.user) {
+      setProfile(result.user);
+    }
+    return result;
+  };
+
   const signOut = async () => {
     try {
       await supabase.auth.signOut();
@@ -115,6 +126,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isLoading,
     refreshProfile,
     signOut,
+    updateProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
