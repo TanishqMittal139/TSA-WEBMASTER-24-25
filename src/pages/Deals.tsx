@@ -98,14 +98,14 @@ const deals: DealData[] = [
 const Deals: React.FC = () => {
   const [activeTab, setActiveTab] = useState("current");
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   
   // Filter deals based on tab
   const currentDeals = deals;
   const upcomingDeals: DealData[] = []; // Empty for now, could be populated from API in the future
   
   const handleActivateDeal = (deal: DealData) => {
-    if (!user) {
+    if (!user || !session) {
       toast({
         title: "Sign in Required",
         description: "Please sign in to use this deal",

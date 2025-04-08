@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Navbar from '../components/ui/navbar';
@@ -9,7 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Check, ShoppingCart, ArrowLeft, Tag } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
-import { isAuthenticated } from '@/services/auth';
+import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
 import { DealData } from './Deals';
 
@@ -104,13 +103,14 @@ const DealUse: React.FC = () => {
   const [selectedItems, setSelectedItems] = useState<any[]>([]);
   const [filteredItems, setFilteredItems] = useState<any[]>([]);
   const { addItem, items } = useCart();
+  const { user, session } = useAuth();
   
   useEffect(() => {
     // Scroll to top on component mount
     window.scrollTo(0, 0);
     
     // Redirect if not authenticated
-    if (!isAuthenticated()) {
+    if (!user || !session) {
       toast({
         title: "Authentication Required",
         description: "Please sign in to use deals",
@@ -147,7 +147,7 @@ const DealUse: React.FC = () => {
         parsedDeal.items?.includes(item.id)
       ));
     }
-  }, [dealId, navigate]);
+  }, [dealId, navigate, user, session]);
   
   const handleItemSelect = (item: any) => {
     const exists = selectedItems.find(i => i.id === item.id);
