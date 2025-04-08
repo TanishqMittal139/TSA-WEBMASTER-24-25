@@ -50,7 +50,7 @@ const Menu = () => {
 
   const filterMeals = () => {
     // Start with category filter
-    let filteredMeals = getMealsByCategory(activeCategory);
+    let filteredMeals = activeCategory === 'all' ? getAllMeals() : getMealsByCategory(activeCategory);
     
     // Apply search term filter if any
     if (searchTerm) {
@@ -169,12 +169,101 @@ const Menu = () => {
         {/* Category tabs */}
         <Tabs value={activeCategory} onValueChange={handleCategoryChange} className="mb-8">
           <TabsList className="mb-8 flex flex-wrap">
+            <TabsTrigger value="all" className="px-6">
+              All
+            </TabsTrigger>
             {menuCategories.map(category => (
               <TabsTrigger key={category.id} value={category.id} className="px-6">
                 {category.name}
               </TabsTrigger>
             ))}
           </TabsList>
+          
+          <TabsContent value="all">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {displayedMeals.map(meal => (
+                <NutritionCard 
+                  key={meal.id}
+                  nutrition={meal.nutrition || {calories: 0, protein: 0, carbs: 0, fat: 0}}
+                  name={meal.name}
+                >
+                  <Link to={`/menu/${meal.id}`} className="block h-full">
+                    <Card className="h-full overflow-hidden hover:shadow-lg transition-all">
+                      <div className="aspect-w-16 aspect-h-9 relative h-48">
+                        <img
+                          src={meal.image}
+                          alt={meal.name}
+                          className="w-full h-full object-cover"
+                        />
+                        {meal.hasDiscount && (
+                          <div className="absolute top-2 right-2">
+                            <Badge className="bg-red-500 text-white">
+                              Special Offer
+                            </Badge>
+                          </div>
+                        )}
+                      </div>
+                      <CardContent className="p-4">
+                        <div className="flex justify-between items-start">
+                          <h3 className="text-lg font-semibold text-foreground">{meal.name}</h3>
+                          <div>
+                            {meal.hasDiscount ? (
+                              <div className="text-right">
+                                <span className="line-through text-muted-foreground text-sm mr-2">
+                                  {meal.price}
+                                </span>
+                                <span className="text-red-500 font-semibold">
+                                  {meal.discountPrice}
+                                </span>
+                              </div>
+                            ) : (
+                              <span className="font-semibold text-foreground">{meal.price}</span>
+                            )}
+                          </div>
+                        </div>
+                        
+                        <p className="text-muted-foreground text-sm mt-2 mb-3 line-clamp-2">
+                          {meal.description}
+                        </p>
+                        
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {meal.vegetarian && (
+                            <Badge variant="outline" className="text-xs border-green-500 text-green-600">
+                              Vegetarian
+                            </Badge>
+                          )}
+                          {meal.vegan && (
+                            <Badge variant="outline" className="text-xs border-green-600 text-green-700">
+                              Vegan
+                            </Badge>
+                          )}
+                          {meal.glutenFree && (
+                            <Badge variant="outline" className="text-xs border-amber-500 text-amber-600">
+                              Gluten-Free
+                            </Badge>
+                          )}
+                          {meal.cuisineType && (
+                            <Badge variant="secondary" className="text-xs">
+                              {meal.cuisineType.charAt(0).toUpperCase() + meal.cuisineType.slice(1)}
+                            </Badge>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                </NutritionCard>
+              ))}
+            </div>
+            
+            {displayedMeals.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">No items match your current filters.</p>
+                <Button variant="outline" onClick={clearFilters} className="mt-4">
+                  Clear Filters
+                </Button>
+              </div>
+            )}
+          </TabsContent>
           
           {menuCategories.map(category => (
             <TabsContent key={category.id} value={category.id}>

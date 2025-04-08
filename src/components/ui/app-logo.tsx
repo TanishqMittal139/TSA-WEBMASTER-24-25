@@ -12,7 +12,7 @@ const AppLogo: React.FC<AppLogoProps> = ({ size = 24, color, className = "" }) =
   return (
     <div className={`flex items-center ${className}`}>
       <Salad size={size} className={`text-primary ${color ? color : ""}`} />
-      <span className="ml-2 font-bold text-lg">TastyHub</span>
+      <span className="ml-2 font-bold text-lg text-foreground">TastyHub</span>
     </div>
   );
 };
