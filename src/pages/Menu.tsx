@@ -109,7 +109,7 @@ const Menu = () => {
   };
   
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gradient-to-b from-background to-background/70">
       <Navbar />
       
       <main className="container mx-auto px-4 py-12 pt-24">
@@ -130,11 +130,13 @@ const Menu = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <Select value={dietaryFilter} onValueChange={handleDietaryFilterChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Dietary Preference" />
-                </SelectTrigger>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Dietary Preference" />
+                  </SelectTrigger>
+                </FormControl>
                 <SelectContent>
-                  <SelectItem value="">All Dietary Preferences</SelectItem>
+                  <SelectItem value="all">All Dietary Preferences</SelectItem>
                   {dietaryTags.map(tag => (
                     <SelectItem key={tag.id} value={tag.id}>
                       {tag.name}
@@ -146,11 +148,13 @@ const Menu = () => {
             
             <div>
               <Select value={cuisineFilter} onValueChange={handleCuisineFilterChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Cuisine Type" />
-                </SelectTrigger>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Cuisine Type" />
+                  </SelectTrigger>
+                </FormControl>
                 <SelectContent>
-                  <SelectItem value="">All Cuisines</SelectItem>
+                  <SelectItem value="all">All Cuisines</SelectItem>
                   {cuisineTypes.map(cuisine => (
                     <SelectItem key={cuisine.id} value={cuisine.id}>
                       {cuisine.name}

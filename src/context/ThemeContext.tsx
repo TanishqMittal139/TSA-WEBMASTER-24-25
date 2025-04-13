@@ -26,9 +26,15 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     // Update document root class for Tailwind dark mode
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
+      document.body.style.background = 'linear-gradient(225deg, #1a1f2c 0%, #2d3748 100%)';
     } else {
       document.documentElement.classList.remove('dark');
+      document.body.style.background = 'linear-gradient(225deg, #FFE29F 0%, #FFA99F 48%, #FF719A 100%)';
     }
+    
+    // Apply a subtle pattern to the body
+    document.body.style.backgroundSize = 'cover';
+    document.body.style.backgroundAttachment = 'fixed';
   }, [theme]);
   
   const toggleTheme = () => {

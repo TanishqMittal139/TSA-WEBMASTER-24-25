@@ -200,11 +200,18 @@ export const cancelReservation = async (reservationId: string) => {
       .eq('id', reservationId)
       .eq('user_id', session.user.id) // Ensure the user owns the reservation
       .select()
-      .single();
+      .maybeSingle(); // Use maybeSingle instead of single to avoid errors when no data is returned
       
     if (error) {
       console.error("Error cancelling reservation:", error);
       return { error, data: null };
+    }
+    
+    if (!data) {
+      return { 
+        error: { message: "Reservation not found or you don't have permission to cancel it" },
+        data: null 
+      };
     }
     
     // Map database column names to our expected format
