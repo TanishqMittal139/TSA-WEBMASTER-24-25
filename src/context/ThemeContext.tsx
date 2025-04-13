@@ -26,15 +26,70 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     // Update document root class for Tailwind dark mode
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
-      document.body.style.background = 'linear-gradient(225deg, #1a1f2c 0%, #2d3748 100%)';
+      document.body.style.background = 'linear-gradient(225deg, #0f172a 0%, #1e293b 100%)';
+      document.documentElement.style.setProperty('--primary-color', '#22c55e');
     } else {
       document.documentElement.classList.remove('dark');
-      document.body.style.background = 'linear-gradient(225deg, #FFE29F 0%, #FFA99F 48%, #FF719A 100%)';
+      document.body.style.background = 'linear-gradient(225deg, #f8fafc 0%, #e0f2fe 100%)';
+      document.documentElement.style.setProperty('--primary-color', '#16a34a');
     }
     
-    // Apply a subtle pattern to the body
+    // Apply a subtle pattern and animation to the body
     document.body.style.backgroundSize = 'cover';
     document.body.style.backgroundAttachment = 'fixed';
+    
+    // Create animated background elements
+    const createBackgroundElements = () => {
+      // Clean up any existing elements
+      const existingElements = document.querySelectorAll('.background-element');
+      existingElements.forEach(el => el.remove());
+      
+      const container = document.createElement('div');
+      container.className = 'fixed inset-0 overflow-hidden pointer-events-none z-[-1]';
+      
+      // Create floating elements
+      for (let i = 0; i < 15; i++) {
+        const element = document.createElement('div');
+        const size = Math.random() * 100 + 50;
+        const posX = Math.random() * 100;
+        const posY = Math.random() * 100;
+        const duration = Math.random() * 30 + 20;
+        const delay = Math.random() * 5;
+        
+        element.className = 'background-element absolute rounded-full blur-3xl opacity-10';
+        element.style.width = `${size}px`;
+        element.style.height = `${size}px`;
+        element.style.left = `${posX}%`;
+        element.style.top = `${posY}%`;
+        element.style.backgroundColor = theme === 'dark' ? '#22c55e' : '#16a34a';
+        element.style.animation = `float ${duration}s ease-in-out ${delay}s infinite alternate`;
+        
+        container.appendChild(element);
+      }
+      
+      document.body.appendChild(container);
+      
+      // Add global keyframes for floating animation if it doesn't exist
+      if (!document.querySelector('#background-keyframes')) {
+        const style = document.createElement('style');
+        style.id = 'background-keyframes';
+        style.textContent = `
+          @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(30px, -30px) scale(1.1); }
+          }
+        `;
+        document.head.appendChild(style);
+      }
+    };
+    
+    createBackgroundElements();
+    
+    // Clean up function
+    return () => {
+      const existingElements = document.querySelectorAll('.background-element');
+      existingElements.forEach(el => el.remove());
+    };
   }, [theme]);
   
   const toggleTheme = () => {

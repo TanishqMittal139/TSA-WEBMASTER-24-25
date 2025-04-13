@@ -34,6 +34,17 @@
     --ring: 142 76% 36%;
 
     --radius: 0.75rem;
+    
+    /* Futuristic colors */
+    --primary-color: #16a34a;
+    --glow-color: rgba(22, 163, 74, 0.5);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --glass-bg: rgba(255, 255, 255, 0.1);
+    --dark-glass-bg: rgba(15, 23, 42, 0.3);
+    --dark-glass-border: rgba(255, 255, 255, 0.1);
+    
+    /* Font settings */
+    font-family: 'Inter', system-ui, sans-serif;
   }
 
   .dark {
@@ -53,7 +64,7 @@
     --secondary-foreground: 0 0% 98%;
 
     --muted: 240 4% 16%;
-    --muted-foreground: 240 5% 80%; /* Increased brightness for better visibility */
+    --muted-foreground: 240 5% 80%; 
 
     --accent: 142 70% 10%;
     --accent-foreground: 0 0% 98%;
@@ -64,6 +75,17 @@
     --border: 240 4% 16%;
     --input: 240 4% 16%;
     --ring: 142 76% 36%;
+    
+    /* Futuristic colors for dark mode */
+    --primary-color: #22c55e;
+    --glow-color: rgba(34, 197, 94, 0.5);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-bg: rgba(15, 23, 42, 0.3);
+  }
+  
+  /* Apply custom fonts to headings */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', sans-serif;
   }
 }
 
@@ -75,18 +97,47 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+    overflow-x: hidden;
+  }
+  
+  a {
+    @apply transition-colors;
   }
 }
 
 @layer components {
+  /* Enhanced glass morphism */
   .glass-card {
-    @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-lg;
+    @apply bg-white/10 backdrop-blur-lg border border-white/20 shadow-lg relative overflow-hidden transition-all duration-300;
   }
   
-  .glass-card-dark {
-    @apply bg-black/50 backdrop-blur-md border border-white/10 shadow-lg;
+  .glass-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      225deg,
+      transparent 20%,
+      rgba(255, 255, 255, 0.05) 30%,
+      transparent 60%
+    );
+    pointer-events: none;
   }
   
+  .dark .glass-card {
+    @apply bg-black/20 border-white/10;
+  }
+  
+  .dark .glass-card::after {
+    background: linear-gradient(
+      225deg,
+      transparent 20%,
+      rgba(255, 255, 255, 0.05) 30%,
+      transparent 60%
+    );
+  }
+  
+  /* Animated components */
   .hover-lift {
     @apply transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg;
   }
@@ -108,21 +159,46 @@
   }
   
   .hover-scale {
-    @apply transition-transform duration-200 hover:scale-105;
+    @apply transition-transform duration-300 hover:scale-105;
   }
   
+  /* Enhanced button styles */
   .button-primary {
-    @apply bg-primary text-primary-foreground hover:bg-primary/90 px-6 py-3 rounded-full font-medium transition-all duration-200 shadow-md hover:shadow-lg active:scale-95;
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 px-6 py-3 rounded-full font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95 relative overflow-hidden;
+  }
+  
+  .button-primary::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(
+      circle,
+      transparent 30%,
+      rgba(255, 255, 255, 0.1) 30%,
+      transparent 70%
+    );
+    transform: scale(0);
+    opacity: 0;
+    transition: transform 0.5s, opacity 0.5s;
+  }
+  
+  .button-primary:hover::after {
+    transform: scale(1);
+    opacity: 1;
   }
   
   .button-secondary {
-    @apply bg-secondary text-secondary-foreground hover:bg-secondary/80 px-6 py-3 rounded-full font-medium transition-all duration-200 shadow-sm hover:shadow-md active:scale-95;
+    @apply bg-secondary text-secondary-foreground hover:bg-secondary/80 px-6 py-3 rounded-full font-medium transition-all duration-300 shadow-sm hover:shadow-md active:scale-95;
   }
   
   .button-outline {
-    @apply border border-primary text-primary hover:bg-primary/10 px-6 py-3 rounded-full font-medium transition-all duration-200 active:scale-95;
+    @apply border border-primary text-primary hover:bg-primary/10 px-6 py-3 rounded-full font-medium transition-all duration-300 active:scale-95;
   }
   
+  /* Layout utilities */
   .section-padding {
     @apply py-16 md:py-24;
   }
@@ -131,7 +207,7 @@
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
 
-  /* Dark mode specific styles for better visibility */
+  /* Enhanced dark mode */
   .dark .section-title {
     @apply text-white/90;
   }
@@ -144,13 +220,12 @@
     @apply text-white font-bold;
   }
   
-  /* Fix for dark mode text visibility issues */
   .dark .text-muted-foreground {
     @apply text-gray-300/80;
   }
   
   .dark .hours-section {
-    @apply bg-gray-900;
+    @apply bg-gray-900/70 backdrop-blur-lg;
   }
   
   .dark .hours-section h2,
@@ -158,14 +233,53 @@
     @apply text-white;
   }
 
-  /* Special styling for store hours section in dark mode */
   .dark .store-hours-heading {
     @apply text-white font-bold text-2xl mb-4;
   }
   
-  /* Make sure all headings are visible in dark mode */
   .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
     @apply text-white/95;
+  }
+  
+  /* Futuristic element styles */
+  .glow-hover {
+    @apply relative overflow-hidden transition-all duration-300;
+  }
+  
+  .glow-hover::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), var(--glow-color) 0%, transparent 60%);
+    opacity: 0;
+    z-index: -1;
+    transition: opacity 0.3s;
+  }
+  
+  .glow-hover:hover::before {
+    opacity: 1;
+  }
+  
+  .border-gradient {
+    position: relative;
+  }
+  
+  .border-gradient::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    z-index: -1;
+    background: linear-gradient(45deg, var(--primary-color), transparent 60%, var(--primary-color));
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  
+  .border-gradient:hover::before {
+    opacity: 1;
   }
 }
 
@@ -174,7 +288,7 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Intersection Observer Animation Classes */
+/* Enhanced animation classes */
 .fade-up {
   opacity: 0;
   transform: translateY(30px);
@@ -203,7 +317,7 @@ html {
   transform: translateY(0);
 }
 
-/* Custom scrollbar */
+/* Enhanced custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -211,25 +325,91 @@ html {
 
 ::-webkit-scrollbar-track {
   background: hsl(var(--background));
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--primary) / 0.5);
+  background: hsl(var(--primary) / 0.6);
   border-radius: 4px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--primary) / 0.8);
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
 
 .scrollbar-thin {
   scrollbar-width: thin;
+  scrollbar-color: hsl(var(--primary) / 0.6) transparent;
 }
 
-.scrollbar-thumb-muted-foreground\/20::-webkit-scrollbar-thumb {
-  background-color: hsl(var(--muted-foreground) / 0.2);
+/* New animations */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 5px 0 var(--glow-color);
+  }
+  50% {
+    box-shadow: 0 0 20px 5px var(--glow-color);
+  }
 }
 
-.scrollbar-track-transparent::-webkit-scrollbar-track {
-  background-color: transparent;
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Additional animation classes */
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+.animate-rotate {
+  animation: rotate 10s linear infinite;
+}
+
+.bg-gradient-animate {
+  background: linear-gradient(-45deg, #22c55e, #16a34a, #059669, #15803d);
+  background-size: 400% 400%;
+  animation: gradient-shift 15s ease infinite;
+}
+
+.text-gradient-animate {
+  background: linear-gradient(-45deg, #22c55e, #16a34a, #059669, #15803d);
+  background-size: 200% 200%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: gradient-shift 5s ease infinite;
 }
