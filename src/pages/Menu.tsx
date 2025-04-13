@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -14,7 +15,6 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import Navbar from '@/components/ui/navbar';
 import Footer from '@/components/ui/footer';
-import { FormControl } from '@/components/ui/form';
 import { 
   menuCategories, 
   getAllMeals,
@@ -130,11 +130,9 @@ const Menu = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <Select value={dietaryFilter} onValueChange={handleDietaryFilterChange}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Dietary Preference" />
-                  </SelectTrigger>
-                </FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Dietary Preference" />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Dietary Preferences</SelectItem>
                   {dietaryTags.map(tag => (
@@ -148,11 +146,9 @@ const Menu = () => {
             
             <div>
               <Select value={cuisineFilter} onValueChange={handleCuisineFilterChange}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Cuisine Type" />
-                  </SelectTrigger>
-                </FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Cuisine Type" />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Cuisines</SelectItem>
                   {cuisineTypes.map(cuisine => (
