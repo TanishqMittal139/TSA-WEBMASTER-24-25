@@ -177,7 +177,7 @@ const Menu = () => {
                   <SelectValue placeholder="Dietary Preference" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Dietary Preferences</SelectItem>
+                  <SelectItem value="all_dietary">All Dietary Preferences</SelectItem>
                   {dietaryTags.map(tag => (
                     <SelectItem key={tag.id} value={tag.id}>
                       {tag.name}
@@ -193,7 +193,7 @@ const Menu = () => {
                   <SelectValue placeholder="Cuisine Type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Cuisines</SelectItem>
+                  <SelectItem value="all_cuisines">All Cuisines</SelectItem>
                   {cuisineTypes.map(cuisine => (
                     <SelectItem key={cuisine.id} value={cuisine.id}>
                       {cuisine.name}
