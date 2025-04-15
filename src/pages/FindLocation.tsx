@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/ui/navbar';
 import Footer from '@/components/ui/footer';
@@ -10,13 +10,10 @@ import { MapPin, Phone, Clock, Star, Heart, Info, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useFavorites } from '@/context/FavoritesContext';
 import { toast } from '@/components/ui/use-toast';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
 import { isAuthenticated } from '@/services/auth';
 import BlurImage from '@/components/ui/blur-image';
-
-// Free mapbox token for this demo (low usage limits)
-mapboxgl.accessToken = 'pk.eyJ1IjoibG92YWJsZWFpIiwiYSI6ImNsbXo1cTVueTBnbmoya213dDdvcGdjemEifQ.a891N5WH7GE9BTxqmOhROA';
+import LocationMap from '@/components/ui/location-map';
+import { locations as allLocations } from '@/data/locations';
 
 interface Location {
   id: string;
@@ -138,10 +135,7 @@ const FindLocation: React.FC = () => {
   const [activeLocation, setActiveLocation] = useState<Location | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isVisible, setIsVisible] = useState(false);
-  const mapContainerRef = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const markers = useRef<mapboxgl.Marker[]>([]);
-
+  
   useEffect(() => {
     window.scrollTo({
       top: 0,
@@ -156,70 +150,6 @@ const FindLocation: React.FC = () => {
     
     return () => clearTimeout(timer);
   }, []);
-
-  useEffect(() => {
-    if (mapContainerRef.current && !map.current) {
-      map.current = new mapboxgl.Map({
-        container: mapContainerRef.current,
-        style: 'mapbox://styles/mapbox/streets-v12',
-        center: [-77.2, 38.85], // Center of Virginia locations
-        zoom: 9
-      });
-
-      map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
-
-      map.current.on('load', () => {
-        locations.forEach(location => {
-          const marker = new mapboxgl.Marker({ color: '#4B5563' })
-            .setLngLat(location.coordinates)
-            .setPopup(new mapboxgl.Popup().setHTML(`
-              <strong>${location.name}</strong><br>
-              ${location.address}, ${location.city}, ${location.state} ${location.zip}
-            `))
-            .addTo(map.current!);
-          
-          markers.current.push(marker);
-        });
-      });
-    }
-
-    return () => {
-      if (map.current) {
-        map.current.remove();
-        map.current = null;
-        markers.current = [];
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    markers.current.forEach((marker, index) => {
-      marker.remove();
-      
-      const location = locations[index];
-      const isActive = activeLocation?.id === location.id;
-      
-      const newMarker = new mapboxgl.Marker({ 
-        color: isActive ? '#EF4444' : '#4B5563'
-      })
-        .setLngLat(location.coordinates)
-        .setPopup(new mapboxgl.Popup().setHTML(`
-          <strong>${location.name}</strong><br>
-          ${location.address}, ${location.city}, ${location.state} ${location.zip}
-        `))
-        .addTo(map.current!);
-      
-      markers.current[index] = newMarker;
-      
-      if (isActive && map.current) {
-        map.current.flyTo({
-          center: location.coordinates,
-          zoom: 15,
-          essential: true
-        });
-      }
-    });
-  }, [activeLocation]);
 
   const filteredLocations = locations.filter(location => {
     const query = searchQuery.toLowerCase();
@@ -265,6 +195,15 @@ const FindLocation: React.FC = () => {
       }
     }
   };
+
+  const mapLocations = locations.map(loc => ({
+    id: loc.id,
+    name: loc.name,
+    coordinates: loc.coordinates,
+    address: `${loc.address}, ${loc.city}, ${loc.state} ${loc.zip}`,
+    phone: loc.phone,
+    image: loc.image
+  }));
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -382,7 +321,12 @@ const FindLocation: React.FC = () => {
               
               <div className="w-full lg:w-3/5">
                 <div className="rounded-xl overflow-hidden border border-border h-[600px] shadow-sm">
-                  <div ref={mapContainerRef} className="w-full h-full" />
+                  <LocationMap 
+                    locations={mapLocations} 
+                    activeLocationId={activeLocation?.id}
+                    center={activeLocation ? activeLocation.coordinates : [-77.2, 38.85]}
+                    zoom={activeLocation ? 12 : 8}
+                  />
                 </div>
               </div>
             </div>
@@ -506,4 +450,3 @@ const FindLocation: React.FC = () => {
 };
 
 export default FindLocation;
-
