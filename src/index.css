@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -412,4 +411,22 @@ html {
   -webkit-background-clip: text;
   color: transparent;
   animation: gradient-shift 5s ease infinite;
+}
+
+@screen sm {
+  .container {
+    @apply px-6;
+  }
+}
+
+@screen md {
+  .container {
+    @apply px-8;
+  }
+}
+
+@screen lg {
+  .container {
+    @apply px-12;
+  }
 }

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Navbar from '@/components/ui/navbar';
 import Footer from '@/components/ui/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,36 +7,54 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Leaf, Award, Utensils, Wind, Recycle, UserCheck, ChefHat, Sun, Wand2 } from 'lucide-react';
 
 const About = () => {
+  // Initialize Intersection Observer for animations
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+        }
+      });
+    }, { threshold: 0.1 });
+    
+    const elements = document.querySelectorAll('.fade-up, .stagger-item');
+    elements.forEach(el => observer.observe(el));
+    
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className="min-h-screen">
       <Navbar />
       
-      <main className="container mx-auto px-4 py-12 pt-28 animate-fade-in">
+      <main className="container mx-auto px-4 py-12 pt-28">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl font-bold text-foreground relative inline-block mb-8">
-            About TastyHub
-            <span className="absolute -bottom-2 left-0 w-1/3 h-1 bg-primary rounded-full"></span>
-            <span className="absolute -bottom-2 left-0 w-1/4 h-1 bg-primary/50 rounded-full animate-pulse"></span>
-          </h1>
+          <div className="fade-up">
+            <h1 className="text-4xl md:text-5xl font-bold text-foreground relative inline-block mb-8">
+              About TastyHub
+              <div className="absolute -bottom-2 left-0 w-1/3 h-1 bg-primary rounded-full"></div>
+              <div className="absolute -bottom-2 left-0 w-1/4 h-1 bg-primary/50 rounded-full animate-pulse"></div>
+            </h1>
+          </div>
           
-          <div className="my-8 prose prose-lg max-w-none text-foreground/90">
-            <p>
+          <div className="my-8 prose prose-lg max-w-none text-foreground/90 space-y-6 fade-up">
+            <p className="text-lg md:text-xl leading-relaxed">
               TastyHub is not just a restaurant, it's a culinary experience focused on nutrition, sustainability, and exceptional taste. Founded in 2015, our mission is to transform how people experience healthy eating by making nutritious food delicious, accessible, and sustainable.
             </p>
-            <p>
+            <p className="text-lg md:text-xl leading-relaxed">
               We believe that food should nourish both body and planet. Our approach combines cutting-edge nutritional science with culinary artistry to create meals that are as good for you as they are delicious.
             </p>
           </div>
           
           <Tabs defaultValue="farm-to-table" className="my-12">
-            <TabsList className="mb-8 flex flex-wrap bg-background/20 backdrop-blur-md p-1 rounded-xl border border-white/10">
-              <TabsTrigger value="farm-to-table" className="px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <TabsList className="mb-8 flex flex-wrap justify-center md:justify-start bg-background/20 backdrop-blur-md p-1 rounded-xl border border-white/10 w-full overflow-x-auto">
+              <TabsTrigger value="farm-to-table" className="px-4 md:px-6 whitespace-nowrap data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                 Farm-to-Table
               </TabsTrigger>
-              <TabsTrigger value="preparation" className="px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <TabsTrigger value="preparation" className="px-4 md:px-6 whitespace-nowrap data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                 Preparation Process
               </TabsTrigger>
-              <TabsTrigger value="sustainability" className="px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <TabsTrigger value="sustainability" className="px-4 md:px-6 whitespace-nowrap data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                 Sustainability
               </TabsTrigger>
             </TabsList>
@@ -267,7 +285,7 @@ const About = () => {
           </Tabs>
           
           <div className="my-16">
-            <Card className="bg-background/50 backdrop-blur-md border-white/20 dark:border-white/10">
+            <Card className="bg-background/50 backdrop-blur-md border-white/20 dark:border-white/10 hover:shadow-lg transition-all duration-300">
               <CardHeader>
                 <CardTitle className="text-2xl">Get in Touch</CardTitle>
                 <CardDescription>
@@ -277,27 +295,27 @@ const About = () => {
               <CardContent>
                 <div className="grid gap-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="flex flex-col">
+                    <div className="flex flex-col stagger-item stagger-delay-1">
                       <span className="font-medium mb-1">General Inquiries</span>
-                      <span className="text-muted-foreground">info@tastyhub.com</span>
-                      <span className="text-muted-foreground">(804) 123-4567</span>
+                      <span className="text-muted-foreground hover:text-primary transition-colors">info@tastyhub.com</span>
+                      <span className="text-muted-foreground hover:text-primary transition-colors">(804) 123-4567</span>
                     </div>
-                    <div className="flex flex-col">
+                    <div className="flex flex-col stagger-item stagger-delay-2">
                       <span className="font-medium mb-1">Corporate Headquarters</span>
                       <span className="text-muted-foreground">123 Nutrition Avenue</span>
                       <span className="text-muted-foreground">Richmond, VA 23219</span>
                     </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="flex flex-col">
+                    <div className="flex flex-col stagger-item stagger-delay-3">
                       <span className="font-medium mb-1">Hours of Operation</span>
                       <span className="text-muted-foreground">Monday - Friday: 11am - 10pm</span>
                       <span className="text-muted-foreground">Saturday - Sunday: 10am - 11pm</span>
                     </div>
-                    <div className="flex flex-col">
+                    <div className="flex flex-col stagger-item stagger-delay-4">
                       <span className="font-medium mb-1">Group Bookings</span>
-                      <span className="text-muted-foreground">events@tastyhub.com</span>
-                      <span className="text-muted-foreground">(804) 123-4589</span>
+                      <span className="text-muted-foreground hover:text-primary transition-colors">events@tastyhub.com</span>
+                      <span className="text-muted-foreground hover:text-primary transition-colors">(804) 123-4589</span>
                     </div>
                   </div>
                 </div>

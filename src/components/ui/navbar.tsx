@@ -78,7 +78,7 @@ const Navbar: React.FC = () => {
       <div className="container mx-auto px-4 flex items-center justify-between">
         <Link 
           to="/" 
-          className="flex items-center space-x-2 transition-all hover:scale-105"
+          className="flex items-center space-x-2 transition-all hover:scale-105 z-50"
         >
           <AppLogo />
         </Link>
@@ -214,13 +214,14 @@ const Navbar: React.FC = () => {
         </div>
       </div>
       
+      {/* Mobile Menu */}
       <div
         className={cn(
           "fixed inset-0 bg-background/95 backdrop-blur-sm z-40 transform transition-transform duration-300 ease-in-out md:hidden pt-16",
           isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
         )}
       >
-        <div className="flex flex-col pt-4 px-6 h-full overflow-y-auto">
+        <div className="flex flex-col pt-4 px-6 h-full overflow-y-auto pb-20">
           {user && (
             <div className="py-4 mb-4 border-b border-border">
               <div className="flex items-center space-x-3">
@@ -242,11 +243,12 @@ const Navbar: React.FC = () => {
             <Link
               key={link.path}
               to={link.path}
+              onClick={() => setIsMobileMenuOpen(false)}
               className={cn(
-                "flex items-center space-x-3 py-4 text-lg border-b border-border",
+                "flex items-center space-x-3 py-4 text-lg border-b border-border transition-colors",
                 location.pathname === link.path
                   ? "text-primary font-medium"
-                  : "text-foreground"
+                  : "text-foreground hover:text-primary"
               )}
             >
               {link.icon}
@@ -258,7 +260,8 @@ const Navbar: React.FC = () => {
             <>
               <Link 
                 to="/profile" 
-                className="flex items-center space-x-3 py-4 text-lg border-b border-border"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center space-x-3 py-4 text-lg border-b border-border hover:text-primary transition-colors"
               >
                 <User size={18} />
                 <span>Profile</span>
@@ -266,15 +269,19 @@ const Navbar: React.FC = () => {
               
               <Link 
                 to="/favorite-locations" 
-                className="flex items-center space-x-3 py-4 text-lg border-b border-border"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center space-x-3 py-4 text-lg border-b border-border hover:text-primary transition-colors"
               >
                 <Heart size={18} />
                 <span>Favorites</span>
               </Link>
               
               <button 
-                onClick={handleSignOut}
-                className="mt-6 flex items-center space-x-3 py-4 text-lg text-destructive"
+                onClick={() => {
+                  handleSignOut();
+                  setIsMobileMenuOpen(false);
+                }}
+                className="mt-6 flex items-center space-x-3 py-4 text-lg text-destructive hover:text-destructive/80 transition-colors"
               >
                 <LogOut size={18} />
                 <span>Sign Out</span>
@@ -283,7 +290,8 @@ const Navbar: React.FC = () => {
           ) : (
             <Link 
               to="/sign-in" 
-              className="mt-6 flex items-center space-x-3 py-4 text-lg"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="mt-6 flex items-center space-x-3 py-4 text-lg hover:text-primary transition-colors"
             >
               <User size={18} />
               <span>Sign In</span>
