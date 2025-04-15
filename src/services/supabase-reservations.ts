@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 
@@ -80,10 +79,10 @@ export const createReservation = async (reservationData: ReservationInput) => {
     );
     
     if (!profileCreated) {
-      console.log("Creating profile for reservation");
+      console.log("Failed to create profile for reservation, attempting to create reservation without user_id");
     }
 
-    // Create the reservation
+    // Create the reservation with user_id
     const { data, error } = await supabase
       .from('reservations')
       .insert({
@@ -99,10 +98,47 @@ export const createReservation = async (reservationData: ReservationInput) => {
       })
       .select()
       .single();
-      
+    
     if (error) {
-      console.error("Error creating reservation:", error);
-      return { error, data: null };
+      console.error("Error creating reservation with user_id, attempting without:", error);
+      
+      // Try again without user_id (if the foreign key constraint is causing issues)
+      const { data: dataWithoutUserId, error: errorWithoutUserId } = await supabase
+        .from('reservations')
+        .insert({
+          name: reservationData.name,
+          email: reservationData.email,
+          phone: reservationData.phone,
+          date: reservationData.date,
+          time: reservationData.time,
+          guests: reservationData.guests,
+          special_requests: reservationData.specialRequests,
+          status: reservationData.status
+        })
+        .select()
+        .single();
+        
+      if (errorWithoutUserId) {
+        console.error("Error creating reservation without user_id:", errorWithoutUserId);
+        return { error: errorWithoutUserId, data: null };
+      }
+      
+      // Map database column names to our expected format
+      const resultWithoutUserId: ReservationData = {
+        id: dataWithoutUserId.id,
+        user_id: null,
+        name: dataWithoutUserId.name,
+        email: dataWithoutUserId.email,
+        phone: dataWithoutUserId.phone,
+        date: dataWithoutUserId.date,
+        time: dataWithoutUserId.time,
+        guests: dataWithoutUserId.guests,
+        specialRequests: dataWithoutUserId.special_requests || '',
+        status: dataWithoutUserId.status,
+        created_at: dataWithoutUserId.created_at
+      };
+      
+      return { data: resultWithoutUserId, error: null };
     }
     
     // Map database column names to our expected format
@@ -194,6 +230,53 @@ export const cancelReservation = async (reservationId: string) => {
       };
     }
     
+    // Try to cancel by ID only if there's no user_id associated
+    const { data: checkData } = await supabase
+      .from('reservations')
+      .select('user_id')
+      .eq('id', reservationId)
+      .maybeSingle();
+      
+    if (!checkData?.user_id) {
+      // If there's no user_id, cancel by ID only
+      const { data, error } = await supabase
+        .from('reservations')
+        .update({ status: 'cancelled' })
+        .eq('id', reservationId)
+        .select()
+        .maybeSingle();
+        
+      if (error) {
+        console.error("Error cancelling reservation:", error);
+        return { error, data: null };
+      }
+      
+      if (!data) {
+        return { 
+          error: { message: "Reservation not found" },
+          data: null 
+        };
+      }
+      
+      // Map database column names to our expected format
+      const result: ReservationData = {
+        id: data.id,
+        user_id: data.user_id,
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        date: data.date,
+        time: data.time,
+        guests: data.guests,
+        specialRequests: data.special_requests || '',
+        status: data.status,
+        created_at: data.created_at
+      };
+      
+      return { data: result, error: null };
+    }
+    
+    // Otherwise try to cancel by ID and user_id
     const { data, error } = await supabase
       .from('reservations')
       .update({ status: 'cancelled' })

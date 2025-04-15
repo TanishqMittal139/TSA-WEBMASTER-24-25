@@ -5,9 +5,10 @@ import { cn } from '@/lib/utils';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
+import AppLogo from '@/components/ui/app-logo';
 import { 
   Menu, X, ShoppingBag, User, Coffee, Navigation, Info, Percent, CalendarRange, Utensils, LogOut,
-  Settings, Heart, Lock, History
+  Settings, Heart, Lock, History, FileText
 } from 'lucide-react';
 import { 
   DropdownMenu,
@@ -21,7 +22,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from '@/components/ui/use-toast';
 import ThemeToggle from '@/components/ui/theme-toggle';
-import { Button } from '@/components/ui/button'; // Added missing Button import
+import { Button } from '@/components/ui/button';
 
 const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -51,6 +52,7 @@ const Navbar: React.FC = () => {
     { name: 'Deals', path: '/deals', icon: <Percent size={18} /> },
     { name: 'Locations', path: '/find-location', icon: <Navigation size={18} /> },
     { name: 'About', path: '/about', icon: <Info size={18} /> },
+    { name: 'References', path: '/references', icon: <FileText size={18} /> },
     { name: 'Reservations', path: '/reservations', icon: <CalendarRange size={18} /> }
   ];
 
@@ -76,13 +78,12 @@ const Navbar: React.FC = () => {
       <div className="container mx-auto px-4 flex items-center justify-between">
         <Link 
           to="/" 
-          className="flex items-center space-x-2 font-bold text-2xl transition-all hover:scale-105 text-primary"
+          className="flex items-center space-x-2 transition-all hover:scale-105"
         >
-          <Coffee size={28} strokeWidth={2.5} />
-          <span>Tasty Hub</span>
+          <AppLogo />
         </Link>
         
-        <nav className="hidden md:flex items-center space-x-8">
+        <nav className="hidden md:flex items-center space-x-6">
           {navLinks.map((link) => (
             <Link
               key={link.path}

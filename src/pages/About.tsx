@@ -2,161 +2,309 @@
 import React from 'react';
 import Navbar from '@/components/ui/navbar';
 import Footer from '@/components/ui/footer';
-import BlurImage from '@/components/ui/blur-image';
-import ContactForm from '@/components/ui/contact-form';
-import { Award, Coffee, Users, Heart, MapPin, Phone, Mail, Clock } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Leaf, Award, Utensils, Wind, Recycle, UserCheck, ChefHat, Sun, Wand2 } from 'lucide-react';
 
 const About = () => {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen">
       <Navbar />
       
-      <main className="flex-grow">
-        <section className="relative h-80">
-          <div className="absolute inset-0">
-            <BlurImage
-              src="https://images.unsplash.com/photo-1600565193348-f74bd3c7ccdf?q=80&w=2070&auto=format&fit=crop"
-              alt="About Us"
-              className="object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/10"></div>
+      <main className="container mx-auto px-4 py-12 pt-28 animate-fade-in">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-4xl font-bold text-foreground relative inline-block mb-8">
+            About TastyHub
+            <span className="absolute -bottom-2 left-0 w-1/3 h-1 bg-primary rounded-full"></span>
+            <span className="absolute -bottom-2 left-0 w-1/4 h-1 bg-primary/50 rounded-full animate-pulse"></span>
+          </h1>
+          
+          <div className="my-8 prose prose-lg max-w-none text-foreground/90">
+            <p>
+              TastyHub is not just a restaurant, it's a culinary experience focused on nutrition, sustainability, and exceptional taste. Founded in 2015, our mission is to transform how people experience healthy eating by making nutritious food delicious, accessible, and sustainable.
+            </p>
+            <p>
+              We believe that food should nourish both body and planet. Our approach combines cutting-edge nutritional science with culinary artistry to create meals that are as good for you as they are delicious.
+            </p>
           </div>
           
-          <div className="relative container mx-auto px-4 flex flex-col justify-center h-full pt-24">
-            <div className="max-w-2xl">
-              <div className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4">
-                Our Story
-              </div>
-              <h1 className="text-4xl md:text-5xl font-bold mb-4">About Tasty Hub</h1>
-              <p className="text-muted-foreground max-w-xl">
-                Serving delicious food with sustainable practices since 2008.
-              </p>
-            </div>
-          </div>
-        </section>
-        
-        <section className="py-16">
-          <div className="container mx-auto px-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-              <div>
-                <h2 className="text-3xl font-bold mb-6">Our Mission</h2>
-                <p className="text-lg mb-6">
-                  At Tasty Hub, we believe that food should be both delicious and responsible. Our mission is to create exceptional dining experiences while maintaining a commitment to sustainability, ethical sourcing, and community support.
-                </p>
-                <p className="text-lg mb-6">
-                  Founded in 2008, we've grown from a small coffee shop to multiple locations across Virginia, but our core values remain the same: quality ingredients, exceptional service, and a positive impact on our world.
+          <Tabs defaultValue="farm-to-table" className="my-12">
+            <TabsList className="mb-8 flex flex-wrap bg-background/20 backdrop-blur-md p-1 rounded-xl border border-white/10">
+              <TabsTrigger value="farm-to-table" className="px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                Farm-to-Table
+              </TabsTrigger>
+              <TabsTrigger value="preparation" className="px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                Preparation Process
+              </TabsTrigger>
+              <TabsTrigger value="sustainability" className="px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                Sustainability
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="farm-to-table" className="animate-fade-in">
+              <div className="bg-background/50 backdrop-blur-sm p-6 rounded-xl border border-white/20 dark:border-white/10">
+                <div className="flex items-center gap-3 mb-4">
+                  <Leaf className="h-8 w-8 text-primary" />
+                  <h2 className="text-2xl font-bold">Our Farm-to-Table Commitment</h2>
+                </div>
+                
+                <p className="mb-6 text-foreground/90">
+                  TastyHub's farm-to-table philosophy goes beyond a trendy phrase—it's the foundation of our culinary approach. We've established direct relationships with over 35 local farms within a 100-mile radius of our restaurants, ensuring ingredients reach our kitchens within 24 hours of harvest.
                 </p>
                 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-8">
-                  <div className="flex items-start">
-                    <div className="bg-primary/10 p-3 rounded-lg mr-4">
-                      <Coffee className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-medium mb-1">Quality First</h3>
-                      <p className="text-muted-foreground text-sm">We source the finest ingredients for our dishes.</p>
-                    </div>
-                  </div>
+                <div className="grid md:grid-cols-2 gap-6 mb-6">
+                  <Card className="bg-background/30 backdrop-blur-sm border-white/10">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <UserCheck className="h-5 w-5 text-primary" />
+                        <span>Farmer Partnerships</span>
+                      </CardTitle>
+                      <CardDescription>
+                        Building direct relationships with producers
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <p>
+                        We've cultivated long-term partnerships with family-owned farms and ethical producers who share our values. We pay premium prices to support sustainable farming practices and conduct quarterly visits to every farm to ensure our standards are maintained.
+                      </p>
+                    </CardContent>
+                  </Card>
                   
-                  <div className="flex items-start">
-                    <div className="bg-primary/10 p-3 rounded-lg mr-4">
-                      <Award className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-medium mb-1">Award Winning</h3>
-                      <p className="text-muted-foreground text-sm">Recognized for our culinary excellence.</p>
+                  <Card className="bg-background/30 backdrop-blur-sm border-white/10">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Award className="h-5 w-5 text-primary" />
+                        <span>Ingredient Selection</span>
+                      </CardTitle>
+                      <CardDescription>
+                        Only the highest quality makes it to your plate
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <p>
+                        Our chefs personally select each ingredient, prioritizing organic, non-GMO, and heirloom varieties. We maintain a seasonal rotating menu based on what's available locally, ensuring peak nutrition and flavor while reducing carbon footprint associated with long-distance transportation.
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
+                
+                <div className="flex justify-center my-8">
+                  <div className="relative rounded-xl overflow-hidden w-full max-w-2xl border border-white/10">
+                    <img 
+                      src="https://images.unsplash.com/photo-1464226184884-fa280b87c399?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" 
+                      alt="Local farm harvest" 
+                      className="w-full object-cover aspect-video"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex items-end">
+                      <p className="text-white p-4 text-sm">Our partner farms practice sustainable agriculture methods that preserve biodiversity</p>
                     </div>
                   </div>
-                  
-                  <div className="flex items-start">
-                    <div className="bg-primary/10 p-3 rounded-lg mr-4">
-                      <Users className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-medium mb-1">Community Focused</h3>
-                      <p className="text-muted-foreground text-sm">Supporting local businesses and causes.</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start">
-                    <div className="bg-primary/10 p-3 rounded-lg mr-4">
-                      <Heart className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-medium mb-1">Sustainability</h3>
-                      <p className="text-muted-foreground text-sm">Committed to eco-friendly practices.</p>
-                    </div>
-                  </div>
+                </div>
+                
+                <div className="mt-6 prose prose-lg max-w-none text-foreground/90">
+                  <p>
+                    By working directly with farmers, we've eliminated middlemen and reduced food miles by an average of 80% compared to conventional restaurant supply chains. This not only ensures fresher, more nutritious food but also supports the local economy and reduces our environmental impact.
+                  </p>
+                  <p>
+                    We believe you can taste the difference in every bite—the vibrant flavors that only truly fresh ingredients can provide.
+                  </p>
                 </div>
               </div>
-              
-              <div className="relative">
-                <div className="rounded-lg overflow-hidden shadow-xl">
-                  <img 
-                    src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=2070&auto=format&fit=crop" 
-                    alt="Team preparing food" 
-                    className="w-full h-auto"
-                  />
+            </TabsContent>
+            
+            <TabsContent value="preparation" className="animate-fade-in">
+              <div className="bg-background/50 backdrop-blur-sm p-6 rounded-xl border border-white/20 dark:border-white/10">
+                <div className="flex items-center gap-3 mb-4">
+                  <ChefHat className="h-8 w-8 text-primary" />
+                  <h2 className="text-2xl font-bold">Our Preparation Process</h2>
                 </div>
-                <div className="absolute -bottom-6 -left-6 bg-white p-4 rounded-lg shadow-lg w-32 h-32 flex items-center justify-center dark:bg-gray-800 dark:text-white">
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-primary">15+</div>
-                    <div className="text-sm text-muted-foreground">Years of Excellence</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-        
-        <section className="py-16">
-          <div className="container mx-auto px-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-              <div>
-                <h2 className="text-3xl font-bold mb-6">Get in Touch</h2>
-                <p className="text-lg mb-8">
-                  Have questions, suggestions, or feedback? We'd love to hear from you! Fill out the form and our team will get back to you as soon as possible.
+                
+                <p className="mb-6 text-foreground/90">
+                  At TastyHub, food preparation is both an art and a science. We've developed proprietary techniques that maximize nutritional content while creating unforgettable flavor profiles.
                 </p>
                 
-                <div className="space-y-4">
-                  <div className="flex items-start">
-                    <MapPin className="h-5 w-5 text-primary mr-3 mt-0.5" />
-                    <div>
-                      <p className="font-medium">Headquarters</p>
-                      <p className="text-muted-foreground">456 Wilson Blvd, Arlington, VA 22203</p>
-                    </div>
-                  </div>
+                <div className="grid md:grid-cols-3 gap-6 mb-8">
+                  <Card className="bg-background/30 backdrop-blur-sm border-white/10">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Sun className="h-5 w-5 text-primary" />
+                        <span>Nutrient Preservation</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p>
+                        We use specialized low-temperature cooking methods that preserve heat-sensitive vitamins and beneficial plant compounds. Our preparation times are carefully controlled to maximize nutrient bioavailability.
+                      </p>
+                    </CardContent>
+                  </Card>
                   
-                  <div className="flex items-start">
-                    <Phone className="h-5 w-5 text-primary mr-3 mt-0.5" />
-                    <div>
-                      <p className="font-medium">Phone</p>
-                      <p className="text-muted-foreground">(703) 555-1234</p>
-                    </div>
-                  </div>
+                  <Card className="bg-background/30 backdrop-blur-sm border-white/10">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Wand2 className="h-5 w-5 text-primary" />
+                        <span>Flavor Innovation</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p>
+                        Our culinary team includes flavor scientists who use natural techniques to enhance taste without artificial additives. We employ fermentation, aging, and molecular gastronomy to create complex flavor profiles.
+                      </p>
+                    </CardContent>
+                  </Card>
                   
-                  <div className="flex items-start">
-                    <Mail className="h-5 w-5 text-primary mr-3 mt-0.5" />
-                    <div>
-                      <p className="font-medium">Email</p>
-                      <p className="text-muted-foreground">contact@tastyhub-va.com</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start">
-                    <Clock className="h-5 w-5 text-primary mr-3 mt-0.5" />
-                    <div>
-                      <p className="font-medium">Support Hours</p>
-                      <p className="text-muted-foreground">Monday-Friday: 9:00 AM - 6:00 PM</p>
+                  <Card className="bg-background/30 backdrop-blur-sm border-white/10">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Utensils className="h-5 w-5 text-primary" />
+                        <span>Made-to-Order</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p>
+                        Every dish is prepared to order, ensuring maximum freshness. We've implemented efficient kitchen workflows that allow for custom preparation without compromising speed of service.
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
+                
+                <div className="flex justify-center my-8">
+                  <div className="relative rounded-xl overflow-hidden w-full max-w-2xl border border-white/10">
+                    <img 
+                      src="https://images.unsplash.com/photo-1556911220-e15b29be8c8f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" 
+                      alt="Chef preparing fresh ingredients" 
+                      className="w-full object-cover aspect-video"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex items-end">
+                      <p className="text-white p-4 text-sm">Our chefs use innovative techniques that preserve nutrients while enhancing flavor</p>
                     </div>
                   </div>
                 </div>
+                
+                <div className="mt-6 prose prose-lg max-w-none text-foreground/90">
+                  <p>
+                    Our commitment to quality extends to our kitchen equipment. We've invested in state-of-the-art tools that allow precise control over cooking parameters. This attention to detail ensures consistent quality in every meal we serve.
+                  </p>
+                  <p>
+                    Each TastyHub kitchen is designed with separate zones for different preparation methods, preventing cross-contamination and allowing specialized handling of ingredients based on their specific requirements.
+                  </p>
+                </div>
               </div>
-              
-              <ContactForm />
-            </div>
+            </TabsContent>
+            
+            <TabsContent value="sustainability" className="animate-fade-in">
+              <div className="bg-background/50 backdrop-blur-sm p-6 rounded-xl border border-white/20 dark:border-white/10">
+                <div className="flex items-center gap-3 mb-4">
+                  <Recycle className="h-8 w-8 text-primary" />
+                  <h2 className="text-2xl font-bold">Our Sustainability Initiatives</h2>
+                </div>
+                
+                <p className="mb-6 text-foreground/90">
+                  Sustainability isn't just a buzzword at TastyHub—it's integrated into every aspect of our operations. We're committed to leaving a positive impact on both our local communities and the planet.
+                </p>
+                
+                <div className="grid md:grid-cols-2 gap-6 mb-8">
+                  <Card className="bg-background/30 backdrop-blur-sm border-white/10">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Wind className="h-5 w-5 text-primary" />
+                        <span>Carbon Footprint Reduction</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="space-y-2 list-disc pl-5">
+                        <li>100% renewable energy in all locations</li>
+                        <li>Carbon-neutral delivery program</li>
+                        <li>80% reduction in food miles through local sourcing</li>
+                        <li>Annual carbon audit with published results</li>
+                      </ul>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card className="bg-background/30 backdrop-blur-sm border-white/10">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Recycle className="h-5 w-5 text-primary" />
+                        <span>Waste Reduction</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="space-y-2 list-disc pl-5">
+                        <li>Zero landfill waste program at all locations</li>
+                        <li>Comprehensive composting system</li>
+                        <li>Biodegradable packaging made from reclaimed agricultural waste</li>
+                        <li>Creative usage of vegetable trimmings in stocks and sauces</li>
+                      </ul>
+                    </CardContent>
+                  </Card>
+                </div>
+                
+                <div className="flex justify-center my-8">
+                  <div className="relative rounded-xl overflow-hidden w-full max-w-2xl border border-white/10">
+                    <img 
+                      src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" 
+                      alt="Sustainable farming practices" 
+                      className="w-full object-cover aspect-video"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex items-end">
+                      <p className="text-white p-4 text-sm">Our partners use regenerative agricultural practices that build soil health and sequester carbon</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="mt-6 prose prose-lg max-w-none text-foreground/90">
+                  <p>
+                    We've implemented a water conservation program that has reduced our water usage by 65% compared to industry standards. Our kitchens use water-recycling systems and high-efficiency fixtures throughout our facilities.
+                  </p>
+                  <p>
+                    TastyHub is a founding member of the Sustainable Restaurant Coalition, helping to develop industry-wide standards for environmental responsibility. We transparently share our sustainability metrics through annual impact reports available on our website.
+                  </p>
+                  <p>
+                    We believe that true sustainability requires ongoing innovation and commitment. That's why we dedicate 5% of our profits to research and development of new sustainable food systems and technologies.
+                  </p>
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
+          
+          <div className="my-16">
+            <Card className="bg-background/50 backdrop-blur-md border-white/20 dark:border-white/10">
+              <CardHeader>
+                <CardTitle className="text-2xl">Get in Touch</CardTitle>
+                <CardDescription>
+                  Have questions or want to learn more about TastyHub?
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex flex-col">
+                      <span className="font-medium mb-1">General Inquiries</span>
+                      <span className="text-muted-foreground">info@tastyhub.com</span>
+                      <span className="text-muted-foreground">(804) 123-4567</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="font-medium mb-1">Corporate Headquarters</span>
+                      <span className="text-muted-foreground">123 Nutrition Avenue</span>
+                      <span className="text-muted-foreground">Richmond, VA 23219</span>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex flex-col">
+                      <span className="font-medium mb-1">Hours of Operation</span>
+                      <span className="text-muted-foreground">Monday - Friday: 11am - 10pm</span>
+                      <span className="text-muted-foreground">Saturday - Sunday: 10am - 11pm</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="font-medium mb-1">Group Bookings</span>
+                      <span className="text-muted-foreground">events@tastyhub.com</span>
+                      <span className="text-muted-foreground">(804) 123-4589</span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
-        </section>
+        </div>
       </main>
       
       <Footer />

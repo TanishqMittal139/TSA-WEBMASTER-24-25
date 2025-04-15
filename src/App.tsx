@@ -32,6 +32,10 @@ import Settings from "./pages/Settings";
 import History from "./pages/History";
 import NotFound from "./pages/NotFound";
 import Careers from "./pages/Careers";
+import References from "./pages/References";
+
+// Update document title
+document.title = "TastyHub - Nutrition Made Delicious";
 
 // Scroll to top component with animation
 const ScrollToTop = () => {
@@ -120,6 +124,7 @@ const App = () => {
                       } />
                       <Route path="/find-location" element={<FindLocation />} />
                       <Route path="/about" element={<About />} />
+                      <Route path="/references" element={<References />} />
                       <Route path="/cart" element={<Cart />} />
                       <Route path="/reservations" element={<Reservations />} />
                       <Route path="/reservation-confirmation" element={

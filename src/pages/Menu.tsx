@@ -25,7 +25,6 @@ import {
 } from '@/data/menu-data';
 import { Search, Filter, XCircle } from 'lucide-react';
 import { NutritionCard } from '@/components/ui/nutrition-card';
-import { useTheme } from '@/context/ThemeContext';
 
 const Menu = () => {
   const location = useLocation();
@@ -35,7 +34,6 @@ const Menu = () => {
   const [cuisineFilter, setCuisineFilter] = useState('');
   const [displayedMeals, setDisplayedMeals] = useState<MenuItem[]>([]);
   const [isFilterActive, setIsFilterActive] = useState(false);
-  const { theme } = useTheme();
   const allMeals = getAllMeals();
 
   useEffect(() => {
@@ -69,7 +67,7 @@ const Menu = () => {
     }
     
     // Apply dietary filter if any
-    if (dietaryFilter) {
+    if (dietaryFilter && dietaryFilter !== 'all_dietary') {
       switch (dietaryFilter) {
         case 'vegetarian':
           filteredMeals = filteredMeals.filter(meal => meal.vegetarian);
@@ -84,11 +82,13 @@ const Menu = () => {
     }
     
     // Apply cuisine filter if any
-    if (cuisineFilter) {
+    if (cuisineFilter && cuisineFilter !== 'all_cuisines') {
       filteredMeals = filteredMeals.filter(meal => meal.cuisineType === cuisineFilter);
     }
     
-    setDisplayedMeals(filteredMeals);
+    // Ensure no duplicates in the results
+    const uniqueMeals = Array.from(new Map(filteredMeals.map(meal => [meal.id, meal])).values());
+    setDisplayedMeals(uniqueMeals);
   };
 
   const handleCategoryChange = (value: string) => {
@@ -224,26 +224,8 @@ const Menu = () => {
           
           <TabsContent value="all">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {displayedMeals.map((meal, index) => (
-                <div 
-                  key={meal.id}
-                  className={`transition-all duration-500 animate-fade-in`}
-                  style={{ animationDelay: `${index * 0.05}s` }}
-                >
-                  <MealCard meal={meal} />
-                </div>
-              ))}
-            </div>
-            
-            {displayedMeals.length === 0 && (
-              <NoResults clearFilters={clearFilters} />
-            )}
-          </TabsContent>
-          
-          {menuCategories.map(category => (
-            <TabsContent key={category.id} value={category.id}>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {displayedMeals.map((meal, index) => (
+              {displayedMeals.length > 0 ? (
+                displayedMeals.map((meal, index) => (
                   <div 
                     key={meal.id}
                     className={`transition-all duration-500 animate-fade-in`}
@@ -251,12 +233,30 @@ const Menu = () => {
                   >
                     <MealCard meal={meal} />
                   </div>
-                ))}
-              </div>
-              
-              {displayedMeals.length === 0 && (
+                ))
+              ) : (
                 <NoResults clearFilters={clearFilters} />
               )}
+            </div>
+          </TabsContent>
+          
+          {menuCategories.map(category => (
+            <TabsContent key={category.id} value={category.id}>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {displayedMeals.length > 0 ? (
+                  displayedMeals.map((meal, index) => (
+                    <div 
+                      key={meal.id}
+                      className={`transition-all duration-500 animate-fade-in`}
+                      style={{ animationDelay: `${index * 0.05}s` }}
+                    >
+                      <MealCard meal={meal} />
+                    </div>
+                  ))
+                ) : (
+                  <NoResults clearFilters={clearFilters} />
+                )}
+              </div>
             </TabsContent>
           ))}
         </Tabs>
@@ -269,6 +269,9 @@ const Menu = () => {
 
 // Meal Card Component
 const MealCard = ({ meal }: { meal: MenuItem }) => {
+  // Fallback image for meals without images
+  const fallbackImage = "/placeholder.svg";
+  
   return (
     <NutritionCard 
       nutrition={meal.nutrition || {calories: 0, protein: 0, carbs: 0, fat: 0}}
@@ -278,9 +281,13 @@ const MealCard = ({ meal }: { meal: MenuItem }) => {
         <Card className="h-full overflow-hidden hover:shadow-xl transition-all duration-300 bg-background/50 backdrop-blur-sm border-white/20 dark:border-white/10 hover:-translate-y-2">
           <div className="aspect-w-16 aspect-h-9 relative h-48 overflow-hidden">
             <img
-              src={meal.image}
+              src={meal.image || fallbackImage}
               alt={meal.name}
               className="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = fallbackImage;
+              }}
             />
             {meal.hasDiscount && (
               <div className="absolute top-2 right-2 animate-pulse">
@@ -345,7 +352,7 @@ const MealCard = ({ meal }: { meal: MenuItem }) => {
 // No Results Component
 const NoResults = ({ clearFilters }: { clearFilters: () => void }) => {
   return (
-    <div className="text-center py-16 animate-fade-in">
+    <div className="text-center py-16 animate-fade-in col-span-3">
       <div className="mb-4 text-6xl">🍽️</div>
       <p className="text-xl text-muted-foreground mb-4">No items match your current filters.</p>
       <Button variant="default" onClick={clearFilters} className="mt-4 px-6">
