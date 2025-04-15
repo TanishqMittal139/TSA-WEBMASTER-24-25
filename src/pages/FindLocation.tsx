@@ -12,6 +12,7 @@ import LocationSearch from '@/components/locations/LocationSearch';
 import LocationCard from '@/components/locations/LocationCard';
 import LocationDetails from '@/components/locations/LocationDetails';
 import { locations } from '@/data/locations'; // Import the predefined locations
+import { cn } from '@/lib/utils'; // Import the cn function
 
 const FindLocation: React.FC = () => {
   const navigate = useNavigate();
@@ -40,9 +41,9 @@ const FindLocation: React.FC = () => {
     return (
       location.name.toLowerCase().includes(query) ||
       location.address.toLowerCase().includes(query) ||
-      location.city.toLowerCase().includes(query) ||
       location.state.toLowerCase().includes(query) ||
-      location.zip.toLowerCase().includes(query)
+      location.region.toLowerCase().includes(query) ||
+      location.phone.toLowerCase().includes(query)
     );
   });
 
@@ -84,10 +85,49 @@ const FindLocation: React.FC = () => {
     id: loc.id,
     name: loc.name,
     coordinates: loc.coordinates,
-    address: `${loc.address}, ${loc.city}, ${loc.state} ${loc.zip}`,
+    address: loc.address,
     phone: loc.phone,
-    image: loc.image
+    image: "https://images.unsplash.com/photo-1555507036-ab1f4038808a?q=80&w=2026"
   }));
+
+  // Create enhanced location objects for our components
+  const enhancedLocations = filteredLocations.map(loc => ({
+    id: loc.id,
+    name: loc.name,
+    address: loc.address,
+    city: loc.address.split(',')[1]?.trim() || '',
+    state: loc.state,
+    zip: loc.address.split(',')[2]?.trim() || '',
+    phone: loc.phone,
+    rating: 4.5, // Default rating
+    image: "https://images.unsplash.com/photo-1555507036-ab1f4038808a?q=80&w=2026" // Default image
+  }));
+
+  // Create enhanced details for the active location
+  const getEnhancedLocation = (loc: typeof locations[0]) => {
+    if (!loc) return null;
+    return {
+      id: loc.id,
+      name: loc.name,
+      address: loc.address,
+      city: loc.address.split(',')[1]?.trim() || '',
+      state: loc.state,
+      zip: loc.address.split(',')[2]?.trim() || '',
+      phone: loc.phone,
+      image: "https://images.unsplash.com/photo-1555507036-ab1f4038808a?q=80&w=2026",
+      hours: {
+        monday: "7:00 AM - 9:00 PM",
+        tuesday: "7:00 AM - 9:00 PM",
+        wednesday: "7:00 AM - 9:00 PM",
+        thursday: "7:00 AM - 9:00 PM",
+        friday: "7:00 AM - 9:00 PM",
+        saturday: "8:30 AM - 10:00 PM",
+        sunday: "8:30 AM - 10:00 PM"
+      },
+      features: ["Dine-in", "Takeout", "Delivery", "Outdoor Seating", "Wi-Fi"],
+      coordinates: loc.coordinates
+    };
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -131,13 +171,13 @@ const FindLocation: React.FC = () => {
                 
                 <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
                   {filteredLocations.length > 0 ? (
-                    filteredLocations.map((location) => (
+                    enhancedLocations.map((location) => (
                       <LocationCard
                         key={location.id}
                         location={location}
                         isActive={activeLocation?.id === location.id}
                         isFavorite={isFavoriteLocation(location.id)}
-                        onSelect={() => setActiveLocation(location)}
+                        onSelect={() => setActiveLocation(locations.find(loc => loc.id === location.id) || null)}
                         onToggleFavorite={(e) => {
                           e.stopPropagation();
                           handleToggleFavorite(location.id);
@@ -171,7 +211,7 @@ const FindLocation: React.FC = () => {
             <div className="container mx-auto px-4">
               <div className="max-w-5xl mx-auto">
                 <LocationDetails
-                  location={activeLocation}
+                  location={getEnhancedLocation(activeLocation)!}
                   isFavorite={isFavoriteLocation(activeLocation.id)}
                   onToggleFavorite={() => handleToggleFavorite(activeLocation.id)}
                 />
