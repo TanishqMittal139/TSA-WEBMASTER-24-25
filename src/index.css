@@ -280,6 +280,83 @@
   .border-gradient:hover::before {
     opacity: 1;
   }
+  
+  /* Enhanced animations */
+  .animate-in {
+    @apply opacity-100 translate-y-0;
+  }
+  
+  .transform-style-3d {
+    transform-style: preserve-3d;
+  }
+  
+  .perspective-400 {
+    perspective: 400px;
+  }
+  
+  .perspective-600 {
+    perspective: 600px;
+  }
+  
+  .perspective-800 {
+    perspective: 800px;
+  }
+  
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+  
+  /* Interactive timeline */
+  .timeline-item.is-visible {
+    @apply opacity-100 translate-y-0;
+  }
+  
+  /* Staggered animations */
+  .stagger-item {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+  }
+  
+  .stagger-item.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  /* Interactive grid */
+  .interactive-grid-item {
+    @apply transition-all duration-500 hover:z-10;
+  }
+  
+  .interactive-grid-item:hover {
+    transform: scale(1.05);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+  
+  /* Enhanced glass card */
+  .glass-card-hover {
+    @apply transition-all duration-300 hover:shadow-xl;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .glass-card-hover::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      225deg,
+      transparent 40%,
+      rgba(255, 255, 255, 0.1) 60%,
+      transparent 80%
+    );
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  
+  .glass-card-hover:hover::after {
+    opacity: 1;
+  }
 }
 
 /* Custom animations and scroll behavior */
@@ -385,6 +462,21 @@ html {
   }
 }
 
+@keyframes float-rotate {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-10px) rotate(2deg);
+  }
+  50% {
+    transform: translateY(0) rotate(0deg);
+  }
+  75% {
+    transform: translateY(10px) rotate(-2deg);
+  }
+}
+
 /* Additional animation classes */
 .animate-float {
   animation: float 6s ease-in-out infinite;
@@ -396,6 +488,15 @@ html {
 
 .animate-rotate {
   animation: rotate 10s linear infinite;
+}
+
+.animate-float-rotate {
+  animation: float-rotate 10s ease-in-out infinite;
+}
+
+.animate-gradient-shift {
+  animation: gradient-shift 5s ease infinite;
+  background-size: 200% 200%;
 }
 
 .bg-gradient-animate {
