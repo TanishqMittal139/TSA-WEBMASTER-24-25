@@ -20,10 +20,10 @@ const MenuTabs: React.FC<MenuTabsProps> = ({
 }) => {
   return (
     <Tabs value={activeCategory} onValueChange={onCategoryChange} className="mb-12">
-      <TabsList className="mb-8 flex flex-wrap bg-background/20 backdrop-blur-md p-1 rounded-xl border border-white/10">
+      <TabsList className="mb-8 flex flex-wrap bg-background/20 backdrop-blur-md p-2 rounded-xl border border-white/10 shadow-lg">
         <TabsTrigger 
           value="all" 
-          className="px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+          className="px-6 py-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
         >
           All
         </TabsTrigger>
@@ -31,19 +31,19 @@ const MenuTabs: React.FC<MenuTabsProps> = ({
           <TabsTrigger 
             key={category.id} 
             value={category.id} 
-            className="px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+            className="px-6 py-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
           >
             {category.name}
           </TabsTrigger>
         ))}
       </TabsList>
       
-      <TabsContent value="all">
+      <TabsContent value="all" className="animate-fade-in">
         <MealGrid meals={displayedMeals} onClearFilters={onClearFilters} />
       </TabsContent>
       
       {menuCategories.map(category => (
-        <TabsContent key={category.id} value={category.id}>
+        <TabsContent key={category.id} value={category.id} className="animate-fade-in">
           <MealGrid meals={displayedMeals} onClearFilters={onClearFilters} />
         </TabsContent>
       ))}
