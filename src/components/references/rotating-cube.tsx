@@ -38,62 +38,64 @@ const RotatingCube: React.FC<RotatingCubeProps> = ({ size = 150, className }) =>
   const translateZ = faceSize / 2;
   
   return (
-    <div className={`perspective-${size * 2} ${className || ''}`} style={{ perspective: `${size * 2}px`, height: `${size}px`, width: `${size}px` }}>
+    <div 
+      className={`${className || ''} relative`} 
+      style={{ height: `${size}px`, width: `${size}px`, perspective: `${size * 2}px` }}
+    >
       <div 
         ref={cubeRef}
-        className="relative transform-style-3d"
+        className="relative w-full h-full"
         style={{ 
-          width: `${faceSize}px`, 
-          height: `${faceSize}px`,
-          transformStyle: 'preserve-3d'
+          transformStyle: 'preserve-3d',
+          transform: 'rotateX(0deg) rotateY(0deg)'
         }}
       >
         {/* Front */}
         <div 
-          className="absolute w-full h-full bg-primary/30 border border-white/20 rounded-lg flex items-center justify-center"
+          className="absolute w-full h-full flex items-center justify-center bg-primary/20 backdrop-blur-sm border border-white/20 rounded-lg"
           style={{ transform: `translateZ(${translateZ}px)` }}
         >
-          <span className="text-white text-lg font-bold">TastyHub</span>
+          <span className="text-white text-sm font-medium">TastyHub</span>
         </div>
         
         {/* Back */}
         <div 
-          className="absolute w-full h-full bg-primary/30 border border-white/20 rounded-lg flex items-center justify-center"
+          className="absolute w-full h-full flex items-center justify-center bg-primary/20 backdrop-blur-sm border border-white/20 rounded-lg"
           style={{ transform: `rotateY(180deg) translateZ(${translateZ}px)` }}
         >
-          <span className="text-white text-lg font-bold">Quality</span>
+          <span className="text-white text-sm font-medium">Quality</span>
         </div>
         
         {/* Left */}
         <div 
-          className="absolute w-full h-full bg-primary/30 border border-white/20 rounded-lg flex items-center justify-center"
+          className="absolute w-full h-full flex items-center justify-center bg-primary/20 backdrop-blur-sm border border-white/20 rounded-lg"
           style={{ transform: `rotateY(-90deg) translateZ(${translateZ}px)` }}
         >
-          <span className="text-white text-lg font-bold">Fresh</span>
+          <span className="text-white text-sm font-medium">Fresh</span>
         </div>
         
         {/* Right */}
         <div 
-          className="absolute w-full h-full bg-primary/30 border border-white/20 rounded-lg flex items-center justify-center"
+          className="absolute w-full h-full flex items-center justify-center bg-primary/20 backdrop-blur-sm border border-white/20 rounded-lg"
           style={{ transform: `rotateY(90deg) translateZ(${translateZ}px)` }}
         >
-          <span className="text-white text-lg font-bold">Nutrition</span>
+          <span className="text-white text-sm font-medium">Nutrition</span>
         </div>
         
         {/* Top */}
         <div 
-          className="absolute w-full h-full bg-primary/30 border border-white/20 rounded-lg flex items-center justify-center"
+          className="absolute w-full h-full flex items-center justify-center bg-primary/20 backdrop-blur-sm border border-white/20 rounded-lg"
           style={{ transform: `rotateX(90deg) translateZ(${translateZ}px)` }}
         >
-          <span className="text-white text-lg font-bold">Sustainable</span>
+          <span className="text-white text-sm font-medium">Sustainable</span>
         </div>
         
         {/* Bottom */}
         <div 
-          className="absolute w-full h-full bg-primary/30 border border-white/20 rounded-lg flex items-center justify-center"
+          className="absolute w-full h-full flex items-center justify-center bg-primary/20 backdrop-blur-sm border border-white/20 rounded-lg"
           style={{ transform: `rotateX(-90deg) translateZ(${translateZ}px)` }}
         >
-          <span className="text-white text-lg font-bold">Healthy</span>
+          <span className="text-white text-sm font-medium">Healthy</span>
         </div>
       </div>
     </div>

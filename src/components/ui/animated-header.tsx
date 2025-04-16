@@ -20,25 +20,23 @@ const AnimatedHeader = ({ title, subtitle, className }: AnimatedHeaderProps) => 
           }
         });
       },
-      { threshold: 0.1, rootMargin: "0px 0px -10% 0px" }
+      { threshold: 0.1 }
     );
     
     if (headerRef.current) {
       observer.observe(headerRef.current);
     }
     
-    // Add the animate-in class after a short delay to ensure it's visible immediately
-    const timer = setTimeout(() => {
-      if (headerRef.current) {
-        headerRef.current.classList.add('animate-in');
-      }
-    }, 100);
+    // Make the element visible by default and then apply animations
+    if (headerRef.current) {
+      headerRef.current.style.opacity = '1';
+      headerRef.current.classList.add('animate-in');
+    }
     
     return () => {
       if (headerRef.current) {
         observer.unobserve(headerRef.current);
       }
-      clearTimeout(timer);
     };
   }, []);
   
@@ -46,7 +44,7 @@ const AnimatedHeader = ({ title, subtitle, className }: AnimatedHeaderProps) => 
     <div 
       ref={headerRef} 
       className={cn(
-        "opacity-0 translate-y-4 transition-all duration-1000 ease-out",
+        "transition-all duration-1000 ease-out",
         className
       )}
     >

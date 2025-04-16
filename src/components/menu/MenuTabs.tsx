@@ -20,23 +20,26 @@ const MenuTabs: React.FC<MenuTabsProps> = ({
 }) => {
   return (
     <Tabs value={activeCategory} onValueChange={onCategoryChange} className="mb-12">
-      <TabsList className="mb-8 flex flex-wrap justify-center bg-background/20 backdrop-blur-md p-2 rounded-xl border border-white/10 shadow-lg overflow-x-auto no-scrollbar">
-        <TabsTrigger 
-          value="all" 
-          className="px-6 py-3 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=inactive]:bg-background/40 data-[state=inactive]:hover:bg-background/60 transition-all duration-300"
-        >
-          All
-        </TabsTrigger>
-        {menuCategories.map(category => (
+      <div className="relative overflow-hidden mb-8">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-primary/10 opacity-50 blur-xl"></div>
+        <TabsList className="relative overflow-x-auto flex flex-wrap justify-center backdrop-blur-md p-2 rounded-xl border border-white/10 shadow-lg no-scrollbar z-10 bg-black/5">
           <TabsTrigger 
-            key={category.id} 
-            value={category.id} 
-            className="px-6 py-3 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=inactive]:bg-background/40 data-[state=inactive]:hover:bg-background/60 transition-all duration-300"
+            value="all" 
+            className="px-6 py-3 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=inactive]:bg-background/40 data-[state=inactive]:hover:bg-background/60 transition-all duration-300"
           >
-            {category.name}
+            All
           </TabsTrigger>
-        ))}
-      </TabsList>
+          {menuCategories.map(category => (
+            <TabsTrigger 
+              key={category.id} 
+              value={category.id} 
+              className="px-6 py-3 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=inactive]:bg-background/40 data-[state=inactive]:hover:bg-background/60 transition-all duration-300"
+            >
+              {category.name}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </div>
       
       <div className="relative">
         <TabsContent value="all" className="animate-fade-in duration-500">
