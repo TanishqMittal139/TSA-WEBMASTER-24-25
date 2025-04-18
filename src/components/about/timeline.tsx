@@ -13,7 +13,7 @@ interface TimelineProps {
   className?: string;
 }
 
-const Timeline: React.FC<TimelineProps> = ({ events, className }) => {
+const Timeline: React.FC<TimelineProps> = ({ events = [], className }) => {
   const timelineRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
@@ -39,6 +39,10 @@ const Timeline: React.FC<TimelineProps> = ({ events, className }) => {
       }
     };
   }, []);
+  
+  if (!events || events.length === 0) {
+    return null; // Return null or an empty state component if there are no events
+  }
   
   return (
     <div 
