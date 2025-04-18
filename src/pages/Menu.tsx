@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Navbar from '@/components/ui/navbar';
@@ -79,7 +80,7 @@ const Menu = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <Navbar />
       
       <main className="container mx-auto px-4 py-12 pt-28 animate-fade-in">
