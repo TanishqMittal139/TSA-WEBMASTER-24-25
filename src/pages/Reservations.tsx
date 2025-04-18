@@ -9,6 +9,8 @@ import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import Navbar from '@/components/ui/navbar';
 import Footer from '@/components/ui/footer';
+import BlurImage from '@/components/ui/blur-image';
+import AnimatedHeader from '@/components/ui/animated-header';
 import {
   Form,
   FormControl,
