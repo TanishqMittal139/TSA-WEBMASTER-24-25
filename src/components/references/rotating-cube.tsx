@@ -6,15 +6,15 @@ interface RotatingCubeProps {
   className?: string;
 }
 
-const RotatingCube: React.FC<RotatingCubeProps> = ({ size = 150, className }) => {
+const RotatingCube: React.FC<RotatingCubeProps> = ({ size = 120, className }) => {
   const cubeRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
     let animationFrameId: number;
     let rotateX = 0;
     let rotateY = 0;
-    let autoRotateX = 0.1;
-    let autoRotateY = 0.2;
+    let autoRotateX = 0.3;
+    let autoRotateY = 0.5;
     
     const updateRotation = () => {
       if (!cubeRef.current) return;

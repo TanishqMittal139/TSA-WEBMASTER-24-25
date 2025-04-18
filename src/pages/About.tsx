@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef } from 'react';
 import Navbar from '@/components/ui/navbar';
 import Footer from '@/components/ui/footer';
@@ -9,6 +10,7 @@ import AnimatedHeader from '@/components/ui/animated-header';
 import InteractiveCard from '@/components/ui/interactive-card';
 import ParallaxGallery from '@/components/ui/parallax-gallery';
 import Timeline from '@/components/about/timeline';
+import BlurImage from '@/components/ui/blur-image';
 
 const About = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -96,15 +98,30 @@ const About = () => {
     <div className="min-h-screen" ref={containerRef}>
       <Navbar />
       
-      <main className="container mx-auto px-4 py-12 pt-28 overflow-hidden">
+      {/* Hero Section */}
+      <section className="relative h-80">
+        <div className="absolute inset-0">
+          <BlurImage
+            src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2670&auto=format&fit=crop"
+            alt="About TastyHub"
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/10"></div>
+        </div>
+        
+        <div className="relative container mx-auto px-4 flex flex-col justify-center h-full pt-24">
+          <AnimatedHeader 
+            title="About TastyHub" 
+            subtitle="We're not just a restaurant, we're a culinary journey focused on nutrition, sustainability, and exceptional taste."
+            className="text-white"
+          />
+        </div>
+      </section>
+      
+      <main className="container mx-auto px-4 py-12 overflow-hidden">
         <div className="max-w-6xl mx-auto">
-          {/* Hero Section */}
+          {/* Introduction Section */}
           <div className="mb-16">
-            <AnimatedHeader 
-              title="About TastyHub" 
-              subtitle="We're not just a restaurant, we're a culinary journey focused on nutrition, sustainability, and exceptional taste."
-            />
-            
             <div className="mt-12 prose prose-lg max-w-none text-foreground/90 space-y-6 fade-up">
               <p className="text-lg md:text-xl leading-relaxed">
                 Founded in 2015, our mission is to transform how people experience healthy eating by making nutritious food delicious, accessible, and sustainable. We believe that food should nourish both body and planet, combining cutting-edge nutritional science with culinary artistry.
@@ -158,7 +175,7 @@ const About = () => {
             <ParallaxGallery images={galleryImages} />
           </div>
           
-          {/* Tabbed Content Section */}
+          {/* Tabbed Content Section - Fixed Farm to Table zoom */}
           <div className="my-24 fade-up">
             <h2 className="text-3xl font-bold mb-12 text-center">How We Deliver Excellence</h2>
             <Tabs defaultValue="farm-to-table" className="w-full">
@@ -194,11 +211,11 @@ const About = () => {
                     </div>
                   </div>
                   
-                  <div className="relative rounded-xl overflow-hidden h-full min-h-[400px] group">
+                  <div className="relative rounded-xl overflow-hidden h-full min-h-[400px]">
                     <img 
                       src="https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&w=1000&q=80" 
                       alt="Local farm harvest" 
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      className="w-full h-full object-cover"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent flex items-end">
                       <div className="p-6">
@@ -261,16 +278,16 @@ const About = () => {
               <TabsContent value="sustainability" className="animate-fade-in">
                 <div className="grid md:grid-cols-2 gap-8">
                   <div>
-                    <div className="relative h-full">
+                    <div className="relative h-full rounded-xl overflow-hidden">
                       <img 
                         src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=1000&q=80" 
                         alt="Sustainable farming practices" 
-                        className="rounded-xl h-full object-cover"
+                        className="h-full object-cover"
                       />
-                      <div className="absolute inset-0 backdrop-blur-[2px] opacity-0 hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
-                        <div className="bg-background/80 p-6 max-w-md rounded-xl">
-                          <h4 className="text-xl font-bold mb-2">Regenerative Agriculture</h4>
-                          <p>Our partners use farming practices that build soil health, increase biodiversity, and sequester carbon, creating a positive environmental impact with every meal we serve.</p>
+                      <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-transparent flex items-end">
+                        <div className="p-6">
+                          <h4 className="text-xl font-bold text-white mb-2">Regenerative Agriculture</h4>
+                          <p className="text-white/90">Our partners use farming practices that build soil health, increase biodiversity, and sequester carbon, creating a positive environmental impact with every meal we serve.</p>
                         </div>
                       </div>
                     </div>

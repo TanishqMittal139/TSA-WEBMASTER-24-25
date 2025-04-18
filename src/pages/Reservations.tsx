@@ -245,16 +245,29 @@ const Reservations = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       
-      <main className="flex-grow pt-20">
+      <main className="flex-grow">
+        {/* Hero Section */}
+        <section className="relative h-80">
+          <div className="absolute inset-0">
+            <BlurImage
+              src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=2670&auto=format&fit=crop"
+              alt="Reservations"
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/10"></div>
+          </div>
+          
+          <div className="relative container mx-auto px-4 flex flex-col justify-center h-full pt-24">
+            <AnimatedHeader 
+              title="Reservations" 
+              subtitle="Reserve your table or manage your existing reservations at Tasty Hub"
+              className="text-white"
+            />
+          </div>
+        </section>
+        
         <section className="container mx-auto px-4 py-12">
           <div className="max-w-3xl mx-auto">
-            <div className="text-center mb-10">
-              <h1 className="text-3xl md:text-4xl font-bold mb-4">Reservations</h1>
-              <p className="text-muted-foreground">
-                Reserve your table or manage your existing reservations at Tasty Hub.
-              </p>
-            </div>
-            
             {!user ? (
               <div className="bg-card rounded-xl shadow-lg p-6 md:p-8 text-center">
                 <ShieldAlert className="h-12 w-12 mx-auto text-muted-foreground mb-4" />

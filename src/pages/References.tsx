@@ -10,6 +10,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext
 import InteractiveCard from '@/components/ui/interactive-card';
 import AnimatedHeader from '@/components/ui/animated-header';
 import RotatingCube from '@/components/references/rotating-cube';
+import BlurImage from '@/components/ui/blur-image';
 
 const References = () => {
   const cardsRef = useRef<HTMLDivElement>(null);
@@ -51,22 +52,42 @@ const References = () => {
       
       <Navbar />
       
-      <main className="container mx-auto px-4 py-12 pt-28 animate-fade-in relative z-10">
+      {/* Hero Section */}
+      <section className="relative h-80">
+        <div className="absolute inset-0">
+          <BlurImage
+            src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=2670&auto=format&fit=crop"
+            alt="References & Citations"
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/10"></div>
+        </div>
+        
+        <div className="relative container mx-auto px-4 flex flex-col justify-center h-full pt-20">
+          <AnimatedHeader 
+            title="References & Citations"
+            subtitle="Information about our technologies, resources, and documentation"
+            className="text-white"
+          />
+        </div>
+      </section>
+      
+      <main className="container mx-auto px-4 py-12 animate-fade-in relative z-10">
         <div className="max-w-5xl mx-auto">
           <div className="grid md:grid-cols-3 gap-12 items-center mb-16">
             <div className="md:col-span-2">
-              <AnimatedHeader 
-                title="References & Citations"
-                subtitle="Information about our technologies, resources, and documentation"
-              />
+              <p className="text-xl text-muted-foreground mb-4 fade-up">
+                This page outlines the technologies, resources, and documentation used in the development of TastyHub.
+              </p>
             </div>
             
             <div className="flex justify-center">
-              <RotatingCube size={180} className="mx-auto" />
+              <RotatingCube size={120} className="mx-auto" />
             </div>
           </div>
           
-          <Card className="mb-10 bg-background/50 backdrop-blur-sm border-white/20 dark:border-white/10 overflow-hidden relative fade-up">
+          {/* Statement of Originality Card */}
+          <Card className="mb-10 bg-background/50 backdrop-blur-sm border-white/20 dark:border-white/10 overflow-hidden relative fade-up shadow-lg hover:shadow-xl transition-all duration-300">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5 pointer-events-none"></div>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -86,6 +107,7 @@ const References = () => {
             </CardContent>
           </Card>
           
+          {/* Technology Stack Section with Improved Visuals */}
           <div className="mb-16">
             <h2 className="text-3xl font-bold mb-8 relative inline-block fade-up">
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-primary/80 to-primary/60">
@@ -121,8 +143,9 @@ const References = () => {
             </Carousel>
           </div>
           
+          {/* Image Usage and Development Standards Cards with Animation */}
           <div ref={cardsRef} className="grid gap-8 md:grid-cols-2 mb-16">
-            <Card className="stagger-item bg-background/50 backdrop-blur-sm border-white/20 dark:border-white/10 overflow-hidden stagger-delay-1 h-full glassmorphism">
+            <Card className="stagger-item bg-background/50 backdrop-blur-sm border-white/20 dark:border-white/10 overflow-hidden stagger-delay-1 h-full glassmorphism transform transition-all duration-500 hover:-translate-y-2 hover:shadow-lg">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Leaf className="h-5 w-5 text-primary" />
@@ -145,7 +168,7 @@ const References = () => {
               </CardContent>
             </Card>
             
-            <Card className="stagger-item bg-background/50 backdrop-blur-sm border-white/20 dark:border-white/10 overflow-hidden stagger-delay-2 h-full glassmorphism">
+            <Card className="stagger-item bg-background/50 backdrop-blur-sm border-white/20 dark:border-white/10 overflow-hidden stagger-delay-2 h-full glassmorphism transform transition-all duration-500 hover:-translate-y-2 hover:shadow-lg">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Award className="h-5 w-5 text-primary" />
@@ -169,7 +192,8 @@ const References = () => {
             </Card>
           </div>
           
-          <Card className="mb-16 bg-background/50 backdrop-blur-sm border-white/20 dark:border-white/10 relative overflow-hidden fade-up">
+          {/* Academic Documentation Card with Visual Improvements */}
+          <Card className="mb-16 bg-background/50 backdrop-blur-sm border-white/20 dark:border-white/10 relative overflow-hidden fade-up transform transition-all duration-500 hover:shadow-xl">
             <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 via-transparent to-primary/5"></div>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -224,7 +248,8 @@ const References = () => {
             </CardContent>
           </Card>
           
-          <div className="animate-float-rotate">
+          {/* Ongoing Development Card with Enhanced Animation */}
+          <div className="transform transition-all duration-700 hover:scale-[1.02]">
             <Card className="bg-background/50 backdrop-blur-sm border-white/20 dark:border-white/10 hover:shadow-xl transition-all duration-500 relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10"></div>
               <CardHeader>
@@ -242,11 +267,11 @@ const References = () => {
                 </p>
                 
                 <div className="flex flex-wrap justify-center gap-4 mt-8">
-                  <Button className="bg-primary hover:bg-primary/90 text-white rounded-full px-6">
+                  <Button className="bg-primary hover:bg-primary/90 text-white rounded-full px-6 transition-transform duration-300 hover:scale-105">
                     <Shield className="mr-2 h-4 w-4" />
                     Privacy Policy
                   </Button>
-                  <Button variant="outline" className="rounded-full px-6 border-primary/20 hover:border-primary/60">
+                  <Button variant="outline" className="rounded-full px-6 border-primary/20 hover:border-primary/60 transition-transform duration-300 hover:scale-105">
                     <FileText className="mr-2 h-4 w-4" />
                     Terms of Service
                   </Button>
