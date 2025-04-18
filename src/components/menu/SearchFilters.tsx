@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Search, Filter, XCircle } from 'lucide-react';
+import { Search, XCircle } from 'lucide-react';
 import { dietaryTags, cuisineTypes } from '@/data/menu-data';
 
 interface SearchFiltersProps {
@@ -61,7 +60,7 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
                 <SelectValue placeholder="Dietary" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all_dietary">All Dietary</SelectItem>
+                <SelectItem value="all_dietary">Any Diet</SelectItem>
                 {dietaryTags.map(tag => (
                   <SelectItem key={tag.id} value={tag.id}>
                     {tag.name}
@@ -75,7 +74,7 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
                 <SelectValue placeholder="Cuisine" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all_cuisines">All Cuisines</SelectItem>
+                <SelectItem value="all_cuisines">Any Cuisine</SelectItem>
                 {cuisineTypes.map(cuisine => (
                   <SelectItem key={cuisine.id} value={cuisine.id}>
                     {cuisine.name}

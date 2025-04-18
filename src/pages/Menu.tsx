@@ -6,6 +6,7 @@ import Footer from '@/components/ui/footer';
 import SearchFilters from '@/components/menu/SearchFilters';
 import MenuTabs from '@/components/menu/MenuTabs';
 import AnimatedHeader from '@/components/ui/animated-header';
+import BlurImage from '@/components/ui/blur-image';
 import { 
   menuCategories, 
   getAllMeals,
@@ -83,30 +84,45 @@ const Menu = () => {
     <div className="min-h-screen">
       <Navbar />
       
-      <main className="container mx-auto px-4 py-12 pt-28 animate-fade-in">
-        <AnimatedHeader 
-          title="Our Menu" 
-          subtitle="Discover our nutritionally balanced dishes crafted with fresh ingredients for a healthier you"
-          className="mb-12"
-        />
+      <main>
+        <section className="relative h-80">
+          <div className="absolute inset-0">
+            <BlurImage
+              src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=2670&auto=format&fit=crop"
+              alt="Our Menu"
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/10"></div>
+          </div>
+          
+          <div className="relative container mx-auto px-4 flex flex-col justify-center h-full pt-24">
+            <AnimatedHeader 
+              title="Our Menu" 
+              subtitle="Discover our nutritionally balanced dishes crafted with fresh ingredients for a healthier you"
+              className="mb-12"
+            />
+          </div>
+        </section>
         
-        <SearchFilters
-          searchTerm={searchTerm}
-          dietaryFilter={dietaryFilter}
-          cuisineFilter={cuisineFilter}
-          isFilterActive={isFilterActive}
-          onSearchChange={handleSearchChange}
-          onDietaryFilterChange={setDietaryFilter}
-          onCuisineFilterChange={setCuisineFilter}
-          onClearFilters={clearFilters}
-        />
+        <div className="container mx-auto px-4 py-12">
+          <SearchFilters
+            searchTerm={searchTerm}
+            dietaryFilter={dietaryFilter}
+            cuisineFilter={cuisineFilter}
+            isFilterActive={isFilterActive}
+            onSearchChange={handleSearchChange}
+            onDietaryFilterChange={setDietaryFilter}
+            onCuisineFilterChange={setCuisineFilter}
+            onClearFilters={clearFilters}
+          />
 
-        <MenuTabs
-          activeCategory={activeCategory}
-          displayedMeals={displayedMeals}
-          onCategoryChange={setActiveCategory}
-          onClearFilters={clearFilters}
-        />
+          <MenuTabs
+            activeCategory={activeCategory}
+            displayedMeals={displayedMeals}
+            onCategoryChange={setActiveCategory}
+            onClearFilters={clearFilters}
+          />
+        </div>
       </main>
       
       <Footer />

@@ -26,7 +26,7 @@ const MenuTabs: React.FC<MenuTabsProps> = ({
             value="all" 
             className="px-4 py-2 rounded-md data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
           >
-            All
+            All Items
           </TabsTrigger>
           {menuCategories.map(category => (
             <TabsTrigger 
