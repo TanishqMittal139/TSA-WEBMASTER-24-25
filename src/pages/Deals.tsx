@@ -1,8 +1,24 @@
+
 import React from 'react';
 import Navbar from '@/components/ui/navbar';
 import Footer from '@/components/ui/footer';
 import AnimatedHeader from '@/components/ui/animated-header';
 import BlurImage from '@/components/ui/blur-image';
+
+// Define and export the DealData interface
+export interface DealData {
+  id: string;
+  title: string;
+  description: string;
+  discount: string;
+  discountType: 'percentage' | 'fixed';
+  discountAmount: number;
+  appliesTo: 'all' | 'category' | 'specific';
+  categories?: string[];
+  items?: string[];
+  image: string;
+  code: string;
+}
 
 const Deals = () => {
   return (
