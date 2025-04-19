@@ -102,7 +102,7 @@ const About = () => {
       <section className="relative h-80">
         <div className="absolute inset-0">
           <BlurImage
-            src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2670&auto=format&fit=crop"
+            src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=2074&auto=format&fit=crop"
             alt="About TastyHub"
             className="object-cover"
           />

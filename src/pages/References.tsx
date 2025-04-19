@@ -56,7 +56,7 @@ const References = () => {
       <section className="relative h-80">
         <div className="absolute inset-0">
           <BlurImage
-            src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=2670&auto=format&fit=crop"
+            src="https://images.unsplash.com/photo-1434626881859-194d67b2b86f?q=80&w=2074&auto=format&fit=crop"
             alt="References & Citations"
             className="object-cover"
           />
