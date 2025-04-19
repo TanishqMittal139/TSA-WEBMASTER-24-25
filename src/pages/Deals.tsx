@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -10,6 +9,7 @@ import Navbar from '../components/ui/navbar';
 import Footer from '../components/ui/footer';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/components/ui/use-toast';
+import BlurImage from '@/components/ui/blur-image';
 
 export interface DealData {
   id: string;
@@ -100,10 +100,9 @@ const Deals: React.FC = () => {
   const navigate = useNavigate();
   const { user, session } = useAuth();
   
-  // Filter deals based on tab
   const currentDeals = deals;
-  const upcomingDeals: DealData[] = []; // Empty for now, could be populated from API in the future
-  
+  const upcomingDeals: DealData[] = [];
+
   const handleActivateDeal = (deal: DealData) => {
     if (!user || !session) {
       toast({
@@ -115,10 +114,7 @@ const Deals: React.FC = () => {
       return;
     }
     
-    // Store the selected deal in localStorage to use it on the next page
     localStorage.setItem('active_deal', JSON.stringify(deal));
-    
-    // Navigate to the deal use page
     navigate(`/deals/${deal.id}/use`);
   };
   
@@ -210,7 +206,6 @@ const Deals: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {upcomingDeals.map(deal => (
                   <Card key={deal.id} className="overflow-hidden h-full">
-                    {/* Similar structure as current deals but with "Coming Soon" overlay */}
                     <div className="relative h-48">
                       <img 
                         src={deal.image} 
