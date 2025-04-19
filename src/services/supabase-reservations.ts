@@ -79,8 +79,10 @@ export const createReservation = async (reservationData: ReservationInput) => {
     );
     
     if (!profileCreated) {
-      console.log("Failed to create profile for reservation, attempting to create reservation without user_id");
+      console.log("Failed to create profile for reservation, continuing with reservation creation");
     }
+
+    console.log("Creating reservation with user_id:", session.user.id);
 
     // Create the reservation with user_id
     const { data, error } = await supabase
@@ -100,45 +102,8 @@ export const createReservation = async (reservationData: ReservationInput) => {
       .single();
     
     if (error) {
-      console.error("Error creating reservation with user_id, attempting without:", error);
-      
-      // Try again without user_id (if the foreign key constraint is causing issues)
-      const { data: dataWithoutUserId, error: errorWithoutUserId } = await supabase
-        .from('reservations')
-        .insert({
-          name: reservationData.name,
-          email: reservationData.email,
-          phone: reservationData.phone,
-          date: reservationData.date,
-          time: reservationData.time,
-          guests: reservationData.guests,
-          special_requests: reservationData.specialRequests,
-          status: reservationData.status
-        })
-        .select()
-        .single();
-        
-      if (errorWithoutUserId) {
-        console.error("Error creating reservation without user_id:", errorWithoutUserId);
-        return { error: errorWithoutUserId, data: null };
-      }
-      
-      // Map database column names to our expected format
-      const resultWithoutUserId: ReservationData = {
-        id: dataWithoutUserId.id,
-        user_id: null,
-        name: dataWithoutUserId.name,
-        email: dataWithoutUserId.email,
-        phone: dataWithoutUserId.phone,
-        date: dataWithoutUserId.date,
-        time: dataWithoutUserId.time,
-        guests: dataWithoutUserId.guests,
-        specialRequests: dataWithoutUserId.special_requests || '',
-        status: dataWithoutUserId.status,
-        created_at: dataWithoutUserId.created_at
-      };
-      
-      return { data: resultWithoutUserId, error: null };
+      console.error("Error creating reservation:", error);
+      return { error, data: null };
     }
     
     // Map database column names to our expected format
