@@ -14,6 +14,7 @@ interface LocationCardProps {
     zip: string;
     phone: string;
     rating: number;
+    reviewCount: number;
     image: string;
   };
   isActive: boolean;
@@ -70,6 +71,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
               ))}
             </div>
             <span>{location.rating}</span>
+            <span>({location.reviewCount} reviews)</span>
           </div>
           <p className="text-sm text-muted-foreground mb-1 flex items-start">
             <MapPin size={14} className="mr-1 mt-0.5 flex-shrink-0" />

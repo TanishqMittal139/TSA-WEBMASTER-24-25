@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/ui/navbar';
@@ -7,12 +6,11 @@ import { toast } from '@/components/ui/use-toast';
 import { isAuthenticated } from '@/services/auth';
 import { useFavorites } from '@/context/FavoritesContext';
 import BlurImage from '@/components/ui/blur-image';
-import LocationMap from '@/components/ui/location-map';
 import LocationSearch from '@/components/locations/LocationSearch';
 import LocationCard from '@/components/locations/LocationCard';
 import LocationDetails from '@/components/locations/LocationDetails';
-import { locations } from '@/data/locations'; // Import the predefined locations
-import { cn } from '@/lib/utils'; // Import the cn function
+import { locations } from '@/data/locations';
+import { cn } from '@/lib/utils';
 
 const FindLocation: React.FC = () => {
   const navigate = useNavigate();
@@ -81,15 +79,6 @@ const FindLocation: React.FC = () => {
     }
   };
 
-  const mapLocations = filteredLocations.map(loc => ({
-    id: loc.id,
-    name: loc.name,
-    coordinates: loc.coordinates,
-    address: loc.address,
-    phone: loc.phone,
-    image: "https://images.unsplash.com/photo-1555507036-ab1f4038808a?q=80&w=2026"
-  }));
-
   // Create enhanced location objects for our components
   const enhancedLocations = filteredLocations.map(loc => ({
     id: loc.id,
@@ -99,8 +88,9 @@ const FindLocation: React.FC = () => {
     state: loc.state,
     zip: loc.address.split(',')[2]?.trim() || '',
     phone: loc.phone,
-    rating: 4.5, // Default rating
-    image: "https://images.unsplash.com/photo-1555507036-ab1f4038808a?q=80&w=2026" // Default image
+    rating: loc.rating,
+    reviewCount: loc.reviewCount,
+    image: loc.image
   }));
 
   // Create enhanced details for the active location
@@ -114,7 +104,7 @@ const FindLocation: React.FC = () => {
       state: loc.state,
       zip: loc.address.split(',')[2]?.trim() || '',
       phone: loc.phone,
-      image: "https://images.unsplash.com/photo-1555507036-ab1f4038808a?q=80&w=2026",
+      image: loc.image,
       hours: {
         monday: "7:00 AM - 9:00 PM",
         tuesday: "7:00 AM - 9:00 PM",
@@ -162,45 +152,32 @@ const FindLocation: React.FC = () => {
         
         <section className="py-16">
           <div className="container mx-auto px-4">
-            <div className="flex flex-col lg:flex-row gap-8">
-              <div className="w-full lg:w-2/5 space-y-6">
-                <LocationSearch 
-                  searchQuery={searchQuery}
-                  setSearchQuery={setSearchQuery}
-                />
-                
-                <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
-                  {filteredLocations.length > 0 ? (
-                    enhancedLocations.map((location) => (
-                      <LocationCard
-                        key={location.id}
-                        location={location}
-                        isActive={activeLocation?.id === location.id}
-                        isFavorite={isFavoriteLocation(location.id)}
-                        onSelect={() => setActiveLocation(locations.find(loc => loc.id === location.id) || null)}
-                        onToggleFavorite={(e) => {
-                          e.stopPropagation();
-                          handleToggleFavorite(location.id);
-                        }}
-                      />
-                    ))
-                  ) : (
-                    <div className="text-center py-8">
-                      <p className="text-muted-foreground">No locations found matching your search.</p>
-                    </div>
-                  )}
-                </div>
-              </div>
+            <div className="max-w-4xl mx-auto space-y-6">
+              <LocationSearch 
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+              />
               
-              <div className="w-full lg:w-3/5">
-                <div className="rounded-xl overflow-hidden border border-border h-[600px] shadow-sm">
-                  <LocationMap 
-                    locations={mapLocations} 
-                    activeLocationId={activeLocation?.id}
-                    center={activeLocation ? activeLocation.coordinates : [-77.2, 38.85]}
-                    zoom={activeLocation ? 12 : 8}
-                  />
-                </div>
+              <div className="space-y-4">
+                {filteredLocations.length > 0 ? (
+                  enhancedLocations.map((location) => (
+                    <LocationCard
+                      key={location.id}
+                      location={location}
+                      isActive={activeLocation?.id === location.id}
+                      isFavorite={isFavoriteLocation(location.id)}
+                      onSelect={() => setActiveLocation(locations.find(loc => loc.id === location.id) || null)}
+                      onToggleFavorite={(e) => {
+                        e.stopPropagation();
+                        handleToggleFavorite(location.id);
+                      }}
+                    />
+                  ))
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground">No locations found matching your search.</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
