@@ -10,6 +10,19 @@ import { NutritionCard } from '../ui/nutrition-card';
 const FeaturedSection = () => {
   const popularItems = getPopularMeals().slice(0, 4);
   
+  // Fallback images for each category
+  const categoryFallbacks: Record<string, string> = {
+    breakfast: "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=800&auto=format&fit=crop",
+    lunch: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop",
+    dinner: "https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?w=800&auto=format&fit=crop",
+    desserts: "https://images.unsplash.com/photo-1551024506-0bccd828d307?w=800&auto=format&fit=crop",
+    drinks: "https://images.unsplash.com/photo-1544145945-f90425340c7e?w=800&auto=format&fit=crop"
+  };
+
+  const getFallbackImage = (category: string) => {
+    return categoryFallbacks[category.toLowerCase()] || "/placeholder.svg";
+  };
+  
   return (
     <section className="py-16 px-4 bg-background">
       <div className="container mx-auto">
@@ -27,9 +40,13 @@ const FeaturedSection = () => {
                 <Card className="h-full overflow-hidden transition-all duration-300 hover:shadow-lg">
                   <div className="relative h-48">
                     <img
-                      src={item.image}
+                      src={item.image || getFallbackImage(item.category)}
                       alt={item.name}
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = getFallbackImage(item.category);
+                      }}
                     />
                     {item.vegetarian && (
                       <Badge className="absolute top-2 right-2 bg-green-600 text-white">

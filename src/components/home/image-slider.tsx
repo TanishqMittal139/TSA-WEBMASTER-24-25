@@ -59,6 +59,7 @@ const ImageSlider: React.FC<ImageSliderProps> = ({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [imageLoadError, setImageLoadError] = useState<Record<number, boolean>>({});
 
   const nextSlide = () => {
     if (isAnimating) return;
@@ -76,6 +77,17 @@ const ImageSlider: React.FC<ImageSliderProps> = ({
     if (isAnimating || index === currentIndex) return;
     setIsAnimating(true);
     setCurrentIndex(index);
+  };
+
+  // Fallback image in case the image fails to load
+  const fallbackImage = "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=2670&auto=format&fit=crop";
+
+  const getImageSrc = (index: number) => {
+    return imageLoadError[index] ? fallbackImage : images[index].src;
+  };
+
+  const handleImageError = (index: number) => {
+    setImageLoadError(prev => ({...prev, [index]: true}));
   };
 
   useEffect(() => {
@@ -102,9 +114,10 @@ const ImageSlider: React.FC<ImageSliderProps> = ({
         >
           <div className="absolute inset-0 bg-black/20 z-10"></div>
           <img
-            src={images[currentIndex].src}
+            src={getImageSrc(currentIndex)}
             alt={images[currentIndex].alt}
             className="w-full h-full object-cover"
+            onError={() => handleImageError(currentIndex)}
           />
           
           {(images[currentIndex].title || images[currentIndex].description) && (
