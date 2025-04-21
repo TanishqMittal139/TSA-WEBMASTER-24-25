@@ -11,97 +11,14 @@ import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
 import { DealData } from './Deals';
-
-// Simulate menu items
-const menuItems = [
-  {
-    id: "sandwich-veggie-deluxe",
-    name: "Veggie Deluxe Sandwich",
-    price: "$9.99",
-    category: "sandwiches",
-    image: "https://images.unsplash.com/photo-1554433607-66b5efe9d304?q=80&w=2574&auto=format&fit=crop",
-    description: "Loaded with fresh vegetables, avocado, and our special sauce"
-  },
-  {
-    id: "sandwich-mushroom",
-    name: "Portobello Mushroom Sandwich",
-    price: "$8.99",
-    category: "sandwiches",
-    image: "https://images.unsplash.com/photo-1550507992-eb63ffee0847?q=80&w=2670&auto=format&fit=crop",
-    description: "Grilled portobello mushroom with caramelized onions and aioli"
-  },
-  {
-    id: "sandwich-mediterranean",
-    name: "Mediterranean Wrap",
-    price: "$8.49",
-    category: "sandwiches",
-    image: "https://images.unsplash.com/photo-1540713434306-58505cf1b6fc?q=80&w=2574&auto=format&fit=crop",
-    description: "Falafel, hummus, and fresh vegetables in a whole grain wrap"
-  },
-  {
-    id: "coffee-latte",
-    name: "Oat Milk Latte",
-    price: "$4.99",
-    category: "beverages",
-    image: "https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=2637&auto=format&fit=crop",
-    description: "Espresso with steamed oat milk and a hint of vanilla"
-  },
-  {
-    id: "coffee-americano",
-    name: "Americano",
-    price: "$3.49",
-    category: "beverages",
-    image: "https://images.unsplash.com/photo-1518057111178-44a106bad149?q=80&w=2674&auto=format&fit=crop",
-    description: "Espresso diluted with hot water for a smooth coffee experience"
-  },
-  {
-    id: "coffee-cappuccino",
-    name: "Almond Cappuccino",
-    price: "$4.99",
-    category: "beverages",
-    image: "https://images.unsplash.com/photo-1534687941688-13eeb7c779bd?q=80&w=2574&auto=format&fit=crop",
-    description: "Equal parts espresso, steamed almond milk, and foam"
-  },
-  {
-    id: "soup-tomato",
-    name: "Roasted Tomato Soup",
-    price: "$5.99",
-    category: "soups",
-    image: "https://images.unsplash.com/photo-1547592166-23ac45744acd?q=80&w=2671&auto=format&fit=crop",
-    description: "Creamy tomato soup with basil and a touch of cream"
-  },
-  {
-    id: "soup-lentil",
-    name: "Hearty Lentil Soup",
-    price: "$6.49",
-    category: "soups",
-    image: "https://images.unsplash.com/photo-1600626334166-2e9345cdf4ec?q=80&w=2670&auto=format&fit=crop",
-    description: "Nutritious lentil soup with vegetables and herbs"
-  },
-  {
-    id: "soup-carrot",
-    name: "Carrot Ginger Soup",
-    price: "$5.99",
-    category: "soups",
-    image: "https://images.unsplash.com/photo-1607528971899-2e89e6c0ec69?q=80&w=2574&auto=format&fit=crop",
-    description: "Smooth carrot soup with a kick of ginger"
-  },
-  {
-    id: "gift-card-50",
-    name: "$50 Gift Card",
-    price: "$50.00",
-    category: "gift-cards",
-    image: "https://images.unsplash.com/photo-1612599316791-451087e8f877?q=80&w=2628&auto=format&fit=crop",
-    description: "Give the gift of delicious food with our $50 gift card"
-  }
-];
+import { getAllMeals, MenuItem } from '@/data/menu-data';
 
 const DealUse: React.FC = () => {
   const navigate = useNavigate();
   const { dealId } = useParams<{ dealId: string }>();
   const [deal, setDeal] = useState<DealData | null>(null);
-  const [selectedItems, setSelectedItems] = useState<any[]>([]);
-  const [filteredItems, setFilteredItems] = useState<any[]>([]);
+  const [selectedItems, setSelectedItems] = useState<MenuItem[]>([]);
+  const [filteredItems, setFilteredItems] = useState<MenuItem[]>([]);
   const { addItem, items } = useCart();
   const { user, session } = useAuth();
   
@@ -135,12 +52,14 @@ const DealUse: React.FC = () => {
     const parsedDeal = JSON.parse(activeDeal);
     setDeal(parsedDeal);
     
-    // Filter menu items based on deal
+    // Filter menu items based on deal using actual menu items
+    const menuItems = getAllMeals();
+    
     if (parsedDeal.appliesTo === 'all') {
       setFilteredItems(menuItems);
     } else if (parsedDeal.appliesTo === 'category' && parsedDeal.categories) {
       setFilteredItems(menuItems.filter(item => 
-        parsedDeal.categories?.includes(item.category)
+        parsedDeal.categories?.includes(item.category.toLowerCase())
       ));
     } else if (parsedDeal.appliesTo === 'specific' && parsedDeal.items) {
       setFilteredItems(menuItems.filter(item => 
@@ -149,7 +68,7 @@ const DealUse: React.FC = () => {
     }
   }, [dealId, navigate, user, session]);
   
-  const handleItemSelect = (item: any) => {
+  const handleItemSelect = (item: MenuItem) => {
     const exists = selectedItems.find(i => i.id === item.id);
     
     if (exists) {
@@ -173,29 +92,27 @@ const DealUse: React.FC = () => {
     }
   };
   
-  const applyDiscountToPrice = (price: string) => {
+  const applyDiscountToPrice = (price: number) => {
     if (!deal) return price;
     
-    const numericPrice = parseFloat(price.replace('$', ''));
-    let discountedPrice = numericPrice;
+    let discountedPrice = price;
     
     if (deal.discountType === 'percentage') {
-      discountedPrice = numericPrice * (1 - (deal.discountAmount / 100));
+      discountedPrice = price * (1 - (deal.discountAmount / 100));
     } else if (deal.discountType === 'fixed') {
-      discountedPrice = numericPrice - deal.discountAmount;
+      discountedPrice = price - deal.discountAmount;
     }
     
-    return `$${discountedPrice.toFixed(2)}`;
+    return discountedPrice;
   };
   
   const calculateTotal = () => {
-    if (!deal || selectedItems.length === 0) return "$0.00";
+    if (!deal || selectedItems.length === 0) return 0;
     
     let total = 0;
     
     selectedItems.forEach(item => {
-      const price = parseFloat(item.price.replace('$', ''));
-      total += price;
+      total += item.price;
     });
     
     if (deal.discountType === 'percentage') {
@@ -204,8 +121,10 @@ const DealUse: React.FC = () => {
       total = Math.max(0, total - deal.discountAmount);
     }
     
-    return `$${total.toFixed(2)}`;
+    return total;
   };
+  
+  const formatPrice = (price: number) => `$${price.toFixed(2)}`;
   
   const handleAddToCart = () => {
     if (selectedItems.length === 0) {
@@ -236,7 +155,7 @@ const DealUse: React.FC = () => {
         id: item.id,
         name: item.name,
         price: applyDiscountToPrice(item.price),
-        image: item.image,
+        image: item.imageUrl,
         category: item.category,
         hasDiscount: true
       });
@@ -301,7 +220,7 @@ const DealUse: React.FC = () => {
               
               {deal.id === 'combo-meal' && (
                 <p className="text-sm text-muted-foreground mb-4">
-                  Choose 1 sandwich, 1 coffee, and 1 soup to complete your combo
+                  Choose items to complete your combo
                 </p>
               )}
               
@@ -319,7 +238,7 @@ const DealUse: React.FC = () => {
                     <CardContent className="p-0">
                       <div className="relative h-40 w-full">
                         <img 
-                          src={item.image} 
+                          src={item.imageUrl || item.image} 
                           alt={item.name} 
                           className="absolute inset-0 w-full h-full object-cover rounded-t-lg"
                         />
@@ -334,11 +253,11 @@ const DealUse: React.FC = () => {
                           <h4 className="font-medium">{item.name}</h4>
                           <div className="flex flex-col items-end">
                             <span className={selectedItems.some(i => i.id === item.id) ? "line-through text-muted-foreground text-sm" : ""}>
-                              {item.price}
+                              {formatPrice(item.price)}
                             </span>
                             {selectedItems.some(i => i.id === item.id) && (
                               <span className="text-primary font-medium">
-                                {applyDiscountToPrice(item.price)}
+                                {formatPrice(applyDiscountToPrice(item.price))}
                               </span>
                             )}
                           </div>
@@ -368,7 +287,7 @@ const DealUse: React.FC = () => {
                       <div key={item.id} className="flex justify-between items-center">
                         <div className="flex items-center">
                           <div className="h-10 w-10 rounded overflow-hidden flex-shrink-0 mr-3">
-                            <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
+                            <img src={item.imageUrl || item.image} alt={item.name} className="h-full w-full object-cover" />
                           </div>
                           <div>
                             <p className="font-medium">{item.name}</p>
@@ -376,8 +295,8 @@ const DealUse: React.FC = () => {
                           </div>
                         </div>
                         <div className="flex flex-col items-end">
-                          <span className="line-through text-muted-foreground text-xs">{item.price}</span>
-                          <span>{applyDiscountToPrice(item.price)}</span>
+                          <span className="line-through text-muted-foreground text-xs">{formatPrice(item.price)}</span>
+                          <span>{formatPrice(applyDiscountToPrice(item.price))}</span>
                         </div>
                       </div>
                     ))}
@@ -387,7 +306,7 @@ const DealUse: React.FC = () => {
                   
                   <div className="flex justify-between font-bold">
                     <span>Total</span>
-                    <span>{calculateTotal()}</span>
+                    <span>{formatPrice(calculateTotal())}</span>
                   </div>
                   
                   {deal.id === 'combo-meal' && selectedItems.length < 3 && (
