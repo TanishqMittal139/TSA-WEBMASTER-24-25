@@ -7,9 +7,13 @@ import { ArrowRight } from 'lucide-react';
 const CharitableInitiative = () => {
   return (
     <section className="py-24 bg-background relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary/5 rounded-full" aria-hidden="true"></div>
+      <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-primary/5 rounded-full" aria-hidden="true"></div>
+      
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div className="relative rounded-2xl overflow-hidden">
+          <div className="relative rounded-2xl overflow-hidden shadow-xl transform hover:scale-[1.02] transition-transform duration-300">
             <img
               src="https://images.unsplash.com/photo-1593113598332-cd288d649433?w=800&auto=format&fit=crop"
               alt="Volunteer helping at food bank"
@@ -54,19 +58,19 @@ const CharitableInitiative = () => {
             </p>
             
             <div className="flex flex-wrap gap-4 pt-4">
-              <Button asChild>
-                <Link to="/about#initiative" className="gap-2">
-                  Learn More <ArrowRight size={16} />
+              <Button asChild className="group">
+                <Link to="/about#initiative" className="flex items-center gap-2">
+                  Learn More <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                 </Link>
               </Button>
-              <Button variant="outline" asChild>
+              <Button variant="outline" asChild className="group">
                 <a 
                   href="https://feedingamerica.org/donate" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="gap-2"
+                  className="flex items-center gap-2"
                 >
-                  Donate Now <ArrowRight size={16} />
+                  Donate Now <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                 </a>
               </Button>
             </div>
