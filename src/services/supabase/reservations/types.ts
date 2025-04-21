@@ -14,3 +14,11 @@ export type ReservationData = {
 };
 
 export type ReservationInput = Omit<ReservationData, 'id' | 'user_id' | 'created_at'>;
+
+// Type for the simplified reservation form
+export type ReservationFormInput = {
+  date: string;
+  time: string;
+  guests: string;
+  locationId: string;
+};

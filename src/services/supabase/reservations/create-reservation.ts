@@ -1,9 +1,12 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { ReservationInput, ReservationData } from "./types";
+import { ReservationInput, ReservationData, ReservationFormInput } from "./types";
 import { ensureUserProfile } from "../profiles/ensure-profile";
 
-export const createReservation = async (reservationData: ReservationInput) => {
+// Overloaded function to handle both full reservation data and simplified form data
+export const createReservation = async (
+  reservationData: ReservationInput | ReservationFormInput
+) => {
   try {
     // Check if the user is authenticated
     const { data: { session } } = await supabase.auth.getSession();
@@ -13,6 +16,40 @@ export const createReservation = async (reservationData: ReservationInput) => {
         error: { message: "User not authenticated" },
         data: null
       };
+    }
+    
+    // Check if we're using the simplified form input
+    if ('locationId' in reservationData) {
+      // This is a simplified form input
+      const { data: userData } = await supabase.auth.getUser();
+      
+      if (!userData || !userData.user) {
+        return {
+          error: { message: "User data not available" },
+          data: null
+        };
+      }
+      
+      // Get user profile to fill in missing fields
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', session.user.id)
+        .single();
+      
+      // Create a complete reservation input using profile data
+      const completeReservationData: ReservationInput = {
+        name: profileData?.name || userData.user.email?.split('@')[0] || 'Guest',
+        email: profileData?.email || userData.user.email || '',
+        phone: profileData?.phone || '',
+        date: reservationData.date,
+        time: reservationData.time,
+        guests: reservationData.guests,
+        specialRequests: '',
+        status: 'confirmed'
+      };
+      
+      reservationData = completeReservationData;
     }
     
     // Ensure user profile exists

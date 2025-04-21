@@ -71,9 +71,9 @@ const Reservations = () => {
     }
 
     createReservation({
-      date: data.date,
+      date: format(data.date, 'yyyy-MM-dd'),
       time: data.time,
-      guests: parseInt(data.guests),
+      guests: data.guests,
       locationId: locationId || 'defaultLocationId',
     }).then(() => {
       toast({
