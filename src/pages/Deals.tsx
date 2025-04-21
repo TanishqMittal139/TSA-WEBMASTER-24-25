@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -64,8 +65,9 @@ const deals: DealData[] = [
     discountAmount: 5.99,
     code: 'LUNCH599',
     validUntil: '2025-12-31',
-    appliesTo: 'specific',
-    items: ['sandwich-veggie-deluxe', 'sandwich-mushroom', 'sandwich-mediterranean'],
+    appliesTo: 'category',
+    categories: ['lunch'],
+    items: ['sandwich-veggie-deluxe', 'sandwich-mushroom', 'sandwich-mediterranean', 'bowl-chicken-rice', 'salad-greek', 'tacos-beef'],
     image: 'https://images.unsplash.com/photo-1627309302198-09a50ae1b209?q=80&w=1374&auto=format&fit=crop',
     isPopular: true
   },

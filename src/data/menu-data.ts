@@ -6,7 +6,8 @@ export const menuCategories = [
   { id: 'entrees', name: 'Entrées', icon: Utensils },
   { id: 'sides', name: 'Sides', icon: Tag },
   { id: 'desserts', name: 'Desserts', icon: Utensils },
-  { id: 'beverages', name: 'Beverages', icon: Navigation }
+  { id: 'beverages', name: 'Beverages', icon: Navigation },
+  { id: 'lunch', name: 'Lunch', icon: Utensils }
 ];
 
 export interface NutritionInfo {
@@ -186,6 +187,74 @@ export const menuItems: MenuItem[] = [
     vegan: true,
     glutenFree: true
   },
+  // Adding new lunch-specific menu items with unique images
+  {
+    id: 'sandwich-veggie-deluxe',
+    name: 'Veggie Deluxe Sandwich',
+    description: 'Fresh vegetables, hummus, and avocado on whole grain bread',
+    price: 9.99,
+    imageUrl: 'https://images.unsplash.com/photo-1540914124281-342587941389?w=400&auto=format&fit=crop&q=60',
+    category: 'lunch',
+    cuisineType: 'american',
+    tags: ['sandwich', 'vegetarian', 'healthy'],
+    vegetarian: true,
+    vegan: true
+  },
+  {
+    id: 'sandwich-mushroom',
+    name: 'Portobello Mushroom Sandwich',
+    description: 'Grilled portobello mushroom with roasted peppers and goat cheese',
+    price: 10.99,
+    imageUrl: 'https://images.unsplash.com/photo-1550507992-eb63ffee0847?w=400&auto=format&fit=crop&q=60',
+    category: 'lunch',
+    cuisineType: 'american',
+    tags: ['sandwich', 'vegetarian', 'mushroom'],
+    vegetarian: true
+  },
+  {
+    id: 'sandwich-mediterranean',
+    name: 'Mediterranean Wrap',
+    description: 'Falafel, hummus, cucumber, tomato, and tzatziki sauce in a wrap',
+    price: 11.99,
+    imageUrl: 'https://images.unsplash.com/photo-1600850056064-a8b380df8395?w=400&auto=format&fit=crop&q=60',
+    category: 'lunch',
+    cuisineType: 'mediterranean',
+    tags: ['wrap', 'vegetarian', 'falafel'],
+    vegetarian: true
+  },
+  {
+    id: 'bowl-chicken-rice',
+    name: 'Teriyaki Chicken Bowl',
+    description: 'Grilled teriyaki chicken over brown rice with steamed vegetables',
+    price: 12.99,
+    imageUrl: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400&auto=format&fit=crop&q=60',
+    category: 'lunch',
+    cuisineType: 'asian',
+    tags: ['bowl', 'chicken', 'rice']
+  },
+  {
+    id: 'salad-greek',
+    name: 'Greek Salad',
+    description: 'Crisp lettuce, cucumber, tomato, olives, and feta cheese with olive oil dressing',
+    price: 9.99,
+    imageUrl: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400&auto=format&fit=crop&q=60',
+    category: 'lunch',
+    cuisineType: 'mediterranean',
+    tags: ['salad', 'vegetarian', 'healthy'],
+    vegetarian: true,
+    glutenFree: true
+  },
+  {
+    id: 'tacos-beef',
+    name: 'Street Tacos',
+    description: 'Three corn tortillas with seasoned beef, cilantro, onion, and lime',
+    price: 11.99,
+    imageUrl: 'https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?w=400&auto=format&fit=crop&q=60',
+    category: 'lunch',
+    cuisineType: 'mexican',
+    tags: ['tacos', 'beef', 'spicy'],
+    glutenFree: true
+  }
 ];
 
 export const dietaryTags = [
