@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -16,7 +17,10 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
     lunch: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop",
     dinner: "https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?w=800&auto=format&fit=crop",
     desserts: "https://images.unsplash.com/photo-1551024506-0bccd828d307?w=800&auto=format&fit=crop",
-    drinks: "https://images.unsplash.com/photo-1544145945-f90425340c7e?w=800&auto=format&fit=crop"
+    drinks: "https://images.unsplash.com/photo-1544145945-f90425340c7e?w=800&auto=format&fit=crop",
+    entrees: "https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?w=800&auto=format&fit=crop",
+    sides: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop",
+    beverages: "https://images.unsplash.com/photo-1544145945-f90425340c7e?w=800&auto=format&fit=crop"
   };
   
   const getFallbackImage = (category: string) => {
@@ -32,7 +36,7 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
         <Card className="h-full overflow-hidden hover:shadow-xl transition-all duration-300 bg-background/50 backdrop-blur-sm border-white/20 dark:border-white/10 hover:-translate-y-2">
           <div className="aspect-w-16 aspect-h-9 relative h-48 overflow-hidden">
             <img
-              src={meal.image || getFallbackImage(meal.category)}
+              src={meal.image || meal.imageUrl || getFallbackImage(meal.category)}
               alt={meal.name}
               className="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
               onError={(e) => {
@@ -55,14 +59,14 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
                 {meal.hasDiscount ? (
                   <div className="text-right">
                     <span className="line-through text-muted-foreground text-sm mr-2">
-                      {meal.price}
+                      ${meal.price.toFixed(2)}
                     </span>
                     <span className="text-red-500 font-semibold">
-                      {meal.discountPrice}
+                      ${meal.discountPrice?.toFixed(2)}
                     </span>
                   </div>
                 ) : (
-                  <span className="font-semibold text-foreground">{meal.price}</span>
+                  <span className="font-semibold text-foreground">${meal.price.toFixed(2)}</span>
                 )}
               </div>
             </div>

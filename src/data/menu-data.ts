@@ -1,4 +1,5 @@
 import { FileText, Utensils, Percent, Navigation, Tag } from 'lucide-react';
+import { additionalMenuItems } from './additional-menu-items';
 
 export const menuCategories = [
   { id: 'all', name: 'All', icon: Utensils },
@@ -7,6 +8,16 @@ export const menuCategories = [
   { id: 'desserts', name: 'Desserts', icon: Utensils },
   { id: 'beverages', name: 'Beverages', icon: Navigation }
 ];
+
+export interface NutritionInfo {
+  calories: number | string;
+  protein: number | string;
+  carbs: number | string;
+  fat: number | string;
+  sodium?: number | string;
+  fiber?: number | string;
+  sugar?: number | string;
+}
 
 export interface MenuItem {
   id: string;
@@ -20,6 +31,15 @@ export interface MenuItem {
   vegetarian?: boolean;
   vegan?: boolean;
   glutenFree?: boolean;
+  
+  image?: string;
+  nutrition?: NutritionInfo;
+  hasDiscount?: boolean;
+  discountPrice?: number;
+  rating?: number;
+  allergens?: string[];
+  preparationTime?: string;
+  ingredients?: string[];
 }
 
 export const menuItems: MenuItem[] = [
@@ -32,7 +52,13 @@ export const menuItems: MenuItem[] = [
     category: 'entrees',
     cuisineType: 'italian',
     tags: ['pizza', 'italian'],
-    vegetarian: true
+    vegetarian: true,
+    nutrition: {
+      calories: 850,
+      protein: '30g',
+      carbs: '95g',
+      fat: '28g'
+    }
   },
   {
     id: '2',
@@ -176,11 +202,19 @@ export const cuisineTypes = [
   { id: 'indian', name: 'Indian' }
 ];
 
-export const getAllMeals = (): MenuItem[] => menuItems;
+export const getAllMeals = (): MenuItem[] => [...menuItems, ...additionalMenuItems];
 
 export const getMealsByCategory = (category: string): MenuItem[] => {
   if (category === 'all') {
     return getAllMeals();
   }
-  return menuItems.filter(meal => meal.category === category);
+  return [...menuItems, ...additionalMenuItems].filter(meal => meal.category === category);
+};
+
+export const getPopularMeals = (): MenuItem[] => {
+  return [...menuItems, ...additionalMenuItems].slice(0, 6);
+};
+
+export const getMenuItemById = (id: string): MenuItem | undefined => {
+  return [...menuItems, ...additionalMenuItems].find(item => item.id === id);
 };

@@ -8,7 +8,7 @@ import { getPopularMeals } from '@/data/menu-data';
 import { NutritionCard } from '../ui/nutrition-card';
 
 const FeaturedSection = () => {
-  const popularItems = getPopularMeals().slice(0, 4);
+  const popularItems = getPopularMeals();
   
   // Fallback images for each category
   const categoryFallbacks: Record<string, string> = {
@@ -16,7 +16,10 @@ const FeaturedSection = () => {
     lunch: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop",
     dinner: "https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?w=800&auto=format&fit=crop",
     desserts: "https://images.unsplash.com/photo-1551024506-0bccd828d307?w=800&auto=format&fit=crop",
-    drinks: "https://images.unsplash.com/photo-1544145945-f90425340c7e?w=800&auto=format&fit=crop"
+    drinks: "https://images.unsplash.com/photo-1544145945-f90425340c7e?w=800&auto=format&fit=crop",
+    entrees: "https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?w=800&auto=format&fit=crop",
+    sides: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop",
+    beverages: "https://images.unsplash.com/photo-1544145945-f90425340c7e?w=800&auto=format&fit=crop"
   };
 
   const getFallbackImage = (category: string) => {
@@ -40,7 +43,7 @@ const FeaturedSection = () => {
                 <Card className="h-full overflow-hidden transition-all duration-300 hover:shadow-lg">
                   <div className="relative h-48">
                     <img
-                      src={item.image || getFallbackImage(item.category)}
+                      src={item.image || item.imageUrl || getFallbackImage(item.category)}
                       alt={item.name}
                       className="w-full h-full object-cover"
                       onError={(e) => {
@@ -62,7 +65,7 @@ const FeaturedSection = () => {
                         : item.description}
                     </p>
                     <div className="flex justify-between items-center">
-                      <span className="font-medium text-foreground">{item.price}</span>
+                      <span className="font-medium text-foreground">${item.price.toFixed(2)}</span>
                       {item.rating && (
                         <div className="flex items-center">
                           <svg
