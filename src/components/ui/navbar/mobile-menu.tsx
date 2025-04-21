@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { X, User, LogOut } from 'lucide-react';
@@ -7,15 +6,11 @@ import { NavLink } from './nav-link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import type { Profile } from '@/types/profile';
+import { NAV_LINKS } from '@/constants/nav-links';
 
 interface MobileMenuProps {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-  navLinks: Array<{
-    name: string;
-    path: string;
-    icon: React.ReactNode;
-  }>;
   user: SupabaseUser | null;
   profile: Profile | null;
   handleSignOut: () => Promise<void>;
@@ -24,7 +19,6 @@ interface MobileMenuProps {
 const MobileMenu: React.FC<MobileMenuProps> = ({
   isOpen,
   setIsOpen,
-  navLinks,
   user,
   profile,
   handleSignOut,
@@ -43,7 +37,6 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
 
   return (
     <>
-      {/* Mobile Menu Overlay */}
       {isOpen && (
         <div 
           className="fixed inset-0 bg-background/95 backdrop-blur-sm z-40 md:hidden"
@@ -51,7 +44,6 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
         />
       )}
       
-      {/* Mobile Menu */}
       <div
         className={cn(
           "fixed inset-y-0 right-0 w-full max-w-xs bg-background z-50 transform transition-transform duration-300 ease-in-out shadow-lg md:hidden",
@@ -87,13 +79,13 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
           )}
           
           <nav className="flex-1 px-4">
-            {navLinks.map((link) => (
+            {NAV_LINKS.map((link) => (
               <NavLink
                 key={link.path}
                 to={link.path}
                 onClick={() => setIsOpen(false)}
                 isActive={location.pathname === link.path}
-                icon={link.icon}
+                icon={<link.icon size={18} />}
                 className="flex items-center space-x-3 py-4 text-lg border-b border-border"
               >
                 {link.name}

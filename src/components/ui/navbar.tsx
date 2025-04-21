@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -6,14 +5,13 @@ import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import AppLogo from '@/components/ui/app-logo';
-import { 
-  Menu, ShoppingBag, Coffee, Navigation, Info, Percent, CalendarRange, Utensils, FileText
-} from 'lucide-react';
+import { ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ThemeToggle from '@/components/ui/theme-toggle';
 import { NavLink } from './navbar/nav-link';
 import UserMenu from './navbar/user-menu';
 import MobileMenu from './navbar/mobile-menu';
+import { NAV_LINKS } from '@/constants/nav-links';
 
 const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -37,15 +35,7 @@ const Navbar: React.FC = () => {
     setIsMobileMenuOpen(false);
   }, [location.pathname]);
   
-  const navLinks = [
-    { name: 'Home', path: '/', icon: <Coffee size={18} /> },
-    { name: 'Menu', path: '/menu', icon: <Utensils size={18} /> },
-    { name: 'Deals', path: '/deals', icon: <Percent size={18} /> },
-    { name: 'Locations', path: '/find-location', icon: <Navigation size={18} /> },
-    { name: 'About', path: '/about', icon: <Info size={18} /> },
-    { name: 'References', path: '/references', icon: <FileText size={18} /> },
-    { name: 'Reservations', path: '/reservations', icon: <CalendarRange size={18} /> }
-  ];
+  const navLinks = NAV_LINKS;
 
   const handleSignOut = async () => {
     await signOut();
