@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { menuCategories } from '@/data/menu-data';
+import { menuCategories } from '@/data/menu';
 import MealGrid from './MealGrid';
-import { MenuItem } from '@/data/menu-data';
+import { MenuItem } from '@/types/menu';
 
 interface MenuTabsProps {
   activeCategory: string;

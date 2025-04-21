@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Navbar from '@/components/ui/navbar';
@@ -11,8 +10,8 @@ import {
   menuCategories, 
   getAllMeals,
   getMealsByCategory,
-  MenuItem
-} from '@/data/menu-data';
+} from '@/data/menu';
+import { MenuItem } from '@/types/menu';
 
 const Menu = () => {
   const location = useLocation();

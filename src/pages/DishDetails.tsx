@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { useCart } from '@/context/CartContext';
 import { useFavoriteMeals } from '@/context/FavoriteMealsContext';
-import { getMenuItemById } from '@/data/menu-data';
+import { getMenuItemById } from '@/data/menu';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 

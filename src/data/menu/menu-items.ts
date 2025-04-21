@@ -1,47 +1,4 @@
-import { FileText, Utensils, Percent, Navigation, Tag } from 'lucide-react';
-import { additionalMenuItems } from './additional-menu-items';
-
-export const menuCategories = [
-  { id: 'all', name: 'All', icon: Utensils },
-  { id: 'entrees', name: 'Entrées', icon: Utensils },
-  { id: 'sides', name: 'Sides', icon: Tag },
-  { id: 'desserts', name: 'Desserts', icon: Utensils },
-  { id: 'beverages', name: 'Beverages', icon: Navigation },
-  { id: 'lunch', name: 'Lunch', icon: Utensils }
-];
-
-export interface NutritionInfo {
-  calories: number | string;
-  protein: number | string;
-  carbs: number | string;
-  fat: number | string;
-  sodium?: number | string;
-  fiber?: number | string;
-  sugar?: number | string;
-}
-
-export interface MenuItem {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  imageUrl: string;
-  category: string;
-  cuisineType: string;
-  tags?: string[];
-  vegetarian?: boolean;
-  vegan?: boolean;
-  glutenFree?: boolean;
-  
-  image?: string;
-  nutrition?: NutritionInfo;
-  hasDiscount?: boolean;
-  discountPrice?: number;
-  rating?: number;
-  allergens?: string[];
-  preparationTime?: string;
-  ingredients?: string[];
-}
+import { MenuItem } from '@/types/menu';
 
 export const menuItems: MenuItem[] = [
   {
@@ -256,34 +213,3 @@ export const menuItems: MenuItem[] = [
     glutenFree: true
   }
 ];
-
-export const dietaryTags = [
-  { id: 'vegetarian', name: 'Vegetarian' },
-  { id: 'vegan', name: 'Vegan' },
-  { id: 'gluten-free', name: 'Gluten-Free' }
-];
-
-export const cuisineTypes = [
-  { id: 'italian', name: 'Italian' },
-  { id: 'american', name: 'American' },
-  { id: 'mexican', name: 'Mexican' },
-  { id: 'chinese', name: 'Chinese' },
-  { id: 'indian', name: 'Indian' }
-];
-
-export const getAllMeals = (): MenuItem[] => [...menuItems, ...additionalMenuItems];
-
-export const getMealsByCategory = (category: string): MenuItem[] => {
-  if (category === 'all') {
-    return getAllMeals();
-  }
-  return [...menuItems, ...additionalMenuItems].filter(meal => meal.category === category);
-};
-
-export const getPopularMeals = (): MenuItem[] => {
-  return [...menuItems, ...additionalMenuItems].slice(0, 6);
-};
-
-export const getMenuItemById = (id: string): MenuItem | undefined => {
-  return [...menuItems, ...additionalMenuItems].find(item => item.id === id);
-};
