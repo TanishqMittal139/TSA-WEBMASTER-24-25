@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -11,7 +10,18 @@ interface MealCardProps {
 }
 
 const MealCard: React.FC<MealCardProps> = ({ meal }) => {
-  const fallbackImage = "/placeholder.svg";
+  // Array of fallback images for different categories
+  const categoryFallbacks: Record<string, string> = {
+    breakfast: "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=800&auto=format&fit=crop",
+    lunch: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop",
+    dinner: "https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?w=800&auto=format&fit=crop",
+    desserts: "https://images.unsplash.com/photo-1551024506-0bccd828d307?w=800&auto=format&fit=crop",
+    drinks: "https://images.unsplash.com/photo-1544145945-f90425340c7e?w=800&auto=format&fit=crop"
+  };
+  
+  const getFallbackImage = (category: string) => {
+    return categoryFallbacks[category] || "/placeholder.svg";
+  };
   
   return (
     <NutritionCard 
@@ -22,12 +32,12 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
         <Card className="h-full overflow-hidden hover:shadow-xl transition-all duration-300 bg-background/50 backdrop-blur-sm border-white/20 dark:border-white/10 hover:-translate-y-2">
           <div className="aspect-w-16 aspect-h-9 relative h-48 overflow-hidden">
             <img
-              src={meal.image || fallbackImage}
+              src={meal.image || getFallbackImage(meal.category)}
               alt={meal.name}
               className="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
-                target.src = fallbackImage;
+                target.src = getFallbackImage(meal.category);
               }}
             />
             {meal.hasDiscount && (
