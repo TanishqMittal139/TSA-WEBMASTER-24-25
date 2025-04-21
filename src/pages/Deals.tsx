@@ -66,7 +66,7 @@ const deals: DealData[] = [
     code: 'LUNCH599',
     validUntil: '2025-12-31',
     appliesTo: 'category',
-    categories: ['lunch'],
+    categories: ['lunch', 'sides'],
     items: ['sandwich-veggie-deluxe', 'sandwich-mushroom', 'sandwich-mediterranean', 'bowl-chicken-rice', 'salad-greek', 'tacos-beef'],
     image: 'https://images.unsplash.com/photo-1627309302198-09a50ae1b209?q=80&w=1374&auto=format&fit=crop',
     isPopular: true
