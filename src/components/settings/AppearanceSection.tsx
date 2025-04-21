@@ -3,18 +3,11 @@ import React from 'react';
 import { Moon, Sun } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { useSettings } from '@/context/SettingsContext';
 
-interface AppearanceSectionProps {
-  settings: {
-    appearance: {
-      theme: string;
-      fontSize: string;
-    };
-  };
-  onSettingChange: (category: string, setting: string, value: string) => void;
-}
+const AppearanceSection = () => {
+  const { settings, handleSettingChange } = useSettings();
 
-const AppearanceSection = ({ settings, onSettingChange }: AppearanceSectionProps) => {
   return (
     <div className="space-y-6">
       <div>
@@ -27,7 +20,7 @@ const AppearanceSection = ({ settings, onSettingChange }: AppearanceSectionProps
           className="mt-4 grid grid-cols-3 gap-4"
           value={settings.appearance.theme}
           onValueChange={(value) => 
-            onSettingChange('appearance', 'theme', value)
+            handleSettingChange('appearance', 'theme', value)
           }
         >
           <div>
@@ -90,7 +83,7 @@ const AppearanceSection = ({ settings, onSettingChange }: AppearanceSectionProps
           className="mt-4 space-y-3"
           value={settings.appearance.fontSize}
           onValueChange={(value) => 
-            onSettingChange('appearance', 'fontSize', value)
+            handleSettingChange('appearance', 'fontSize', value)
           }
         >
           <div className="flex items-center space-x-2">

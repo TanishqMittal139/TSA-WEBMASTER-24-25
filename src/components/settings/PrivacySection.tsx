@@ -3,18 +3,11 @@ import React from 'react';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { useSettings } from '@/context/SettingsContext';
 
-interface PrivacySectionProps {
-  settings: {
-    privacy: {
-      shareActivity: boolean;
-      allowDataCollection: boolean;
-    };
-  };
-  onSettingChange: (category: string, setting: string, value: boolean) => void;
-}
+const PrivacySection = () => {
+  const { settings, handleSettingChange } = useSettings();
 
-const PrivacySection = ({ settings, onSettingChange }: PrivacySectionProps) => {
   return (
     <div className="space-y-6">
       <div>
@@ -35,7 +28,7 @@ const PrivacySection = ({ settings, onSettingChange }: PrivacySectionProps) => {
               id="share-activity"
               checked={settings.privacy.shareActivity}
               onCheckedChange={(checked) => 
-                onSettingChange('privacy', 'shareActivity', checked)
+                handleSettingChange('privacy', 'shareActivity', checked)
               }
             />
           </div>
@@ -51,7 +44,7 @@ const PrivacySection = ({ settings, onSettingChange }: PrivacySectionProps) => {
               id="data-collection"
               checked={settings.privacy.allowDataCollection}
               onCheckedChange={(checked) => 
-                onSettingChange('privacy', 'allowDataCollection', checked)
+                handleSettingChange('privacy', 'allowDataCollection', checked)
               }
             />
           </div>

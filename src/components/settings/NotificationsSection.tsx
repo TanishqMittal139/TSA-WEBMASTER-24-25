@@ -2,20 +2,11 @@
 import React from 'react';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { useSettings } from '@/context/SettingsContext';
 
-interface NotificationsSectionProps {
-  settings: {
-    notifications: {
-      marketing: boolean;
-      deals: boolean;
-      orders: boolean;
-      email: boolean;
-    };
-  };
-  onSettingChange: (category: string, setting: string, value: boolean) => void;
-}
+const NotificationsSection = () => {
+  const { settings, handleSettingChange } = useSettings();
 
-const NotificationsSection = ({ settings, onSettingChange }: NotificationsSectionProps) => {
   return (
     <div className="space-y-6">
       <div>
@@ -36,7 +27,7 @@ const NotificationsSection = ({ settings, onSettingChange }: NotificationsSectio
               id="marketing-emails"
               checked={settings.notifications.marketing}
               onCheckedChange={(checked) => 
-                onSettingChange('notifications', 'marketing', checked)
+                handleSettingChange('notifications', 'marketing', checked)
               }
             />
           </div>
@@ -52,7 +43,7 @@ const NotificationsSection = ({ settings, onSettingChange }: NotificationsSectio
               id="deal-notifications"
               checked={settings.notifications.deals}
               onCheckedChange={(checked) => 
-                onSettingChange('notifications', 'deals', checked)
+                handleSettingChange('notifications', 'deals', checked)
               }
             />
           </div>
@@ -68,7 +59,7 @@ const NotificationsSection = ({ settings, onSettingChange }: NotificationsSectio
               id="order-notifications"
               checked={settings.notifications.orders}
               onCheckedChange={(checked) => 
-                onSettingChange('notifications', 'orders', checked)
+                handleSettingChange('notifications', 'orders', checked)
               }
             />
           </div>
@@ -84,7 +75,7 @@ const NotificationsSection = ({ settings, onSettingChange }: NotificationsSectio
               id="emails-from-us"
               checked={settings.notifications.email}
               onCheckedChange={(checked) => 
-                onSettingChange('notifications', 'email', checked)
+                handleSettingChange('notifications', 'email', checked)
               }
             />
           </div>
