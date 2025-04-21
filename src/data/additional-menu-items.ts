@@ -1,4 +1,4 @@
-import { MenuItem } from './menu-data';
+import { MenuItem } from '@/types/menu';
 
 export const additionalMenuItems: MenuItem[] = [
   // More Breakfast Items
