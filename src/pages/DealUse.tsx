@@ -1,309 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+
+import React from 'react';
+import { useParams } from 'react-router-dom';
 import Navbar from '../components/ui/navbar';
 import Footer from '../components/ui/footer';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
-import { Check, ShoppingCart, ArrowLeft, Tag } from 'lucide-react';
-import { toast } from '@/components/ui/use-toast';
-import { useAuth } from '@/context/AuthContext';
-import { useCart } from '@/context/CartContext';
-import { DealData } from './Deals';
-import { getAllMeals, MenuItem } from '@/data/menu-data';
+import DealHeader from '@/components/deals/DealHeader';
+import DealMenuItems from '@/components/deals/DealMenuItems';
+import DealSummary from '@/components/deals/DealSummary';
+import { useDealLogic } from '@/hooks/use-deal-logic';
 
 const DealUse: React.FC = () => {
-  const navigate = useNavigate();
   const { dealId } = useParams<{ dealId: string }>();
-  const [deal, setDeal] = useState<DealData | null>(null);
-  const [selectedItems, setSelectedItems] = useState<MenuItem[]>([]);
-  const [filteredItems, setFilteredItems] = useState<MenuItem[]>([]);
-  const [categorizedItems, setCategorizedItems] = useState<{
-    sandwiches: MenuItem[];
-    sides: MenuItem[];
-    other: MenuItem[];
-  }>({
-    sandwiches: [],
-    sides: [],
-    other: []
-  });
-  const { addItem, items } = useCart();
-  const { user, session } = useAuth();
-  
-  useEffect(() => {
-    // Scroll to top on component mount
-    window.scrollTo(0, 0);
-    
-    // Redirect if not authenticated
-    if (!user || !session) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to use deals",
-        variant: "destructive"
-      });
-      navigate('/sign-in', { state: { redirectTo: '/deals' } });
-      return;
-    }
-    
-    // Get the deal from localStorage
-    const activeDeal = localStorage.getItem('active_deal');
-    if (!activeDeal) {
-      toast({
-        title: "No Active Deal",
-        description: "Please select a deal first",
-        variant: "destructive"
-      });
-      navigate('/deals');
-      return;
-    }
-    
-    const parsedDeal = JSON.parse(activeDeal);
-    setDeal(parsedDeal);
-    
-    // Filter menu items based on deal using actual menu items
-    const menuItems = getAllMeals();
-    
-    if (parsedDeal.appliesTo === 'all') {
-      setFilteredItems(menuItems);
-    } else if (parsedDeal.appliesTo === 'category' && parsedDeal.categories) {
-      setFilteredItems(menuItems.filter(item => 
-        parsedDeal.categories?.includes(item.category.toLowerCase())
-      ));
-    } else if (parsedDeal.appliesTo === 'specific' && parsedDeal.items) {
-      setFilteredItems(menuItems.filter(item => 
-        parsedDeal.items?.includes(item.id)
-      ));
-    }
-
-    // For lunch special, categorize items
-    if (parsedDeal.id === 'lunch-special') {
-      const sandwiches = menuItems.filter(item => 
-        item.tags?.includes('sandwich') || item.name.toLowerCase().includes('sandwich')
-      );
-      
-      const sides = menuItems.filter(item => 
-        item.category === 'sides' || item.tags?.includes('soup') || item.tags?.includes('salad')
-      );
-      
-      const other = menuItems.filter(item => 
-        !sandwiches.some(s => s.id === item.id) && 
-        !sides.some(s => s.id === item.id) &&
-        parsedDeal.categories?.includes(item.category.toLowerCase())
-      );
-      
-      setCategorizedItems({
-        sandwiches,
-        sides,
-        other
-      });
-    }
-  }, [dealId, navigate, user, session]);
-  
-  const handleItemSelect = (item: MenuItem) => {
-    const exists = selectedItems.find(i => i.id === item.id);
-    
-    if (exists) {
-      setSelectedItems(selectedItems.filter(i => i.id !== item.id));
-    } else {
-      // For the combo meal, limit to 1 of each category
-      if (deal?.id === 'combo-meal') {
-        const hasCategory = selectedItems.some(i => i.category === item.category);
-        if (hasCategory) {
-          // Replace the item of the same category
-          setSelectedItems([
-            ...selectedItems.filter(i => i.category !== item.category),
-            item
-          ]);
-        } else {
-          setSelectedItems([...selectedItems, item]);
-        }
-      } 
-      // For the lunch special, allow only one sandwich and one side
-      else if (deal?.id === 'lunch-special') {
-        const isSandwich = item.tags?.includes('sandwich') || item.name.toLowerCase().includes('sandwich');
-        const isSide = item.category === 'sides' || item.tags?.includes('soup') || item.tags?.includes('salad');
-        
-        // If selecting a sandwich
-        if (isSandwich) {
-          const currentSandwich = selectedItems.find(i => 
-            i.tags?.includes('sandwich') || i.name.toLowerCase().includes('sandwich')
-          );
-          
-          if (currentSandwich) {
-            // Replace the current sandwich
-            setSelectedItems([
-              ...selectedItems.filter(i => !(i.tags?.includes('sandwich') || i.name.toLowerCase().includes('sandwich'))),
-              item
-            ]);
-          } else {
-            setSelectedItems([...selectedItems, item]);
-          }
-        } 
-        // If selecting a side
-        else if (isSide) {
-          const currentSide = selectedItems.find(i => 
-            i.category === 'sides' || i.tags?.includes('soup') || i.tags?.includes('salad')
-          );
-          
-          if (currentSide) {
-            // Replace the current side
-            setSelectedItems([
-              ...selectedItems.filter(i => !(i.category === 'sides' || i.tags?.includes('soup') || i.tags?.includes('salad'))),
-              item
-            ]);
-          } else {
-            setSelectedItems([...selectedItems, item]);
-          }
-        } else {
-          // For other items, just add
-          setSelectedItems([...selectedItems, item]);
-        }
-      } else {
-        setSelectedItems([...selectedItems, item]);
-      }
-    }
-  };
-  
-  const applyDiscountToPrice = (price: number, item: MenuItem) => {
-    if (!deal) return price;
-    
-    let discountedPrice = price;
-    
-    // For lunch special, only the side is free
-    if (deal.id === 'lunch-special') {
-      const isSide = item.category === 'sides' || item.tags?.includes('soup') || item.tags?.includes('salad');
-      if (isSide) {
-        return 0; // Free side
-      }
-      return price; // Regular price for the sandwich
-    }
-    
-    if (deal.discountType === 'percentage') {
-      discountedPrice = price * (1 - (deal.discountAmount / 100));
-    } else if (deal.discountType === 'fixed') {
-      discountedPrice = price - deal.discountAmount;
-    }
-    
-    return discountedPrice;
-  };
-  
-  const calculateTotal = () => {
-    if (!deal || selectedItems.length === 0) return 0;
-    
-    let total = 0;
-    
-    if (deal.id === 'lunch-special') {
-      // For lunch special, only charge for the sandwich
-      const sandwich = selectedItems.find(item => 
-        item.tags?.includes('sandwich') || item.name.toLowerCase().includes('sandwich')
-      );
-      
-      if (sandwich) {
-        total += sandwich.price;
-      }
-      
-      // Other items are regular price
-      selectedItems.forEach(item => {
-        const isSandwich = item.tags?.includes('sandwich') || item.name.toLowerCase().includes('sandwich');
-        const isSide = item.category === 'sides' || item.tags?.includes('soup') || item.tags?.includes('salad');
-        
-        if (!isSandwich && !isSide) {
-          total += item.price;
-        }
-      });
-      
-      return total;
-    }
-    
-    selectedItems.forEach(item => {
-      total += item.price;
-    });
-    
-    if (deal.discountType === 'percentage') {
-      total = total * (1 - (deal.discountAmount / 100));
-    } else if (deal.discountType === 'fixed' && deal.appliesTo === 'all') {
-      total = Math.max(0, total - deal.discountAmount);
-    }
-    
-    return total;
-  };
-  
-  const formatPrice = (price: number) => `$${price.toFixed(2)}`;
-  
-  const handleAddToCart = () => {
-    if (selectedItems.length === 0) {
-      toast({
-        title: "No Items Selected",
-        description: "Please select items to apply your deal",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    // For lunch special, validate that both a sandwich and a side are selected
-    if (deal?.id === 'lunch-special') {
-      const hasSandwich = selectedItems.some(item => 
-        item.tags?.includes('sandwich') || item.name.toLowerCase().includes('sandwich')
-      );
-      const hasSide = selectedItems.some(item => 
-        item.category === 'sides' || item.tags?.includes('soup') || item.tags?.includes('salad')
-      );
-      
-      if (!hasSandwich) {
-        toast({
-          title: "Sandwich Required",
-          description: "Please select a sandwich for your lunch special",
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      if (!hasSide) {
-        toast({
-          title: "Side Required",
-          description: "Please select a free side or soup for your lunch special",
-          variant: "destructive"
-        });
-        return;
-      }
-    }
-    
-    // Check if cart already has discounted items
-    const hasDiscountedItems = items.some(item => item.hasDiscount);
-    
-    if (hasDiscountedItems) {
-      toast({
-        title: "Only One Deal Allowed",
-        description: "You can only apply one deal per order. Please remove discounted items first.",
-        variant: "destructive",
-        duration: 3000,
-      });
-      return;
-    }
-    
-    // Add each item to cart with discounted price
-    selectedItems.forEach(item => {
-      addItem({
-        id: item.id,
-        name: item.name,
-        price: formatPrice(applyDiscountToPrice(item.price, item)),
-        image: item.imageUrl,
-        category: item.category,
-        hasDiscount: true
-      });
-    });
-    
-    // Clear the active deal after use
-    localStorage.removeItem('active_deal');
-    
-    toast({
-      title: "Deal Applied",
-      description: `${selectedItems.length} items added to your cart with ${deal?.discount} discount`,
-    });
-    
-    navigate('/cart');
-  };
+  const {
+    deal,
+    selectedItems,
+    filteredItems,
+    categorizedItems,
+    handleItemSelect,
+    handleAddToCart,
+    calculateTotal,
+    getValidationMessage,
+    isValid
+  } = useDealLogic(dealId);
   
   if (!deal) {
     return (
@@ -322,187 +39,43 @@ const DealUse: React.FC = () => {
       return (
         <>
           {categorizedItems.sandwiches.length > 0 && (
-            <div className="mb-8">
-              <h3 className="text-lg font-semibold mb-4">Select a Sandwich</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {categorizedItems.sandwiches.map(item => (
-                  <Card 
-                    key={item.id} 
-                    className={`cursor-pointer transition-all ${
-                      selectedItems.some(i => i.id === item.id) 
-                        ? 'ring-2 ring-primary' 
-                        : 'hover:border-primary/50'
-                    }`}
-                    onClick={() => handleItemSelect(item)}
-                  >
-                    <CardContent className="p-0">
-                      <div className="relative h-40 w-full">
-                        <img 
-                          src={item.imageUrl || item.image} 
-                          alt={item.name} 
-                          className="absolute inset-0 w-full h-full object-cover rounded-t-lg"
-                        />
-                        {selectedItems.some(i => i.id === item.id) && (
-                          <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-1">
-                            <Check size={16} />
-                          </div>
-                        )}
-                      </div>
-                      <div className="p-4">
-                        <div className="flex justify-between items-start mb-2">
-                          <h4 className="font-medium">{item.name}</h4>
-                          <span>{formatPrice(item.price)}</span>
-                        </div>
-                        <p className="text-sm text-muted-foreground">{item.description}</p>
-                        <Badge variant="outline" className="mt-2">{item.category}</Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
+            <DealMenuItems
+              items={categorizedItems.sandwiches}
+              selectedItems={selectedItems}
+              onItemSelect={handleItemSelect}
+              title="Select a Sandwich"
+            />
           )}
           
           {categorizedItems.sides.length > 0 && (
-            <div className="mb-8">
-              <h3 className="text-lg font-semibold mb-4">Select a Free Side</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {categorizedItems.sides.map(item => (
-                  <Card 
-                    key={item.id} 
-                    className={`cursor-pointer transition-all ${
-                      selectedItems.some(i => i.id === item.id) 
-                        ? 'ring-2 ring-primary' 
-                        : 'hover:border-primary/50'
-                    }`}
-                    onClick={() => handleItemSelect(item)}
-                  >
-                    <CardContent className="p-0">
-                      <div className="relative h-40 w-full">
-                        <img 
-                          src={item.imageUrl || item.image} 
-                          alt={item.name} 
-                          className="absolute inset-0 w-full h-full object-cover rounded-t-lg"
-                        />
-                        {selectedItems.some(i => i.id === item.id) && (
-                          <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-1">
-                            <Check size={16} />
-                          </div>
-                        )}
-                      </div>
-                      <div className="p-4">
-                        <div className="flex justify-between items-start mb-2">
-                          <h4 className="font-medium">{item.name}</h4>
-                          <div className="flex flex-col items-end">
-                            <span className={selectedItems.some(i => i.id === item.id) ? "line-through text-muted-foreground text-sm" : ""}>
-                              {formatPrice(item.price)}
-                            </span>
-                            {selectedItems.some(i => i.id === item.id) && (
-                              <span className="text-primary font-medium">FREE</span>
-                            )}
-                          </div>
-                        </div>
-                        <p className="text-sm text-muted-foreground">{item.description}</p>
-                        <Badge variant="outline" className="mt-2">{item.category}</Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
+            <DealMenuItems
+              items={categorizedItems.sides}
+              selectedItems={selectedItems}
+              onItemSelect={handleItemSelect}
+              title="Select a Free Side"
+              showFreeLabel
+            />
           )}
           
           {categorizedItems.other.length > 0 && (
-            <div className="mb-8">
-              <h3 className="text-lg font-semibold mb-4">Other Items (Regular Price)</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {categorizedItems.other.map(item => (
-                  <Card 
-                    key={item.id} 
-                    className={`cursor-pointer transition-all ${
-                      selectedItems.some(i => i.id === item.id) 
-                        ? 'ring-2 ring-primary' 
-                        : 'hover:border-primary/50'
-                    }`}
-                    onClick={() => handleItemSelect(item)}
-                  >
-                    <CardContent className="p-0">
-                      <div className="relative h-40 w-full">
-                        <img 
-                          src={item.imageUrl || item.image} 
-                          alt={item.name} 
-                          className="absolute inset-0 w-full h-full object-cover rounded-t-lg"
-                        />
-                        {selectedItems.some(i => i.id === item.id) && (
-                          <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-1">
-                            <Check size={16} />
-                          </div>
-                        )}
-                      </div>
-                      <div className="p-4">
-                        <div className="flex justify-between items-start mb-2">
-                          <h4 className="font-medium">{item.name}</h4>
-                          <span>{formatPrice(item.price)}</span>
-                        </div>
-                        <p className="text-sm text-muted-foreground">{item.description}</p>
-                        <Badge variant="outline" className="mt-2">{item.category}</Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
+            <DealMenuItems
+              items={categorizedItems.other}
+              selectedItems={selectedItems}
+              onItemSelect={handleItemSelect}
+              title="Other Items (Regular Price)"
+            />
           )}
         </>
       );
     }
     
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {filteredItems.map(item => (
-          <Card 
-            key={item.id} 
-            className={`cursor-pointer transition-all ${
-              selectedItems.some(i => i.id === item.id) 
-                ? 'ring-2 ring-primary' 
-                : 'hover:border-primary/50'
-            }`}
-            onClick={() => handleItemSelect(item)}
-          >
-            <CardContent className="p-0">
-              <div className="relative h-40 w-full">
-                <img 
-                  src={item.imageUrl || item.image} 
-                  alt={item.name} 
-                  className="absolute inset-0 w-full h-full object-cover rounded-t-lg"
-                />
-                {selectedItems.some(i => i.id === item.id) && (
-                  <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-1">
-                    <Check size={16} />
-                  </div>
-                )}
-              </div>
-              <div className="p-4">
-                <div className="flex justify-between items-start mb-2">
-                  <h4 className="font-medium">{item.name}</h4>
-                  <div className="flex flex-col items-end">
-                    <span className={selectedItems.some(i => i.id === item.id) ? "line-through text-muted-foreground text-sm" : ""}>
-                      {formatPrice(item.price)}
-                    </span>
-                    {selectedItems.some(i => i.id === item.id) && (
-                      <span className="text-primary font-medium">
-                        {formatPrice(applyDiscountToPrice(item.price, item))}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <p className="text-sm text-muted-foreground">{item.description}</p>
-                <Badge variant="outline" className="mt-2">{item.category}</Badge>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <DealMenuItems
+        items={filteredItems}
+        selectedItems={selectedItems}
+        onItemSelect={handleItemSelect}
+        title="Select Items for Your Deal"
+      />
     );
   };
   
@@ -511,32 +84,10 @@ const DealUse: React.FC = () => {
       <Navbar />
       
       <main className="container mx-auto px-4 py-8 pt-24">
-        <Button 
-          variant="ghost" 
-          onClick={() => navigate('/deals')}
-          className="mb-6 flex items-center"
-        >
-          <ArrowLeft size={16} className="mr-2" />
-          Back to Deals
-        </Button>
+        <DealHeader deal={deal} />
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
-            <h1 className="text-3xl font-bold mb-4">Apply Your Deal</h1>
-            
-            <div className="bg-primary/10 rounded-lg p-4 mb-8">
-              <div className="flex items-start gap-4">
-                <div className="bg-primary text-primary-foreground rounded-full p-2">
-                  <Tag size={20} />
-                </div>
-                <div>
-                  <h2 className="text-xl font-semibold">{deal.title}</h2>
-                  <p className="text-muted-foreground">{deal.description}</p>
-                  <Badge variant="secondary" className="mt-2">{deal.discount}</Badge>
-                </div>
-              </div>
-            </div>
-            
             <div className="mb-6">
               <h3 className="text-lg font-medium mb-4">Select Items for Your Deal</h3>
               
@@ -557,97 +108,14 @@ const DealUse: React.FC = () => {
           </div>
           
           <div>
-            <div className="bg-card rounded-xl shadow-md p-6 sticky top-24">
-              <h3 className="text-xl font-semibold mb-4">Your Selection</h3>
-              
-              {selectedItems.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">
-                  Select items to apply your {deal.discount} discount
-                </p>
-              ) : (
-                <>
-                  <div className="space-y-4 mb-4">
-                    {selectedItems.map(item => (
-                      <div key={item.id} className="flex justify-between items-center">
-                        <div className="flex items-center">
-                          <div className="h-10 w-10 rounded overflow-hidden flex-shrink-0 mr-3">
-                            <img src={item.imageUrl || item.image} alt={item.name} className="h-full w-full object-cover" />
-                          </div>
-                          <div>
-                            <p className="font-medium">{item.name}</p>
-                            <Badge variant="outline" className="text-xs">{item.category}</Badge>
-                          </div>
-                        </div>
-                        <div className="flex flex-col items-end">
-                          {deal.id === 'lunch-special' && (item.category === 'sides' || item.tags?.includes('soup') || item.tags?.includes('salad')) ? (
-                            <>
-                              <span className="line-through text-muted-foreground text-xs">{formatPrice(item.price)}</span>
-                              <span className="text-primary font-medium">FREE</span>
-                            </>
-                          ) : (
-                            <>
-                              {applyDiscountToPrice(item.price, item) !== item.price && (
-                                <span className="line-through text-muted-foreground text-xs">{formatPrice(item.price)}</span>
-                              )}
-                              <span>{formatPrice(applyDiscountToPrice(item.price, item))}</span>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  
-                  <Separator className="my-4" />
-                  
-                  <div className="flex justify-between font-bold">
-                    <span>Total</span>
-                    <span>{formatPrice(calculateTotal())}</span>
-                  </div>
-                  
-                  {deal.id === 'combo-meal' && selectedItems.length < 3 && (
-                    <p className="text-sm text-muted-foreground mt-4">
-                      Choose {3 - selectedItems.length} more items to complete your combo
-                    </p>
-                  )}
-
-                  {deal.id === 'lunch-special' && (
-                    <>
-                      {!selectedItems.some(item => item.tags?.includes('sandwich') || item.name.toLowerCase().includes('sandwich')) && (
-                        <p className="text-sm text-muted-foreground mt-4">
-                          Please select a sandwich
-                        </p>
-                      )}
-                      {!selectedItems.some(item => item.category === 'sides' || item.tags?.includes('soup') || item.tags?.includes('salad')) && (
-                        <p className="text-sm text-muted-foreground mt-4">
-                          Please select a free side or soup
-                        </p>
-                      )}
-                    </>
-                  )}
-                </>
-              )}
-              
-              <Button
-                className="w-full mt-6"
-                size="lg"
-                onClick={handleAddToCart}
-                disabled={
-                  selectedItems.length === 0 || 
-                  (deal.id === 'combo-meal' && selectedItems.length < 3) || 
-                  (deal.id === 'lunch-special' && (
-                    !selectedItems.some(item => item.tags?.includes('sandwich') || item.name.toLowerCase().includes('sandwich')) ||
-                    !selectedItems.some(item => item.category === 'sides' || item.tags?.includes('soup') || item.tags?.includes('salad'))
-                  ))
-                }
-              >
-                <ShoppingCart size={18} className="mr-2" />
-                Add to Cart
-              </Button>
-              
-              <p className="text-center text-xs text-muted-foreground mt-4">
-                Deal code: <span className="font-mono">{deal.code}</span>
-              </p>
-            </div>
+            <DealSummary
+              selectedItems={selectedItems}
+              deal={deal}
+              total={calculateTotal()}
+              onAddToCart={handleAddToCart}
+              isValid={isValid()}
+              validationMessage={getValidationMessage()}
+            />
           </div>
         </div>
       </main>
