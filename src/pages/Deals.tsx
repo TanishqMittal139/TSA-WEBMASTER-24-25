@@ -1,16 +1,15 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tag, ArrowRight, CalendarDays } from 'lucide-react';
 import Navbar from '../components/ui/navbar';
 import Footer from '../components/ui/footer';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/components/ui/use-toast';
-import BlurImage from '@/components/ui/blur-image';
+import DealsHero from '@/components/deals/DealsHero';
+import DealsGrid from '@/components/deals/DealsGrid';
+import DealsGuide from '@/components/deals/DealsGuide';
 
 export interface DealData {
   id: string;
@@ -111,26 +110,7 @@ const Deals: React.FC = () => {
   return (
     <div className="min-h-screen">
       <Navbar />
-      
-      <section className="relative h-80">
-        <div className="absolute inset-0">
-          <BlurImage
-            src="https://images.unsplash.com/photo-1607082350899-7e105aa886ae?q=80&w=2070&auto=format&fit=crop"
-            alt="Special Deals"
-            className="object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/10"></div>
-        </div>
-        
-        <div className="relative container mx-auto px-4 flex flex-col justify-center h-full pt-24">
-          <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-4xl font-bold mb-4 text-white">Special Deals & Offers</h1>
-            <p className="text-lg text-white/90">
-              Discover our latest promotions and save on your favorite meals
-            </p>
-          </div>
-        </div>
-      </section>
+      <DealsHero />
       
       <main className="container mx-auto px-4 py-8 mb-12">
         <Tabs defaultValue="current" className="mb-8" onValueChange={setActiveTab}>
@@ -142,86 +122,12 @@ const Deals: React.FC = () => {
           </div>
           
           <TabsContent value="current" className="mt-8">
-            {currentDeals.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {currentDeals.map(deal => (
-                  <Card key={deal.id} className="overflow-hidden h-full flex flex-col">
-                    <div className="relative h-48">
-                      <img 
-                        src={deal.image} 
-                        alt={deal.title}
-                        className="w-full h-full object-cover"
-                      />
-                      {deal.isPopular && (
-                        <Badge className="absolute top-2 right-2 bg-primary text-primary-foreground">
-                          Popular
-                        </Badge>
-                      )}
-                    </div>
-                    <CardContent className="flex-1 flex flex-col p-6">
-                      <div className="flex justify-between items-start mb-4">
-                        <h3 className="text-xl font-semibold">{deal.title}</h3>
-                        <Badge variant="outline" className="text-sm font-bold">
-                          {deal.discount}
-                        </Badge>
-                      </div>
-                      <p className="text-muted-foreground mb-4 flex-1">{deal.description}</p>
-                      <div className="flex justify-between items-center">
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <CalendarDays size={16} className="mr-1" />
-                          <span>Valid until {new Date(deal.validUntil).toLocaleDateString()}</span>
-                        </div>
-                      </div>
-                      <Button
-                        className="w-full mt-4"
-                        onClick={() => handleActivateDeal(deal)}
-                      >
-                        <Tag size={16} className="mr-2" />
-                        Use Deal
-                        <ArrowRight size={16} className="ml-2" />
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground">No current deals available.</p>
-              </div>
-            )}
+            <DealsGrid deals={currentDeals} onActivateDeal={handleActivateDeal} />
           </TabsContent>
           
           <TabsContent value="upcoming" className="mt-8">
             {upcomingDeals.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {upcomingDeals.map(deal => (
-                  <Card key={deal.id} className="overflow-hidden h-full">
-                    <div className="relative h-48">
-                      <img 
-                        src={deal.image} 
-                        alt={deal.title}
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
-                        <Badge className="text-lg py-1 px-4">Coming Soon</Badge>
-                      </div>
-                    </div>
-                    <CardContent className="p-6">
-                      <div className="flex justify-between items-start mb-4">
-                        <h3 className="text-xl font-semibold">{deal.title}</h3>
-                        <Badge variant="outline" className="text-sm font-bold">
-                          {deal.discount}
-                        </Badge>
-                      </div>
-                      <p className="text-muted-foreground mb-4">{deal.description}</p>
-                      <div className="flex items-center text-sm text-muted-foreground">
-                        <CalendarDays size={16} className="mr-1" />
-                        <span>Starting {new Date(deal.validUntil).toLocaleDateString()}</span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+              <DealsGrid deals={upcomingDeals} onActivateDeal={handleActivateDeal} />
             ) : (
               <div className="text-center py-16">
                 <p className="text-muted-foreground">No upcoming deals at the moment.</p>
@@ -240,24 +146,7 @@ const Deals: React.FC = () => {
           </TabsContent>
         </Tabs>
         
-        <div className="bg-muted p-6 rounded-lg max-w-3xl mx-auto mt-12">
-          <h2 className="text-xl font-semibold mb-2">How to Use Deals</h2>
-          <ol className="list-decimal ml-5 space-y-2">
-            <li>Sign in to your account to access exclusive deals</li>
-            <li>Browse available deals and select the one you want</li>
-            <li>Click "Use Deal" to apply the discount to eligible items</li>
-            <li>Complete your order with the discount applied</li>
-          </ol>
-          
-          {!user && (
-            <div className="mt-6 text-center">
-              <p className="mb-3">Sign in to access exclusive deals</p>
-              <Button onClick={() => navigate('/sign-in')}>
-                Sign In Now
-              </Button>
-            </div>
-          )}
-        </div>
+        <DealsGuide />
       </main>
       
       <Footer />
