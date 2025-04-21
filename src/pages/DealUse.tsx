@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Navbar from '../components/ui/navbar';
@@ -154,7 +155,7 @@ const DealUse: React.FC = () => {
       addItem({
         id: item.id,
         name: item.name,
-        price: applyDiscountToPrice(item.price),
+        price: formatPrice(applyDiscountToPrice(item.price)),
         image: item.imageUrl,
         category: item.category,
         hasDiscount: true
