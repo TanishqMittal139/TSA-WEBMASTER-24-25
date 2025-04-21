@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from '@/components/ui/use-toast';
+import { Button } from '@/components/ui/button'; // Added missing Button import
 import ProfileSection from '@/components/settings/ProfileSection';
 import NotificationsSection from '@/components/settings/NotificationsSection';
 import PrivacySection from '@/components/settings/PrivacySection';
@@ -122,6 +123,14 @@ const Settings: React.FC = () => {
     );
   }
   
+  // Create a wrapper function to adapt the updateProfile function to match the expected type
+  const handleUpdateProfile = async (data: { name: string; phone: string }) => {
+    const result = await updateProfile(data);
+    if (!result.success) {
+      throw new Error(result.message);
+    }
+  };
+  
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -161,7 +170,7 @@ const Settings: React.FC = () => {
                   {activeTab === 'account' && (
                     <ProfileSection
                       initialData={profileData}
-                      onUpdateProfile={updateProfile}
+                      onUpdateProfile={handleUpdateProfile}
                     />
                   )}
                   
