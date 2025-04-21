@@ -1,3 +1,4 @@
+
 import { MenuItem } from '@/types/menu';
 
 export const menuItems: MenuItem[] = [
@@ -103,7 +104,7 @@ export const menuItems: MenuItem[] = [
     name: 'Chicken Caesar Salad',
     description: 'Fresh romaine lettuce with grilled chicken, parmesan, croutons, and Caesar dressing.',
     price: 10.99,
-    imageUrl: 'https://images.unsplash.com/photo-1607532941433-596454c63c71?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8Z2FybGljJTIwYnJlYWR8ZW58MHx8MHx8MA==',
+    imageUrl: 'https://images.unsplash.com/photo-1550304943-4f24f54ddde9?w=400&auto=format&fit=crop&q=60',
     category: 'entrees',
     cuisineType: 'american',
     tags: ['salad', 'healthy', 'chicken'],
@@ -113,7 +114,7 @@ export const menuItems: MenuItem[] = [
     name: 'Mashed Potatoes',
     description: 'Creamy mashed potatoes with butter and herbs.',
     price: 6.99,
-    imageUrl: 'https://images.unsplash.com/photo-1607532941433-596454c63c71?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8Z2FybGljJTIwYnJlYWR8ZW58MHx8MHx8MA==',
+    imageUrl: 'https://images.unsplash.com/photo-1482049016688-2d3e1b311543?w=400&auto=format&fit=crop&q=60',
     category: 'sides',
     cuisineType: 'american',
     tags: ['potatoes', 'creamy'],
@@ -125,7 +126,7 @@ export const menuItems: MenuItem[] = [
     name: 'Vanilla Ice Cream',
     description: 'Classic vanilla ice cream.',
     price: 4.99,
-    imageUrl: 'https://images.unsplash.com/photo-1607532941433-596454c63c71?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8Z2FybGljJTIwYnJlYWR8ZW58MHx8MHx8MA==',
+    imageUrl: 'https://images.unsplash.com/photo-1570197788417-0e82375c9371?w=400&auto=format&fit=crop&q=60',
     category: 'desserts',
     cuisineType: 'american',
     tags: ['ice cream', 'vanilla'],
@@ -136,7 +137,7 @@ export const menuItems: MenuItem[] = [
     name: 'Orange Juice',
     description: 'Freshly squeezed orange juice.',
     price: 3.99,
-    imageUrl: 'https://images.unsplash.com/photo-1607532941433-596454c63c71?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8Z2FybGljJTIwYnJlYWR8ZW58MHx8MHx8MA==',
+    imageUrl: 'https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=400&auto=format&fit=crop&q=60',
     category: 'beverages',
     cuisineType: 'american',
     tags: ['juice', 'orange'],
