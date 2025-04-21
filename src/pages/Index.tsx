@@ -4,6 +4,7 @@ import Navbar from '../components/ui/navbar';
 import Footer from '../components/ui/footer';
 import HeroSection from '../components/home/hero-section';
 import FeaturedSection from '../components/home/featured-section';
+import CharitableInitiative from '../components/home/charitable-initiative';
 import HoursSection from '../components/home/hours-section';
 
 const Index: React.FC = () => {
@@ -32,6 +33,7 @@ const Index: React.FC = () => {
       <main>
         <HeroSection />
         <FeaturedSection />
+        <CharitableInitiative />
         <HoursSection />
       </main>
       
