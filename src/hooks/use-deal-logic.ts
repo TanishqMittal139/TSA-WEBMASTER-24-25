@@ -1,11 +1,11 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
 import { DealData } from '@/pages/Deals';
-import { MenuItem, getAllMeals } from '@/data/menu-data';
+import { MenuItem } from '@/types/menu';
+import { getAllMeals } from '@/data/menu';
 
 export const useDealLogic = (dealId: string | undefined) => {
   const navigate = useNavigate();

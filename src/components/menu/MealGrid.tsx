@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { MenuItem } from '@/data/menu-data';
+import { MenuItem } from '@/types/menu';
 import MealCard from './MealCard';
 import NoResults from './NoResults';
 

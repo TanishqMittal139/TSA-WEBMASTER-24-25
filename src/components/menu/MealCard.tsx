@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { NutritionCard } from '@/components/ui/nutrition-card';
-import { MenuItem } from '@/data/menu-data';
+import { MenuItem } from '@/types/menu';
 
 interface MealCardProps {
   meal: MenuItem;

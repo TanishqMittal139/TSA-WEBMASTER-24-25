@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Search, XCircle } from 'lucide-react';
-import { dietaryTags, cuisineTypes } from '@/data/menu-data';
+import { dietaryTags, cuisineTypes } from '@/data/menu';
 
 interface SearchFiltersProps {
   searchTerm: string;

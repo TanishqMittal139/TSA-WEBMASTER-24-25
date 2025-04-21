@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Check } from 'lucide-react';
-import { MenuItem } from '@/data/menu-data';
+import { MenuItem } from '@/types/menu';
 
 interface DealMenuItemsProps {
   items: MenuItem[];

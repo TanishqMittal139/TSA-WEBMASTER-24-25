@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ShoppingCart } from 'lucide-react';
-import { MenuItem } from '@/data/menu-data';
+import { MenuItem } from '@/types/menu';
 import { DealData } from '@/pages/Deals';
 
 interface DealSummaryProps {
