@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -81,18 +80,6 @@ const deals: DealData[] = [
     validUntil: '2025-12-31',
     appliesTo: 'all',
     image: 'https://images.unsplash.com/photo-1565299507177-b0ac66763828?q=80&w=1064&auto=format&fit=crop'
-  },
-  {
-    id: 'new-customer',
-    title: 'New Customer Discount',
-    description: 'First-time customers get 10% off their entire order',
-    discount: '10% OFF',
-    discountType: 'percentage',
-    discountAmount: 10,
-    code: 'WELCOME10',
-    validUntil: '2025-12-31',
-    appliesTo: 'all',
-    image: 'https://images.unsplash.com/photo-1607082350899-7e105aa886ae?q=80&w=2070&auto=format&fit=crop', // Updated to a food-related image of a cafe/restaurant
   }
 ];
 
