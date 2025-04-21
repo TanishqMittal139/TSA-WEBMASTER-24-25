@@ -1,7 +1,7 @@
+
 import React from 'react';
-import Navbar from '@/components/ui/navbar';
-import Footer from '@/components/ui/footer';
-import PageHeader from '@/components/ui/page-header';
+import Navbar from '../components/ui/navbar';
+import Footer from '../components/ui/footer';
 import { useCart } from '../context/CartContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { X, Minus, Plus, ShoppingBag, ArrowLeft, ShoppingCart } from 'lucide-react';
@@ -40,17 +40,10 @@ const Cart: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen">
       <Navbar />
       
-      <PageHeader
-        title="Your Cart"
-        subtitle="Review your selected items and proceed to checkout"
-        badge="Order Summary"
-        imageSrc="https://images.unsplash.com/photo-1559925393-8be0ec4767c8?q=80&w=2071"
-      />
-      
-      <main className="flex-grow">
+      <main className="pt-28 pb-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-10">
             <h1 className="text-3xl font-bold mb-4">Your Cart</h1>

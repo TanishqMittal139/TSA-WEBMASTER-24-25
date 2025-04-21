@@ -1,218 +1,186 @@
+
 import React, { useState, useEffect } from 'react';
-import { Calendar } from 'lucide-react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/ui/navbar';
 import Footer from '@/components/ui/footer';
-import { Calendar as CalendarComponent } from "@/components/ui/calendar"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { format } from 'date-fns';
-import { cn } from "@/lib/utils"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import BlurImage from '@/components/ui/blur-image';
+import AnimatedHeader from '@/components/ui/animated-header';
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/components/ui/use-toast";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { createReservation } from '@/services/supabase-reservations';
-import { isAuthenticated } from '@/services/auth';
-import PageHeader from '@/components/ui/page-header';
-
-const FormSchema = z.object({
-  date: z.date({
-    required_error: "A date is required.",
-  }),
-  time: z.string({
-    required_error: "Please select a time.",
-  }),
-  guests: z.string({
-    required_error: "Please select the number of guests.",
-  }),
-})
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/components/ui/tabs';
+import { toast } from '@/components/ui/use-toast';
+import { ReservationData, getUserReservations, cancelReservation } from '@/services/supabase-reservations';
+import { useAuth } from '@/context/AuthContext';
+import ReservationForm from '@/components/reservations/ReservationForm';
+import ReservationList from '@/components/reservations/ReservationList';
+import ReservationInfo from '@/components/reservations/ReservationInfo';
+import { Button } from '@/components/ui/button';
+import { ShieldAlert, Lock } from 'lucide-react';
 
 const Reservations = () => {
-  const location = useLocation();
   const navigate = useNavigate();
-  const [locationId, setLocationId] = useState<string | null>(null);
-  const { toast } = useToast();
-
+  const [activeTab, setActiveTab] = useState("new");
+  const [myReservations, setMyReservations] = useState<ReservationData[]>([]);
+  const { user, isLoading } = useAuth();
+  
   useEffect(() => {
-    if (location.state && location.state.locationId) {
-      setLocationId(location.state.locationId);
-    }
-  }, [location.state]);
+    const checkAuth = async () => {
+      if (!isLoading) {
+        if (user) {
+          await loadUserReservations();
+        }
+      }
+    };
+    
+    checkAuth();
+  }, [user, isLoading]);
 
-  const form = useForm<z.infer<typeof FormSchema>>({
-    resolver: zodResolver(FormSchema),
-    defaultValues: {
-      date: new Date(),
-      time: "",
-      guests: "",
-    },
-  })
-
-  function onSubmit(data: z.infer<typeof FormSchema>) {
-    if (!isAuthenticated()) {
-      toast({
-        title: "Not authenticated",
-        description: "You must be signed in to make a reservation.",
-      })
-      navigate('/sign-in', { state: { redirectTo: '/reservations' } });
+  const loadUserReservations = async () => {
+    if (!user) {
+      setMyReservations([]);
       return;
     }
+    
+    try {
+      const { data, error } = await getUserReservations();
+      
+      if (error) {
+        console.error("Error loading reservations:", error);
+        toast({
+          title: "Error loading reservations",
+          description: error.message || "Failed to load your reservations",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      setMyReservations(data || []);
+    } catch (error) {
+      console.error("Error in loadUserReservations:", error);
+      setMyReservations([]);
+    }
+  };
 
-    createReservation({
-      date: format(data.date, 'yyyy-MM-dd'),
-      time: data.time,
-      guests: data.guests,
-      locationId: locationId || 'defaultLocationId',
-    }).then(() => {
-      toast({
-        title: "Success",
-        description: "Your reservation has been created.",
-      })
-      navigate('/profile');
-    }).catch((error) => {
+  const handleCancelReservation = async (id: string) => {
+    try {
+      const { error } = await cancelReservation(id);
+      
+      if (!error) {
+        toast({
+          title: "Reservation Cancelled",
+          description: "Your reservation has been successfully cancelled.",
+        });
+        
+        await loadUserReservations();
+      } else {
+        toast({
+          title: "Failed to Cancel",
+          description: error.message || "An error occurred while cancelling your reservation",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      console.error("Cancellation error:", error);
       toast({
         title: "Error",
-        description: "There was an error creating your reservation.",
-      })
-    });
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-grow pt-20">
+          <div className="container mx-auto px-4 py-12">
+            <div className="max-w-3xl mx-auto text-center">
+              <div className="flex justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+              </div>
+              <p className="mt-4">Loading...</p>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
   }
 
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
       
-      <PageHeader
-        title="Make a Reservation"
-        subtitle="Book your table online and enjoy a memorable dining experience"
-        badge="Book a Table"
-        imageSrc="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070"
-      />
-      
       <main className="flex-grow">
-        <div className="container mx-auto py-12">
-          <div className="max-w-2xl mx-auto">
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                <FormField
-                  control={form.control}
-                  name="date"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>Date</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant={"outline"}
-                              className={cn(
-                                "w-[240px] pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground"
-                              )}
-                            >
-                              {field.value ? (
-                                format(field.value, "PPP")
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
-                              <Calendar className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <CalendarComponent
-                            mode="single"
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            disabled={(date) =>
-                              date < new Date()
-                            }
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="time"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Time</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a time" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="12:00">12:00</SelectItem>
-                          <SelectItem value="12:30">12:30</SelectItem>
-                          <SelectItem value="13:00">13:00</SelectItem>
-                          <SelectItem value="13:30">13:30</SelectItem>
-                          <SelectItem value="14:00">14:00</SelectItem>
-                          <SelectItem value="14:30">14:30</SelectItem>
-                          <SelectItem value="15:00">15:00</SelectItem>
-                          <SelectItem value="15:30">15:30</SelectItem>
-                          <SelectItem value="16:00">16:00</SelectItem>
-                          <SelectItem value="16:30">16:30</SelectItem>
-                          <SelectItem value="17:00">17:00</SelectItem>
-                          <SelectItem value="17:30">17:30</SelectItem>
-                          <SelectItem value="18:00">18:00</SelectItem>
-                          <SelectItem value="18:30">18:30</SelectItem>
-                          <SelectItem value="19:00">19:00</SelectItem>
-                          <SelectItem value="19:30">19:30</SelectItem>
-                          <SelectItem value="20:00">20:00</SelectItem>
-                          <SelectItem value="20:30">20:30</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="guests"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Guests</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select guest amount" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="1">1 Guest</SelectItem>
-                          <SelectItem value="2">2 Guests</SelectItem>
-                          <SelectItem value="3">3 Guests</SelectItem>
-                          <SelectItem value="4">4 Guests</SelectItem>
-                          <SelectItem value="5">5 Guests</SelectItem>
-                          <SelectItem value="6">6 Guests</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button type="submit">Submit</Button>
-              </form>
-            </Form>
+        <section className="relative h-80">
+          <div className="absolute inset-0">
+            <BlurImage
+              src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=2670&auto=format&fit=crop"
+              alt="Reservations"
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/10"></div>
           </div>
-        </div>
+          
+          <div className="relative container mx-auto px-4 flex flex-col justify-center h-full pt-24">
+            <AnimatedHeader 
+              title="Reservations" 
+              subtitle="Reserve your table or manage your existing reservations at Tasty Hub"
+              className="text-white"
+            />
+          </div>
+        </section>
+        
+        <section className="container mx-auto px-4 py-12">
+          <div className="max-w-3xl mx-auto">
+            {!user ? (
+              <div className="bg-card rounded-xl shadow-lg p-6 md:p-8 text-center">
+                <ShieldAlert className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <h2 className="text-xl font-semibold mb-2">Authentication Required</h2>
+                <p className="mb-6">Please sign in to make or view reservations.</p>
+                <Button onClick={() => navigate('/sign-in', { state: { from: '/reservations' } })} className="flex items-center mx-auto gap-2">
+                  <Lock size={16} />
+                  Sign In
+                </Button>
+              </div>
+            ) : (
+              <Tabs defaultValue="new" value={activeTab} onValueChange={setActiveTab}>
+                <TabsList className="grid grid-cols-2 mb-8">
+                  <TabsTrigger value="new">New Reservation</TabsTrigger>
+                  <TabsTrigger value="my">
+                    My Reservations 
+                    {myReservations.length > 0 && (
+                      <span className="ml-2 bg-primary/20 text-primary text-xs px-2 py-0.5 rounded-full">
+                        {myReservations.length}
+                      </span>
+                    )}
+                  </TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="new" className="mt-0">
+                  <ReservationForm onSuccess={() => {
+                    loadUserReservations();
+                    setActiveTab("my");
+                  }} />
+                </TabsContent>
+                
+                <TabsContent value="my" className="mt-0">
+                  <ReservationList
+                    reservations={myReservations}
+                    onCancelReservation={handleCancelReservation}
+                    onNewReservation={() => setActiveTab("new")}
+                  />
+                </TabsContent>
+              </Tabs>
+            )}
+            
+            <ReservationInfo />
+          </div>
+        </section>
       </main>
       
       <Footer />
