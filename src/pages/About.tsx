@@ -175,7 +175,7 @@ const About = () => {
             <ParallaxGallery images={galleryImages} />
           </div>
           
-          {/* Tabbed Content Section - Fixed Farm to Table zoom */}
+          {/* Tabbed Content Section - Fixed Farm to Table zoom and standardized all tab layouts */}
           <div className="my-24 fade-up">
             <h2 className="text-3xl font-bold mb-12 text-center">How We Deliver Excellence</h2>
             <Tabs defaultValue="farm-to-table" className="w-full">
@@ -191,9 +191,10 @@ const About = () => {
                 </TabsTrigger>
               </TabsList>
               
+              {/* Farm-to-Table Tab - Fixed zoom issue by removing animate-float class */}
               <TabsContent value="farm-to-table" className="animate-fade-in">
                 <div className="grid md:grid-cols-2 gap-8">
-                  <div className="glassmorphism p-8 rounded-xl border border-white/20 dark:border-white/10 animate-float">
+                  <div className="glassmorphism p-8 rounded-xl border border-white/20 dark:border-white/10">
                     <Leaf className="h-10 w-10 text-primary mb-4" />
                     <h3 className="text-2xl font-bold mb-4">Our Farm-to-Table Commitment</h3>
                     <p className="mb-6 text-foreground/90">
@@ -227,109 +228,76 @@ const About = () => {
                 </div>
               </TabsContent>
               
+              {/* Preparation Process Tab - Updated to match Farm-to-Table layout */}
               <TabsContent value="preparation" className="animate-fade-in">
-                <div className="grid md:grid-cols-3 gap-6">
-                  <InteractiveCard
-                    title="Nutrient Preservation"
-                    icon={Sun}
-                    delay={1}
-                  >
-                    <p>
-                      We use specialized low-temperature cooking methods that preserve heat-sensitive vitamins and beneficial plant compounds. Our preparation times are carefully controlled to maximize nutrient bioavailability.
+                <div className="grid md:grid-cols-2 gap-8">
+                  <div className="glassmorphism p-8 rounded-xl border border-white/20 dark:border-white/10">
+                    <ChefHat className="h-10 w-10 text-primary mb-4" />
+                    <h3 className="text-2xl font-bold mb-4">Culinary Excellence</h3>
+                    <p className="mb-6 text-foreground/90">
+                      Our culinary team includes flavor scientists who use natural techniques to enhance taste without artificial additives. We employ fermentation, aging, and molecular gastronomy to create complex flavor profiles while maintaining nutritional integrity.
                     </p>
-                  </InteractiveCard>
+                    <div className="grid grid-cols-1 gap-4">
+                      <div className="flex items-center gap-3">
+                        <Sun className="h-5 w-5 text-primary flex-shrink-0" />
+                        <span>Specialized low-temperature cooking preserves nutrients</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Wand2 className="h-5 w-5 text-primary flex-shrink-0" />
+                        <span>Innovative techniques for maximum flavor</span>
+                      </div>
+                    </div>
+                  </div>
                   
-                  <InteractiveCard
-                    title="Flavor Innovation"
-                    icon={Wand2}
-                    delay={2}
-                  >
-                    <p>
-                      Our culinary team includes flavor scientists who use natural techniques to enhance taste without artificial additives. We employ fermentation, aging, and molecular gastronomy to create complex flavor profiles.
-                    </p>
-                  </InteractiveCard>
-                  
-                  <InteractiveCard
-                    title="Made-to-Order"
-                    icon={Utensils}
-                    delay={3}
-                  >
-                    <p>
-                      Every dish is prepared to order, ensuring maximum freshness. We've implemented efficient kitchen workflows that allow for custom preparation without compromising speed of service.
-                    </p>
-                  </InteractiveCard>
-                </div>
-                
-                <div className="mt-12 relative rounded-xl overflow-hidden">
-                  <img 
-                    src="https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=1200&q=80" 
-                    alt="Chef preparing fresh ingredients" 
-                    className="w-full object-cover aspect-video"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent flex items-end">
-                    <div className="p-8 max-w-2xl">
-                      <h3 className="text-2xl font-bold text-white mb-3">Quality Equipment & Processes</h3>
-                      <p className="text-white/90">Our commitment to quality extends to our kitchen equipment. We've invested in state-of-the-art tools that allow precise control over cooking parameters, ensuring consistent quality in every meal we serve.</p>
+                  <div className="relative rounded-xl overflow-hidden h-full min-h-[400px]">
+                    <img 
+                      src="https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=1000&q=80" 
+                      alt="Chef preparing fresh ingredients" 
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent flex items-end">
+                      <div className="p-6">
+                        <h4 className="text-xl font-bold text-white mb-2">Quality Equipment & Processes</h4>
+                        <p className="text-white/90">Our commitment to quality extends to our kitchen equipment. We've invested in state-of-the-art tools that allow precise control over cooking parameters.</p>
+                      </div>
                     </div>
                   </div>
                 </div>
               </TabsContent>
               
+              {/* Sustainability Tab - Updated to match Farm-to-Table layout */}
               <TabsContent value="sustainability" className="animate-fade-in">
                 <div className="grid md:grid-cols-2 gap-8">
-                  <div>
-                    <div className="relative h-full rounded-xl overflow-hidden">
-                      <img 
-                        src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=1000&q=80" 
-                        alt="Sustainable farming practices" 
-                        className="h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-transparent flex items-end">
-                        <div className="p-6">
-                          <h4 className="text-xl font-bold text-white mb-2">Regenerative Agriculture</h4>
-                          <p className="text-white/90">Our partners use farming practices that build soil health, increase biodiversity, and sequester carbon, creating a positive environmental impact with every meal we serve.</p>
-                        </div>
+                  <div className="glassmorphism p-8 rounded-xl border border-white/20 dark:border-white/10">
+                    <Recycle className="h-10 w-10 text-primary mb-4" />
+                    <h3 className="text-2xl font-bold mb-4">Environmental Commitment</h3>
+                    <p className="mb-6 text-foreground/90">
+                      We've implemented a comprehensive sustainability program that has reduced our environmental impact by over 65% compared to industry standards. Our kitchens use water-recycling systems and all locations operate on 100% renewable energy.
+                    </p>
+                    <div className="grid grid-cols-1 gap-4">
+                      <div className="flex items-center gap-3">
+                        <Wind className="h-5 w-5 text-primary flex-shrink-0" />
+                        <span>Carbon-neutral delivery program</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Globe className="h-5 w-5 text-primary flex-shrink-0" />
+                        <span>Zero landfill waste at all locations</span>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="space-y-6">
-                    <InteractiveCard
-                      title="Carbon Footprint Reduction"
-                      icon={Wind}
-                      delay={1}
-                    >
-                      <ul className="space-y-2 list-disc pl-5">
-                        <li>100% renewable energy in all locations</li>
-                        <li>Carbon-neutral delivery program</li>
-                        <li>80% reduction in food miles through local sourcing</li>
-                        <li>Annual carbon audit with published results</li>
-                      </ul>
-                    </InteractiveCard>
-                    
-                    <InteractiveCard
-                      title="Waste Reduction"
-                      icon={Recycle}
-                      delay={2}
-                    >
-                      <ul className="space-y-2 list-disc pl-5">
-                        <li>Zero landfill waste program at all locations</li>
-                        <li>Comprehensive composting system</li>
-                        <li>Biodegradable packaging made from reclaimed agricultural waste</li>
-                        <li>Creative usage of vegetable trimmings in stocks and sauces</li>
-                      </ul>
-                    </InteractiveCard>
-                  </div>
-                </div>
-                
-                <div className="mt-12 p-6 bg-background/50 backdrop-blur-md rounded-xl border border-white/20 dark:border-white/10">
-                  <div className="prose prose-lg max-w-none text-foreground/90">
-                    <p>
-                      We've implemented a water conservation program that has reduced our water usage by 65% compared to industry standards. Our kitchens use water-recycling systems and high-efficiency fixtures throughout our facilities.
-                    </p>
-                    <p>
-                      TastyHub is a founding member of the Sustainable Restaurant Coalition, helping to develop industry-wide standards for environmental responsibility. We transparently share our sustainability metrics through annual impact reports available on our website.
-                    </p>
+                  <div className="relative rounded-xl overflow-hidden h-full min-h-[400px]">
+                    <img 
+                      src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=1000&q=80" 
+                      alt="Sustainable farming practices" 
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent flex items-end">
+                      <div className="p-6">
+                        <h4 className="text-xl font-bold text-white mb-2">Regenerative Agriculture</h4>
+                        <p className="text-white/90">Our partners use farming practices that build soil health, increase biodiversity, and sequester carbon, creating a positive environmental impact.</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </TabsContent>
