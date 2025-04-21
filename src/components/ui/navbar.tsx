@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -5,7 +6,7 @@ import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import AppLogo from '@/components/ui/app-logo';
-import { ShoppingBag } from 'lucide-react';
+import { ShoppingBag, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ThemeToggle from '@/components/ui/theme-toggle';
 import { NavLink } from './navbar/nav-link';
@@ -34,8 +35,6 @@ const Navbar: React.FC = () => {
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [location.pathname]);
-  
-  const navLinks = NAV_LINKS;
 
   const handleSignOut = async () => {
     await signOut();
@@ -57,12 +56,12 @@ const Navbar: React.FC = () => {
         
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-6">
-          {navLinks.map((link) => (
+          {NAV_LINKS.map((link) => (
             <NavLink
               key={link.path}
               to={link.path}
               isActive={location.pathname === link.path}
-              icon={link.icon}
+              icon={<link.icon size={link.size} />}
             >
               {link.name}
             </NavLink>
@@ -129,7 +128,6 @@ const Navbar: React.FC = () => {
       <MobileMenu
         isOpen={isMobileMenuOpen}
         setIsOpen={setIsMobileMenuOpen}
-        navLinks={navLinks}
         user={user}
         profile={profile}
         handleSignOut={handleSignOut}
