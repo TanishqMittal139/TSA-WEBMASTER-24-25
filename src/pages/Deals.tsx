@@ -92,7 +92,7 @@ const deals: DealData[] = [
     code: 'WELCOME10',
     validUntil: '2025-12-31',
     appliesTo: 'all',
-    image: 'https://images.unsplash.com/photo-1582562124811-c09040d0a901?q=80&w=1470&auto=format&fit=crop', // Updated image URL
+    image: 'https://images.unsplash.com/photo-1607082350899-7e105aa886ae?q=80&w=2070&auto=format&fit=crop', // Updated to a food-related image of a cafe/restaurant
   }
 ];
 
