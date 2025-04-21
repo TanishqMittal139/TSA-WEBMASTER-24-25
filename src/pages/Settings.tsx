@@ -16,7 +16,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { supabase } from '@/integrations/supabase/client';
 
 const Settings: React.FC = () => {
   const { user, profile, signOut, updateProfile } = useAuth();
@@ -44,18 +43,12 @@ const Settings: React.FC = () => {
   
   // Profile state
   const [profileData, setProfileData] = useState({
-    name: profile?.name || '',
-    email: user?.email || '',
-    phone: profile?.phone || '',
+    name: '',
+    email: '',
+    phone: '',
   });
   
   useEffect(() => {
-    // If user is not authenticated, redirect to sign in
-    if (!user) {
-      navigate('/sign-in');
-      return;
-    }
-    
     // Update profile data when profile changes
     if (profile) {
       setProfileData({
@@ -65,7 +58,7 @@ const Settings: React.FC = () => {
       });
     }
     
-    // Get user settings from database or localStorage
+    // Get user settings from localStorage
     const savedSettings = localStorage.getItem('user_settings');
     if (savedSettings) {
       try {
@@ -74,7 +67,7 @@ const Settings: React.FC = () => {
         console.error('Failed to parse settings', error);
       }
     }
-  }, [user, profile, navigate]);
+  }, [user, profile]);
   
   // Handle profile update
   const handleProfileUpdate = async (e: React.FormEvent) => {
@@ -129,7 +122,9 @@ const Settings: React.FC = () => {
   // Handle sign out
   const handleSignOut = async () => {
     try {
-      await signOut();
+      if (signOut) {
+        await signOut();
+      }
       navigate('/');
       toast({
         title: "Signed Out",
