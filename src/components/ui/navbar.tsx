@@ -73,7 +73,8 @@ const Navbar: React.FC = () => {
   
   return (
     <header className={cn(
-      "fixed w-full z-50 transition-all duration-300 bg-background/90 backdrop-blur-lg shadow-sm py-2"
+      "fixed w-full z-50 transition-all duration-300 bg-background/90 backdrop-blur-lg shadow-sm py-2",
+      isScrolled && "py-1 shadow-md"
     )}>
       <div className="container mx-auto px-4 flex items-center justify-between">
         <Link 
@@ -83,6 +84,7 @@ const Navbar: React.FC = () => {
           <AppLogo />
         </Link>
         
+        {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-6">
           {navLinks.map((link) => (
             <Link
@@ -101,6 +103,7 @@ const Navbar: React.FC = () => {
           ))}
         </nav>
         
+        {/* Desktop Right Side */}
         <div className="hidden md:flex items-center space-x-4">
           <ThemeToggle />
           
@@ -189,6 +192,7 @@ const Navbar: React.FC = () => {
           )}
         </div>
         
+        {/* Mobile Controls */}
         <div className="flex md:hidden items-center space-x-4">
           <ThemeToggle />
           
@@ -214,16 +218,34 @@ const Navbar: React.FC = () => {
         </div>
       </div>
       
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-background/95 backdrop-blur-sm z-40 md:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+      
       {/* Mobile Menu */}
       <div
         className={cn(
-          "fixed inset-0 bg-background/95 backdrop-blur-sm z-40 transform transition-transform duration-300 ease-in-out md:hidden pt-16",
+          "fixed inset-y-0 right-0 w-full max-w-xs bg-background z-50 transform transition-transform duration-300 ease-in-out shadow-lg md:hidden",
           isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
         )}
       >
-        <div className="flex flex-col pt-4 px-6 h-full overflow-y-auto pb-20">
+        <div className="flex flex-col h-full overflow-y-auto pb-20">
+          <div className="flex justify-end p-4">
+            <button
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="p-2 focus:outline-none text-foreground hover:text-primary"
+              aria-label="Close menu"
+            >
+              <X size={24} />
+            </button>
+          </div>
+          
           {user && (
-            <div className="py-4 mb-4 border-b border-border">
+            <div className="p-4 mb-4 border-b border-border">
               <div className="flex items-center space-x-3">
                 <Avatar className="h-10 w-10">
                   <AvatarImage src={profile?.avatar} alt={profile?.name || 'User'} />
@@ -239,64 +261,68 @@ const Navbar: React.FC = () => {
             </div>
           )}
           
-          {navLinks.map((link) => (
-            <Link
-              key={link.path}
-              to={link.path}
-              onClick={() => setIsMobileMenuOpen(false)}
-              className={cn(
-                "flex items-center space-x-3 py-4 text-lg border-b border-border transition-colors",
-                location.pathname === link.path
-                  ? "text-primary font-medium"
-                  : "text-foreground hover:text-primary"
-              )}
-            >
-              {link.icon}
-              <span>{link.name}</span>
-            </Link>
-          ))}
-          
-          {user ? (
-            <>
-              <Link 
-                to="/profile" 
+          <nav className="flex-1 px-4">
+            {navLinks.map((link) => (
+              <Link
+                key={link.path}
+                to={link.path}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center space-x-3 py-4 text-lg border-b border-border hover:text-primary transition-colors"
+                className={cn(
+                  "flex items-center space-x-3 py-4 text-lg border-b border-border transition-colors",
+                  location.pathname === link.path
+                    ? "text-primary font-medium"
+                    : "text-foreground hover:text-primary"
+                )}
+              >
+                {link.icon}
+                <span>{link.name}</span>
+              </Link>
+            ))}
+          </nav>
+          
+          <div className="px-4 mt-auto mb-8">
+            {user ? (
+              <>
+                <Link 
+                  to="/profile" 
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center space-x-3 py-4 text-lg border-b border-border hover:text-primary transition-colors"
+                >
+                  <User size={18} />
+                  <span>Profile</span>
+                </Link>
+                
+                <Link 
+                  to="/favorite-locations" 
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center space-x-3 py-4 text-lg border-b border-border hover:text-primary transition-colors"
+                >
+                  <Heart size={18} />
+                  <span>Favorites</span>
+                </Link>
+                
+                <button 
+                  onClick={() => {
+                    handleSignOut();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full flex items-center space-x-3 py-4 text-lg text-destructive hover:text-destructive/80 transition-colors"
+                >
+                  <LogOut size={18} />
+                  <span>Sign Out</span>
+                </button>
+              </>
+            ) : (
+              <Link 
+                to="/sign-in" 
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center space-x-3 py-4 text-lg hover:text-primary transition-colors"
               >
                 <User size={18} />
-                <span>Profile</span>
+                <span>Sign In</span>
               </Link>
-              
-              <Link 
-                to="/favorite-locations" 
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center space-x-3 py-4 text-lg border-b border-border hover:text-primary transition-colors"
-              >
-                <Heart size={18} />
-                <span>Favorites</span>
-              </Link>
-              
-              <button 
-                onClick={() => {
-                  handleSignOut();
-                  setIsMobileMenuOpen(false);
-                }}
-                className="mt-6 flex items-center space-x-3 py-4 text-lg text-destructive hover:text-destructive/80 transition-colors"
-              >
-                <LogOut size={18} />
-                <span>Sign Out</span>
-              </button>
-            </>
-          ) : (
-            <Link 
-              to="/sign-in" 
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="mt-6 flex items-center space-x-3 py-4 text-lg hover:text-primary transition-colors"
-            >
-              <User size={18} />
-              <span>Sign In</span>
-            </Link>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </header>
