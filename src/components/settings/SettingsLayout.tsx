@@ -50,11 +50,9 @@ const SettingsLayout: React.FC<SettingsLayoutProps> = ({
           </CardHeader>
           <Separator />
           
-          <ScrollArea className="h-[calc(100vh-400px)] md:h-auto">
-            <CardContent className="p-6">
-              {children}
-            </CardContent>
-          </ScrollArea>
+          <CardContent className="p-6">
+            {children}
+          </CardContent>
         </Card>
       </div>
     </div>

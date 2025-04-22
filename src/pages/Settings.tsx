@@ -72,9 +72,14 @@ const Settings: React.FC = () => {
   }
 
   const handleUpdateProfile = async (data: { name: string; phone: string }) => {
-    const result = await updateProfile(data);
-    if (!result.success) {
-      throw new Error(result.message);
+    try {
+      const result = await updateProfile(data);
+      if (result && !result.success) {
+        throw new Error(result.message || "Failed to update profile");
+      }
+      return Promise.resolve();
+    } catch (error) {
+      return Promise.reject(error);
     }
   };
   
