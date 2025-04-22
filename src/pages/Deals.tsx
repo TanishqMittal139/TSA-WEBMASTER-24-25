@@ -9,7 +9,7 @@ import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/components/ui/use-toast';
 import DealsHero from '@/components/deals/DealsHero';
 import DealsGrid from '@/components/deals/DealsGrid';
-import DealsGuide from '@/components/deals/DealsGuide';
+// Removed DealsGuide import
 
 export interface DealData {
   id: string;
@@ -146,7 +146,7 @@ const Deals: React.FC = () => {
           </TabsContent>
         </Tabs>
         
-        <DealsGuide />
+        {/* Removed DealsGuide component */}
       </main>
       
       <Footer />
