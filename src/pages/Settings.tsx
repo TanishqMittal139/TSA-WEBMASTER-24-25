@@ -17,6 +17,7 @@ const Settings: React.FC = () => {
   const { user, profile, signOut, updateProfile } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('account');
+  const [isLoading, setIsLoading] = useState(false);
   
   const [profileData, setProfileData] = useState({
     name: '',
@@ -36,6 +37,7 @@ const Settings: React.FC = () => {
   
   const handleSignOut = async () => {
     try {
+      setIsLoading(true);
       if (signOut) {
         await signOut();
       }
@@ -51,6 +53,8 @@ const Settings: React.FC = () => {
         description: "There was an error signing out. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
   
