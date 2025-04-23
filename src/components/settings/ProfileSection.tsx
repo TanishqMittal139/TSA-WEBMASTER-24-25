@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
+import { createOrUpdateProfile } from '@/services/supabase-profiles';
 
 interface ProfileSectionProps {
   initialData: {
@@ -23,15 +24,26 @@ const ProfileSection = ({ initialData, onUpdateProfile }: ProfileSectionProps) =
     setLoading(true);
     
     try {
-      await onUpdateProfile({
+      // First update profile in Supabase directly
+      const success = await createOrUpdateProfile({
         name: profileData.name,
         phone: profileData.phone,
       });
       
-      toast({
-        title: "Profile Updated",
-        description: "Your profile information has been updated successfully.",
-      });
+      if (success) {
+        // Then call the parent component's update function
+        await onUpdateProfile({
+          name: profileData.name,
+          phone: profileData.phone,
+        });
+        
+        toast({
+          title: "Profile Updated",
+          description: "Your profile information has been updated successfully.",
+        });
+      } else {
+        throw new Error("Failed to update profile in database");
+      }
     } catch (error) {
       console.error('Error updating profile:', error);
       toast({
