@@ -11,6 +11,7 @@ import LocationCard from '@/components/locations/LocationCard';
 import LocationDetails from '@/components/locations/LocationDetails';
 import { locations } from '@/data/locations';
 import { cn } from '@/lib/utils';
+import PageHeader from "@/components/ui/page-header";
 
 const FindLocation: React.FC = () => {
   const navigate = useNavigate();
@@ -79,7 +80,6 @@ const FindLocation: React.FC = () => {
     }
   };
 
-  // Create enhanced location objects for our components
   const enhancedLocations = filteredLocations.map(loc => ({
     id: loc.id,
     name: loc.name,
@@ -93,7 +93,6 @@ const FindLocation: React.FC = () => {
     image: loc.image
   }));
 
-  // Create enhanced details for the active location
   const getEnhancedLocation = (loc: typeof locations[0]) => {
     if (!loc) return null;
     return {
@@ -122,34 +121,15 @@ const FindLocation: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      
+
       <main className="flex-grow">
-        <section className="relative h-80">
-          <div className="absolute inset-0">
-            <BlurImage
-              src="https://images.unsplash.com/photo-1471967183320-ee018f6e114a?q=80&w=2070&auto=format&fit=crop"
-              alt="Find a Tasty Hub location"
-              className="object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/10"></div>
-          </div>
-          
-          <div className="relative container mx-auto px-4 flex flex-col justify-center h-full pt-24">
-            <div className={cn(
-              "transition-all duration-1000 transform",
-              isVisible ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"
-            )}>
-              <div className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4">
-                Our Locations
-              </div>
-              <h1 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">Find a Tasty Hub Near You</h1>
-              <p className="text-muted-foreground max-w-xl">
-                Visit one of our locations and enjoy our fresh, locally-sourced menu offerings.
-              </p>
-            </div>
-          </div>
-        </section>
-        
+        <PageHeader
+          badgeText="Our Locations"
+          title="Find a Tasty Hub Near You"
+          subtitle="Visit one of our locations and enjoy our fresh, locally-sourced menu offerings."
+          bgImage="/lovable-uploads/c6bd1eaa-9001-4a30-a1e9-0ba6659d2ff8.png"
+        />
+
         <section className="py-16">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto space-y-6">
