@@ -3,7 +3,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   User, CalendarRange, Heart, History,
-  Settings, Lock, LogOut
+  Lock, LogOut
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -76,10 +76,6 @@ const UserMenu: React.FC<UserMenuProps> = ({ user, profile, onSignOut }) => {
         <DropdownMenuSeparator />
         
         <DropdownMenuGroup>
-          <DropdownMenuItem onClick={() => navigate('/settings')}>
-            <Settings className="mr-2 h-4 w-4" />
-            <span>Settings</span>
-          </DropdownMenuItem>
           <DropdownMenuItem onClick={() => navigate('/reset-password')}>
             <Lock className="mr-2 h-4 w-4" />
             <span>Change Password</span>
