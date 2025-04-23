@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -28,7 +27,6 @@ import CheckoutConfirmation from "./pages/CheckoutConfirmation";
 import FavoriteLocations from "./pages/FavoriteLocations";
 import DishDetails from "./pages/DishDetails";
 import Profile from "./pages/Profile";
-import Settings from "./pages/Settings";
 import History from "./pages/History";
 import NotFound from "./pages/NotFound";
 import Careers from "./pages/Careers";
@@ -157,11 +155,7 @@ const App = () => {
                           <Profile />
                         </ProtectedRoute>
                       } />
-                      <Route path="/settings" element={
-                        <ProtectedRoute>
-                          <Settings />
-                        </ProtectedRoute>
-                      } />
+                      {/* REMOVED THE SETTINGS PAGE ROUTE */}
                       <Route path="/history" element={
                         <ProtectedRoute>
                           <History />
