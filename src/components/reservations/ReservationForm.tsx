@@ -31,6 +31,7 @@ import {
 } from '@/components/ui/select';
 import { toast } from '@/components/ui/use-toast';
 import { createReservation } from '@/services/supabase-reservations';
+import { syncProfileFromReservation } from '@/services/supabase-profiles';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -101,6 +102,13 @@ const ReservationForm: React.FC<ReservationFormProps> = ({ onSuccess }) => {
       const { data, error } = await createReservation(reservationData);
       
       if (!error && data) {
+        // Try to sync profile data after successful reservation
+        try {
+          await syncProfileFromReservation(reservationData);
+        } catch (err) {
+          console.warn("Failed to sync profile, but reservation succeeded:", err);
+        }
+        
         toast({
           title: "Reservation Confirmed!",
           description: `Your table for ${values.guests} is booked for ${format(values.date, 'MMMM d, yyyy')} at ${values.time}.`,

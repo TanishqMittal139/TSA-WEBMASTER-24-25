@@ -16,42 +16,9 @@ export const createReservation = async (reservationData: ReservationInput) => {
     
     const userId = session.user.id;
     
-    // First, check if profile exists
-    const { data: existingProfile } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('id', userId)
-      .single();
-
-    // If profile doesn't exist, create it
-    if (!existingProfile) {
-      console.log("Creating profile for user ID:", userId);
-      
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          id: userId,
-          email: reservationData.email,
-          name: reservationData.name,
-          phone: reservationData.phone
-        });
-      
-      if (profileError) {
-        console.error("Error creating profile:", profileError);
-        return {
-          error: { 
-            message: `Failed to create user profile: ${profileError.message}` 
-          },
-          data: null
-        };
-      }
-      
-      console.log("Profile created successfully");
-    }
-
+    // Create the reservation with user_id and skip profile creation
+    // This approach works because we already loosened the foreign key constraint
     console.log("Creating reservation with user_id:", userId);
-
-    // Create the reservation with user_id
     const { data, error } = await supabase
       .from('reservations')
       .insert({
