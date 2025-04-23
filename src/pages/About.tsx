@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 import Navbar from '@/components/ui/navbar';
 import Footer from '@/components/ui/footer';
@@ -6,16 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Leaf, Award, Utensils, Wind, Recycle, UserCheck, ChefHat, Sun, Wand2, Globe, Users, Sparkles } from 'lucide-react';
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from '@/components/ui/carousel';
-import AnimatedHeader from '@/components/ui/animated-header';
-import InteractiveCard from '@/components/ui/interactive-card';
-import ParallaxGallery from '@/components/ui/parallax-gallery';
-import Timeline from '@/components/about/timeline';
 import BlurImage from '@/components/ui/blur-image';
 
 const About = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   
-  // Initialize Intersection Observer for animations
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
@@ -98,7 +92,6 @@ const About = () => {
     <div className="min-h-screen" ref={containerRef}>
       <Navbar />
       
-      {/* Hero Section */}
       <section className="relative h-80">
         <div className="absolute inset-0">
           <BlurImage
@@ -110,17 +103,20 @@ const About = () => {
         </div>
         
         <div className="relative container mx-auto px-4 flex flex-col justify-center h-full pt-24">
-          <AnimatedHeader 
-            title="About TastyHub" 
-            subtitle="We're not just a restaurant, we're a culinary journey focused on nutrition, sustainability, and exceptional taste."
-            className="text-white"
-          />
+          <div className="transition-all duration-1000 transform translate-y-0 opacity-100">
+            <div className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4">
+              Our Story
+            </div>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">About TastyHub</h1>
+            <p className="text-muted-foreground max-w-xl">
+              We're not just a restaurant, we're a culinary journey focused on nutrition, sustainability, and exceptional taste.
+            </p>
+          </div>
         </div>
       </section>
       
       <main className="container mx-auto px-4 py-12 overflow-hidden">
         <div className="max-w-6xl mx-auto">
-          {/* Introduction Section */}
           <div className="mb-16">
             <div className="mt-12 prose prose-lg max-w-none text-foreground/90 space-y-6 fade-up">
               <p className="text-lg md:text-xl leading-relaxed">
@@ -129,7 +125,6 @@ const About = () => {
             </div>
           </div>
           
-          {/* Core Values Carousel */}
           <div className="my-20 fade-up">
             <h2 className="text-3xl font-bold mb-8 text-center">Our Core Values</h2>
             <Carousel
@@ -163,19 +158,16 @@ const About = () => {
             </Carousel>
           </div>
           
-          {/* Timeline Section */}
           <div className="my-28">
             <h2 className="text-3xl font-bold mb-12 text-center fade-up">Our Journey</h2>
             <Timeline events={timelineEvents} />
           </div>
           
-          {/* Image Gallery */}
           <div className="my-24">
             <h2 className="text-3xl font-bold mb-12 text-center fade-up">Visualize Our Impact</h2>
             <ParallaxGallery images={galleryImages} />
           </div>
           
-          {/* Tabbed Content Section - Fixed Farm to Table zoom and standardized all tab layouts */}
           <div className="my-24 fade-up">
             <h2 className="text-3xl font-bold mb-12 text-center">How We Deliver Excellence</h2>
             <Tabs defaultValue="farm-to-table" className="w-full">
@@ -191,7 +183,6 @@ const About = () => {
                 </TabsTrigger>
               </TabsList>
               
-              {/* Farm-to-Table Tab - Fixed zoom issue by removing animate-float class */}
               <TabsContent value="farm-to-table" className="animate-fade-in">
                 <div className="grid md:grid-cols-2 gap-8">
                   <div className="glassmorphism p-8 rounded-xl border border-white/20 dark:border-white/10">
@@ -228,7 +219,6 @@ const About = () => {
                 </div>
               </TabsContent>
               
-              {/* Preparation Process Tab - Updated to match Farm-to-Table layout */}
               <TabsContent value="preparation" className="animate-fade-in">
                 <div className="grid md:grid-cols-2 gap-8">
                   <div className="glassmorphism p-8 rounded-xl border border-white/20 dark:border-white/10">
@@ -265,7 +255,6 @@ const About = () => {
                 </div>
               </TabsContent>
               
-              {/* Sustainability Tab - Updated to match Farm-to-Table layout */}
               <TabsContent value="sustainability" className="animate-fade-in">
                 <div className="grid md:grid-cols-2 gap-8">
                   <div className="glassmorphism p-8 rounded-xl border border-white/20 dark:border-white/10">
@@ -304,7 +293,6 @@ const About = () => {
             </Tabs>
           </div>
           
-          {/* Contact Section */}
           <div className="my-20 relative overflow-hidden rounded-2xl border border-white/20 dark:border-white/10 fade-up">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-primary/10 pointer-events-none"></div>
             <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-primary/20 blur-3xl rounded-full pointer-events-none"></div>
