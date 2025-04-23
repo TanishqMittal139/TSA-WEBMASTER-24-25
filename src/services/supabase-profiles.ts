@@ -92,13 +92,20 @@ export const syncProfileFromReservation = async (reservationData: {
   email: string;
   phone: string;
 }): Promise<void> => {
-  const success = await createOrUpdateProfile({
-    name: reservationData.name,
-    email: reservationData.email,
-    phone: reservationData.phone
-  });
-  
-  if (!success) {
-    console.warn("Failed to sync profile data from reservation");
+  try {
+    // Make sure profile exists before attempting to sync
+    await ensureProfileExists();
+    
+    const success = await createOrUpdateProfile({
+      name: reservationData.name,
+      email: reservationData.email,
+      phone: reservationData.phone
+    });
+    
+    if (!success) {
+      console.warn("Failed to sync profile data from reservation");
+    }
+  } catch (error) {
+    console.error("Error syncing profile from reservation:", error);
   }
 };

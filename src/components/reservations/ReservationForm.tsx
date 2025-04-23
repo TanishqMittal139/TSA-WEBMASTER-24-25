@@ -39,7 +39,7 @@ interface ReservationFormProps {
 const ReservationForm: React.FC<ReservationFormProps> = ({ onSuccess }) => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { user, profile } = useAuth();
+  const { user, profile, refreshProfile } = useAuth();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -50,6 +50,15 @@ const ReservationForm: React.FC<ReservationFormProps> = ({ onSuccess }) => {
       specialRequests: '',
     },
   });
+
+  // Update form values when profile changes
+  React.useEffect(() => {
+    if (profile) {
+      form.setValue('name', profile.name || '');
+      form.setValue('email', profile.email || '');
+      form.setValue('phone', profile.phone || '');
+    }
+  }, [profile, form]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!user) {
@@ -84,7 +93,11 @@ const ReservationForm: React.FC<ReservationFormProps> = ({ onSuccess }) => {
       
       if (!error && data) {
         try {
+          // Sync profile with reservation data
           await syncProfileFromReservation(reservationData);
+          
+          // Refresh the profile in the context
+          await refreshProfile();
         } catch (err) {
           console.warn("Failed to sync profile, but reservation succeeded:", err);
         }

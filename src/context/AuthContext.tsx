@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -38,13 +39,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await ensureProfileExists();
       
       const userProfile = await getUserProfile();
-      setProfile(userProfile);
+      if (userProfile) {
+        setProfile(userProfile);
+      } else {
+        console.error("No user profile found after ensuring it exists");
+      }
     } catch (error) {
       console.error("Error fetching user profile:", error);
     }
   };
 
   useEffect(() => {
+    console.log("Setting up auth state change listener");
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
         console.log("Auth state changed:", event, currentSession?.user?.id);
@@ -63,6 +69,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const initializeAuth = async () => {
       try {
+        console.log("Initializing auth...");
         const { data: { session: currentSession } } = await supabase.auth.getSession();
         console.log("Initial session check:", currentSession?.user?.id);
         
@@ -90,20 +97,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (user) {
       await ensureProfileExists();
       const userProfile = await getUserProfile();
-      setProfile(userProfile);
+      if (userProfile) {
+        setProfile(userProfile);
+      }
     }
   };
 
   const updateProfile = async (profileData: Partial<UserProfile>) => {
-    const result = await updateUserProfile(profileData);
-    if (result.success && result.user) {
-      setProfile(result.user);
-      
-      if (profileData.email && profileData.email !== profile?.email) {
-        await refreshProfile();
+    try {
+      const result = await updateUserProfile(profileData);
+      if (result.success && result.user) {
+        setProfile(result.user);
+        
+        // If email was changed, refresh the profile
+        if (profileData.email && profileData.email !== profile?.email) {
+          await refreshProfile();
+        }
       }
+      return result;
+    } catch (error) {
+      console.error("Error in updateProfile:", error);
+      return { success: false, message: 'An unexpected error occurred' };
     }
-    return result;
   };
 
   const signOut = async () => {
