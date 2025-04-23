@@ -12,7 +12,7 @@ interface ProfileSectionProps {
     email: string;
     phone: string;
   };
-  onUpdateProfile: (data: { name: string; phone: string; }) => Promise<void>;
+  onUpdateProfile: (data: { name: string; phone: string; email: string; }) => Promise<void>;
 }
 
 const ProfileSection = ({ initialData, onUpdateProfile }: ProfileSectionProps) => {
@@ -28,6 +28,7 @@ const ProfileSection = ({ initialData, onUpdateProfile }: ProfileSectionProps) =
       const success = await createOrUpdateProfile({
         name: profileData.name,
         phone: profileData.phone,
+        email: profileData.email,
       });
       
       if (success) {
@@ -35,6 +36,7 @@ const ProfileSection = ({ initialData, onUpdateProfile }: ProfileSectionProps) =
         await onUpdateProfile({
           name: profileData.name,
           phone: profileData.phone,
+          email: profileData.email,
         });
         
         toast({
@@ -57,39 +59,43 @@ const ProfileSection = ({ initialData, onUpdateProfile }: ProfileSectionProps) =
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div className="space-y-4">
-        <div>
-          <Label htmlFor="name">Full Name</Label>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="space-y-5">
+        <div className="glass-card p-5 transition-all duration-300 hover:shadow-lg">
+          <Label htmlFor="name" className="text-base font-medium mb-2 block">Full Name</Label>
           <Input 
             id="name" 
             value={profileData.name} 
             onChange={(e) => setProfileData({...profileData, name: e.target.value})}
+            className="glass-input transition-all duration-300"
           />
         </div>
         
-        <div>
-          <Label htmlFor="email">Email</Label>
+        <div className="glass-card p-5 transition-all duration-300 hover:shadow-lg">
+          <Label htmlFor="email" className="text-base font-medium mb-2 block">Email</Label>
           <Input 
             id="email" 
             value={profileData.email} 
-            disabled 
+            onChange={(e) => setProfileData({...profileData, email: e.target.value})}
+            className="glass-input transition-all duration-300"
           />
-          <p className="text-sm text-muted-foreground mt-1">
-            Email cannot be changed. Contact support for assistance.
-          </p>
         </div>
         
-        <div>
-          <Label htmlFor="phone">Phone Number</Label>
+        <div className="glass-card p-5 transition-all duration-300 hover:shadow-lg">
+          <Label htmlFor="phone" className="text-base font-medium mb-2 block">Phone Number</Label>
           <Input 
             id="phone" 
             value={profileData.phone} 
             onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
+            className="glass-input transition-all duration-300"
           />
         </div>
         
-        <Button type="submit" disabled={loading}>
+        <Button 
+          type="submit" 
+          disabled={loading}
+          className="w-full glass-button hover:scale-[1.02] active:scale-[0.98] transition-all duration-300"
+        >
           {loading ? 'Saving...' : 'Save Changes'}
         </Button>
       </div>

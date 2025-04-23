@@ -98,6 +98,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const result = await updateUserProfile(profileData);
     if (result.success && result.user) {
       setProfile(result.user);
+      
+      if (profileData.email && profileData.email !== profile?.email) {
+        await refreshProfile();
+      }
     }
     return result;
   };
