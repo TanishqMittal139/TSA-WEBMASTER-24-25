@@ -32,15 +32,12 @@ import NotFound from "./pages/NotFound";
 import Careers from "./pages/Careers";
 import References from "./pages/References";
 
-// Update document title
 document.title = "TastyHub - Nutrition Made Delicious";
 
-// Scroll to top component with animation
 const ScrollToTop = () => {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    // Add a small delay to ensure smooth scrolling after route change
     const timeoutId = setTimeout(() => {
       window.scrollTo({
         top: 0,
@@ -54,13 +51,11 @@ const ScrollToTop = () => {
   return null;
 };
 
-// Protected route wrapper
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   const { isLoading, user } = useAuth();
   const location = useLocation();
   
   if (isLoading) {
-    // Loading state with a nice spinner
     return (
       <div className="flex items-center justify-center min-h-screen p-8">
         <div className="flex flex-col items-center gap-2">
@@ -89,12 +84,8 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
-  // Initialize auth and other services
   useEffect(() => {
-    // This would be where you might initialize external services
     console.log("Initializing app and services...");
-    
-    // Clear any lingering active deals on app start
     localStorage.removeItem('active_deal');
   }, []);
 
@@ -155,13 +146,11 @@ const App = () => {
                           <Profile />
                         </ProtectedRoute>
                       } />
-                      {/* REMOVED THE SETTINGS PAGE ROUTE */}
                       <Route path="/history" element={
                         <ProtectedRoute>
                           <History />
                         </ProtectedRoute>
                       } />
-                      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </BrowserRouter>
