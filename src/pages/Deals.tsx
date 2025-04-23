@@ -9,7 +9,7 @@ import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/components/ui/use-toast';
 import DealsHero from '@/components/deals/DealsHero';
 import DealsGrid from '@/components/deals/DealsGrid';
-import BlurImage from '@/components/ui/BlurImage';
+import BlurImage from '@/components/ui/blur-image';
 
 export interface DealData {
   id: string;
