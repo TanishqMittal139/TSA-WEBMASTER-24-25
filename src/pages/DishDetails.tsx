@@ -13,21 +13,45 @@ import { useFavoriteMeals } from '@/context/FavoriteMealsContext';
 import { getMenuItemById } from '@/data/menu';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { MenuItem } from '@/types/menu';
 
 const DishDetails = () => {
   const { dishId } = useParams<{ dishId: string }>();
   const navigate = useNavigate();
   const { addItem } = useCart();
   const { addFavoriteMeal, removeFavoriteMeal, isFavoriteMeal } = useFavoriteMeals();
-  const [dish, setDish] = useState<any>(null);
+  const [dish, setDish] = useState<MenuItem | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  console.log("DishDetails rendering with dishId:", dishId);
   
   useEffect(() => {
+    // Reset state on new dishId
+    setLoading(true);
+    setError(null);
+    setDish(null);
+    
     // Simulate API call
     const timer = setTimeout(() => {
       if (dishId) {
-        const foundDish = getMenuItemById(dishId);
-        setDish(foundDish);
+        try {
+          console.log("Fetching dish with ID:", dishId);
+          const foundDish = getMenuItemById(dishId);
+          
+          if (foundDish) {
+            console.log("Found dish:", foundDish.name);
+            setDish(foundDish);
+          } else {
+            console.error("Dish not found for ID:", dishId);
+            setError("Dish not found");
+          }
+        } catch (err) {
+          console.error("Error fetching dish:", err);
+          setError("Error loading dish details");
+        }
+      } else {
+        setError("Invalid dish ID");
       }
       setLoading(false);
     }, 500);
@@ -41,7 +65,7 @@ const DishDetails = () => {
         id: dish.id,
         name: dish.name,
         price: dish.price,
-        image: dish.image,
+        image: dish.image || dish.imageUrl,
         category: dish.category
       });
     }
@@ -57,7 +81,7 @@ const DishDetails = () => {
         id: dish.id,
         name: dish.name,
         price: dish.price,
-        image: dish.image,
+        image: dish.image || dish.imageUrl,
         category: dish.category
       });
     }
@@ -78,14 +102,14 @@ const DishDetails = () => {
     );
   }
   
-  if (!dish) {
+  if (error || !dish) {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
         <div className="flex-grow flex items-center justify-center">
           <div className="text-center">
             <h2 className="text-2xl font-bold mb-2">Dish Not Found</h2>
-            <p className="text-muted-foreground mb-6">The dish you're looking for doesn't exist.</p>
+            <p className="text-muted-foreground mb-6">{error || "The dish you're looking for doesn't exist."}</p>
             <Button onClick={() => navigate('/menu')}>Return to Menu</Button>
           </div>
         </div>
@@ -117,7 +141,7 @@ const DishDetails = () => {
               className="relative h-[300px] md:h-full rounded-lg overflow-hidden"
             >
               <BlurImage
-                src={dish.image}
+                src={dish.image || dish.imageUrl}
                 alt={dish.name}
                 className="object-cover"
               />
@@ -169,7 +193,7 @@ const DishDetails = () => {
                   </div>
                 </div>
                 
-                <div className="text-2xl font-bold text-primary">{dish.price}</div>
+                <div className="text-2xl font-bold text-primary">${dish.price.toFixed(2)}</div>
               </div>
               
               <p className="text-muted-foreground mb-6">{dish.description}</p>

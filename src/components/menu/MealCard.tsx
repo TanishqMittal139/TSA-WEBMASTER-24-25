@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -23,8 +24,10 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
   };
   
   const getFallbackImage = (category: string) => {
-    return categoryFallbacks[category] || "/placeholder.svg";
+    return categoryFallbacks[category.toLowerCase()] || "/placeholder.svg";
   };
+  
+  console.log("Rendering MealCard for:", meal.id, meal.name);
   
   return (
     <NutritionCard 

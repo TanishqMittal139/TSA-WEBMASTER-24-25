@@ -10,6 +10,8 @@ interface MealGridProps {
 }
 
 const MealGrid: React.FC<MealGridProps> = ({ meals, onClearFilters }) => {
+  console.log("MealGrid rendering with", meals.length, "meals", meals.map(m => m.id));
+  
   if (meals.length === 0) {
     return <NoResults clearFilters={onClearFilters} />;
   }

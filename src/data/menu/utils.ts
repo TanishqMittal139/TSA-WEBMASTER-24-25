@@ -33,5 +33,9 @@ export const getPopularMeals = (): MenuItem[] => {
 };
 
 export const getMenuItemById = (id: string): MenuItem | undefined => {
-  return [...menuItems, ...additionalMenuItems].find(item => item.id === id);
+  console.log("getMenuItemById called for:", id);
+  const allMeals = [...menuItems, ...additionalMenuItems];
+  const foundItem = allMeals.find(item => item.id === id);
+  console.log("Found item:", foundItem ? foundItem.name : "Not found");
+  return foundItem;
 };
