@@ -1,7 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { ReservationInput, ReservationData } from "./types";
-import { ensureUserProfile } from "../profiles/ensure-profile";
 
 export const createReservation = async (reservationData: ReservationInput) => {
   try {
@@ -15,24 +14,48 @@ export const createReservation = async (reservationData: ReservationInput) => {
       };
     }
     
-    // Ensure user profile exists
-    const profileCreated = await ensureUserProfile(
-      session.user.id, 
-      reservationData.email, 
-      reservationData.name
-    );
+    const userId = session.user.id;
     
-    if (!profileCreated) {
-      console.log("Failed to create profile for reservation, continuing with reservation creation");
+    // First, check if profile exists
+    const { data: existingProfile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', userId)
+      .single();
+
+    // If profile doesn't exist, create it
+    if (!existingProfile) {
+      console.log("Creating profile for user ID:", userId);
+      
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: userId,
+          email: reservationData.email,
+          name: reservationData.name,
+          phone: reservationData.phone
+        });
+      
+      if (profileError) {
+        console.error("Error creating profile:", profileError);
+        return {
+          error: { 
+            message: `Failed to create user profile: ${profileError.message}` 
+          },
+          data: null
+        };
+      }
+      
+      console.log("Profile created successfully");
     }
 
-    console.log("Creating reservation with user_id:", session.user.id);
+    console.log("Creating reservation with user_id:", userId);
 
     // Create the reservation with user_id
     const { data, error } = await supabase
       .from('reservations')
       .insert({
-        user_id: session.user.id,
+        user_id: userId,
         name: reservationData.name,
         email: reservationData.email,
         phone: reservationData.phone,

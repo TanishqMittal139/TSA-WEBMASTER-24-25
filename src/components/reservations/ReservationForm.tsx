@@ -96,6 +96,8 @@ const ReservationForm: React.FC<ReservationFormProps> = ({ onSuccess }) => {
         status: 'confirmed',
       };
       
+      console.log("Submitting reservation:", reservationData);
+      
       const { data, error } = await createReservation(reservationData);
       
       if (!error && data) {
@@ -106,14 +108,15 @@ const ReservationForm: React.FC<ReservationFormProps> = ({ onSuccess }) => {
         
         onSuccess();
       } else {
-        // Log the complete error for debugging
+        const errorDetails = error?.message 
+          ? `Error: ${error.message}` 
+          : error 
+            ? `Error: ${JSON.stringify(error)}`
+            : "An error occurred while creating your reservation.";
+            
         toast({
           title: "Reservation Failed",
-          description: error?.message 
-            ? `Error: ${error.message}` 
-            : error 
-              ? `Error: ${JSON.stringify(error)}`
-              : "An error occurred while creating your reservation.",
+          description: errorDetails,
           variant: "destructive",
         });
         console.error("Reservation creation failed:", error);
