@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -25,7 +26,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { toast } from '@/components/ui/use-toast';
-import { updateUserProfile, getUserProfile, UserProfile } from '@/services/supabase-auth';
+import { updateUserProfile } from '@/services/supabase-auth';
 import { useAuth } from '@/context/AuthContext';
 
 const profileFormSchema = z.object({
@@ -107,13 +108,15 @@ const Profile = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-gradient-to-br from-background to-secondary/20">
         <Navbar />
         <main className="flex-grow pt-20">
           <div className="container mx-auto px-4 py-12">
-            <div className="max-w-3xl mx-auto text-center">
-              <p>Please sign in to view your profile.</p>
-              <Button onClick={() => navigate('/sign-in')}>Sign In</Button>
+            <div className="max-w-3xl mx-auto text-center space-y-4">
+              <p className="text-lg text-muted-foreground">Please sign in to view your profile.</p>
+              <Button onClick={() => navigate('/sign-in')} className="w-full sm:w-auto">
+                Sign In
+              </Button>
             </div>
           </div>
         </main>
@@ -123,101 +126,129 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-background to-secondary/20">
       <Navbar />
       
-      <main className="flex-grow pt-20">
+      <main className="flex-grow pt-20 animate-fade-in">
         <section className="container mx-auto px-4 py-12">
-          <div className="max-w-3xl mx-auto">
-            <div className="text-center mb-10">
-              <h1 className="text-3xl md:text-4xl font-bold mb-4">Your Profile</h1>
-              <p className="text-muted-foreground">
-                Manage your personal information and preferences.
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-10 space-y-4">
+              <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                Your Profile
+              </h1>
+              <p className="text-lg text-muted-foreground">
+                Manage your personal information and preferences
               </p>
             </div>
             
-            <div className="bg-card rounded-xl shadow-lg p-6 md:p-8">
+            <div className="glass-card p-8 transition-all duration-300 hover:shadow-xl relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
+              
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2">
-                          <User className="h-4 w-4" />
-                          Full Name
-                        </FormLabel>
-                        <FormControl>
-                          <Input placeholder="John Doe" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2">
-                          <Mail className="h-4 w-4" />
-                          Email
-                        </FormLabel>
-                        <FormControl>
-                          <Input placeholder="you@example.com" type="email" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="phone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2">
-                          <Phone className="h-4 w-4" />
-                          Phone Number
-                        </FormLabel>
-                        <FormControl>
-                          <Input placeholder="(555) 123-4567" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="address"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2">
-                          <MapPin className="h-4 w-4" />
-                          Address
-                        </FormLabel>
-                        <FormControl>
-                          <Input placeholder="123 Main St, Anytown" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
+                <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem className="space-y-2">
+                          <FormLabel className="flex items-center gap-2 text-base">
+                            <User className="h-4 w-4" />
+                            Full Name
+                          </FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="John Doe" 
+                              {...field}
+                              className="glass-input transition-all duration-300"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem className="space-y-2">
+                          <FormLabel className="flex items-center gap-2 text-base">
+                            <Mail className="h-4 w-4" />
+                            Email
+                          </FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="email"
+                              placeholder="you@example.com"
+                              {...field}
+                              className="glass-input transition-all duration-300"
+                              disabled
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="phone"
+                      render={({ field }) => (
+                        <FormItem className="space-y-2">
+                          <FormLabel className="flex items-center gap-2 text-base">
+                            <Phone className="h-4 w-4" />
+                            Phone Number
+                          </FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="(555) 123-4567"
+                              {...field}
+                              className="glass-input transition-all duration-300"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="address"
+                      render={({ field }) => (
+                        <FormItem className="space-y-2">
+                          <FormLabel className="flex items-center gap-2 text-base">
+                            <MapPin className="h-4 w-4" />
+                            Address
+                          </FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="123 Main St, Anytown"
+                              {...field}
+                              className="glass-input transition-all duration-300"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
                   <FormField
                     control={form.control}
                     name="bio"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2">
+                      <FormItem className="space-y-2">
+                        <FormLabel className="flex items-center gap-2 text-base">
                           <Book className="h-4 w-4" />
                           Bio
                         </FormLabel>
                         <FormControl>
-                          <Input placeholder="Tell us a bit about yourself" {...field} />
+                          <Input 
+                            placeholder="Tell us a bit about yourself"
+                            {...field}
+                            className="glass-input transition-all duration-300"
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -228,8 +259,8 @@ const Profile = () => {
                     control={form.control}
                     name="birthdate"
                     render={({ field }) => (
-                      <FormItem className="flex flex-col">
-                        <FormLabel className="flex items-center gap-2">
+                      <FormItem className="space-y-2">
+                        <FormLabel className="flex items-center gap-2 text-base">
                           <Cake className="h-4 w-4" />
                           Birthdate
                         </FormLabel>
@@ -237,9 +268,9 @@ const Profile = () => {
                           <PopoverTrigger asChild>
                             <FormControl>
                               <Button
-                                variant={"outline"}
+                                variant="outline"
                                 className={cn(
-                                  "w-full pl-3 text-left font-normal",
+                                  "w-full pl-3 text-left font-normal glass-input",
                                   !field.value && "text-muted-foreground"
                                 )}
                               >
@@ -259,7 +290,6 @@ const Profile = () => {
                               onSelect={field.onChange}
                               disabled={(date) => date > new Date()}
                               initialFocus
-                              className="p-3 pointer-events-auto"
                             />
                           </PopoverContent>
                         </Popover>
@@ -270,7 +300,7 @@ const Profile = () => {
                   
                   <Button 
                     type="submit" 
-                    className="w-full" 
+                    className="w-full glass-button hover:scale-[1.02] active:scale-[0.98] transition-all duration-300"
                     size="lg"
                     disabled={isSubmitting}
                   >

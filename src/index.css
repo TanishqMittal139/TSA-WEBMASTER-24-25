@@ -107,33 +107,68 @@
 @layer components {
   /* Enhanced glass morphism */
   .glass-card {
-    @apply bg-white/10 backdrop-blur-lg border border-white/20 shadow-lg relative overflow-hidden transition-all duration-300;
+    @apply bg-card/30 backdrop-blur-xl border border-white/10 rounded-2xl shadow-lg;
+    position: relative;
+    overflow: hidden;
   }
   
-  .glass-card::after {
+  .glass-card::before {
     content: '';
     position: absolute;
     inset: 0;
     background: linear-gradient(
-      225deg,
-      transparent 20%,
-      rgba(255, 255, 255, 0.05) 30%,
-      transparent 60%
+      to right bottom,
+      transparent,
+      rgba(255, 255, 255, 0.05)
     );
     pointer-events: none;
   }
   
-  .dark .glass-card {
-    @apply bg-black/20 border-white/10;
+  .glass-input {
+    @apply bg-background/50 backdrop-blur-sm border-white/10 focus:border-primary/50 focus:ring-primary/50;
+    transition: all 0.3s ease;
   }
   
-  .dark .glass-card::after {
+  .glass-input:hover {
+    @apply border-white/20;
+  }
+  
+  .glass-button {
+    @apply bg-primary/90 hover:bg-primary text-primary-foreground backdrop-blur-sm border border-white/10;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .glass-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
     background: linear-gradient(
-      225deg,
-      transparent 20%,
-      rgba(255, 255, 255, 0.05) 30%,
-      transparent 60%
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.2),
+      transparent
     );
+    transition: 0.5s;
+  }
+  
+  .glass-button:hover::before {
+    left: 100%;
+  }
+
+  .dark .glass-card {
+    @apply bg-card/20 border-white/5;
+  }
+  
+  .dark .glass-input {
+    @apply bg-background/30 border-white/5 focus:border-primary/30;
+  }
+  
+  .dark .glass-button {
+    @apply bg-primary/80 hover:bg-primary/90;
   }
   
   /* Animated components */
