@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '@/components/ui/navbar';
@@ -62,13 +61,16 @@ const References = () => {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/10"></div>
         </div>
-        
-        <div className="relative container mx-auto px-4 flex flex-col justify-center h-full pt-20">
-          <AnimatedHeader 
-            title="References & Citations"
-            subtitle="Information about our technologies, resources, and documentation"
-            className="text-white"
-          />
+        <div className="relative container mx-auto px-4 flex flex-col justify-center h-full pt-24">
+          <div className="transition-all duration-1000 transform translate-y-0 opacity-100">
+            <div className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4">
+              Documentation
+            </div>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">References & Citations</h1>
+            <p className="text-muted-foreground max-w-xl">
+              Information about our technologies, resources, and documentation.
+            </p>
+          </div>
         </div>
       </section>
       

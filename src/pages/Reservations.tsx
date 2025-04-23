@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/ui/navbar';
@@ -125,13 +124,16 @@ const Reservations = () => {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/10"></div>
           </div>
-          
           <div className="relative container mx-auto px-4 flex flex-col justify-center h-full pt-24">
-            <AnimatedHeader 
-              title="Reservations" 
-              subtitle="Reserve your table or manage your existing reservations at Tasty Hub"
-              className="text-white"
-            />
+            <div className="transition-all duration-1000 transform translate-y-0 opacity-100">
+              <div className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4">
+                Reserve a Table
+              </div>
+              <h1 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">Reservations</h1>
+              <p className="text-muted-foreground max-w-xl">
+                Reserve your table or manage your existing reservations at Tasty Hub.
+              </p>
+            </div>
           </div>
         </section>
         

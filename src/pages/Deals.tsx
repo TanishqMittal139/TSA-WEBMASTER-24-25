@@ -9,7 +9,7 @@ import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/components/ui/use-toast';
 import DealsHero from '@/components/deals/DealsHero';
 import DealsGrid from '@/components/deals/DealsGrid';
-// Removed DealsGuide import
+import BlurImage from '@/components/ui/BlurImage';
 
 export interface DealData {
   id: string;
@@ -110,6 +110,29 @@ const Deals: React.FC = () => {
   return (
     <div className="min-h-screen">
       <Navbar />
+      
+      <section className="relative h-80">
+        <div className="absolute inset-0">
+          <BlurImage
+            src="https://images.unsplash.com/photo-1551024709-8f23befc6f87?q=80&w=1257&auto=format&fit=crop"
+            alt="Deals"
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/10"></div>
+        </div>
+        <div className="relative container mx-auto px-4 flex flex-col justify-center h-full pt-24">
+          <div className="transition-all duration-1000 transform translate-y-0 opacity-100">
+            <div className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4">
+              Current Offers
+            </div>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">Latest Deals & Promotions</h1>
+            <p className="text-muted-foreground max-w-xl">
+              Unlock the best offers at Tasty Hub. Discover exclusive discounts and limited-time deals.
+            </p>
+          </div>
+        </div>
+      </section>
+
       <DealsHero />
       
       <main className="container mx-auto px-4 py-8 mb-12">

@@ -93,13 +93,16 @@ const Menu = () => {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/10"></div>
           </div>
-          
           <div className="relative container mx-auto px-4 flex flex-col justify-center h-full pt-24">
-            <AnimatedHeader 
-              title="Our Menu" 
-              subtitle="Discover our nutritionally balanced dishes crafted with fresh ingredients for a healthier you"
-              className="mb-12"
-            />
+            <div className="transition-all duration-1000 transform translate-y-0 opacity-100">
+              <div className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4">
+                Explore Menu
+              </div>
+              <h1 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">Our Menu</h1>
+              <p className="text-muted-foreground max-w-xl">
+                Discover our nutritionally balanced dishes crafted with fresh ingredients for a healthier you.
+              </p>
+            </div>
           </div>
         </section>
         
