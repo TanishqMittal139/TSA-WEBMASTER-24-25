@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef } from 'react';
 import Navbar from '@/components/ui/navbar';
 import Footer from '@/components/ui/footer';
@@ -6,6 +7,9 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Leaf, Award, Utensils, Wind, Recycle, UserCheck, ChefHat, Sun, Wand2, Globe, Users, Sparkles } from 'lucide-react';
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from '@/components/ui/carousel';
 import BlurImage from '@/components/ui/blur-image';
+import InteractiveCard from '@/components/ui/interactive-card';
+import Timeline from '@/components/about/timeline';
+import ParallaxGallery from '@/components/ui/parallax-gallery';
 
 const About = () => {
   const containerRef = useRef<HTMLDivElement>(null);
