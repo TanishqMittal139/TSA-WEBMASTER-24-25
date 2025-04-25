@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ShoppingBag, Star, Clock, Info, FileText, Leaf, AlertTriangle, Heart } from 'lucide-react';
@@ -65,7 +64,7 @@ const DishDetails = () => {
         id: dish.id,
         name: dish.name,
         price: dish.price,
-        image: dish.image || dish.imageUrl,
+        image: (dish.image || dish.imageUrl || '') as string,
         category: dish.category
       });
     }
@@ -81,7 +80,7 @@ const DishDetails = () => {
         id: dish.id,
         name: dish.name,
         price: dish.price,
-        image: dish.image || dish.imageUrl,
+        image: (dish.image || dish.imageUrl || '') as string,
         category: dish.category
       });
     }
