@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { useCart } from '@/context/CartContext';
 import { useFavoriteMeals } from '@/context/FavoriteMealsContext';
-import { getMenuItemById } from '@/data/menu';
+import { getMenuItemById } from '@/data/menu/utils';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { MenuItem } from '@/types/menu';
@@ -26,12 +26,10 @@ const DishDetails = () => {
   console.log("DishDetails rendering with dishId:", dishId);
   
   useEffect(() => {
-    // Reset state on new dishId
     setLoading(true);
     setError(null);
     setDish(null);
     
-    // Simulate API call
     const timer = setTimeout(() => {
       if (dishId) {
         try {
@@ -64,7 +62,7 @@ const DishDetails = () => {
         id: dish.id,
         name: dish.name,
         price: dish.price,
-        image: (dish.image || dish.imageUrl || '') as string,
+        image: String(dish.image || dish.imageUrl || ''),
         category: dish.category
       });
     }
@@ -80,7 +78,7 @@ const DishDetails = () => {
         id: dish.id,
         name: dish.name,
         price: dish.price,
-        image: (dish.image || dish.imageUrl || '') as string,
+        image: String(dish.image || dish.imageUrl || ''),
         category: dish.category
       });
     }
