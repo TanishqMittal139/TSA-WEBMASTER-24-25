@@ -12,7 +12,7 @@ type AuthContextType = {
   user: User | null;
   profile: UserProfile | null;
   isLoading: boolean;
-  refreshProfile: () => Promise<void>;
+  refreshProfile: () => Promise<UserProfile | null>;
   signOut: () => Promise<void>;
   updateProfile: (data: Partial<UserProfile>) => Promise<{success: boolean; message: string; user?: UserProfile}>;
 };
@@ -22,7 +22,7 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   profile: null,
   isLoading: true,
-  refreshProfile: async () => {},
+  refreshProfile: async () => null,
   signOut: async () => {},
   updateProfile: async () => ({ success: false, message: 'Not implemented' }),
 });
