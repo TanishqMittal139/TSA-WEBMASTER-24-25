@@ -33,7 +33,7 @@ export const cancelReservation = async (reservationId: string) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+          "Authorization": `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4cmtxZ2dlcWhzaXJvcHBxdG9rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM0NTQ4MTMsImV4cCI6MjA1OTAzMDgxM30.esXUYy0IwzeCFkQdygmIXBVPx692GrhsEBZiPQ-rQtg`,
         },
         body: JSON.stringify({
           name: data.name,
