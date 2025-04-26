@@ -1,4 +1,3 @@
-
 import React from "react";
 import BlurImage from "@/components/ui/blur-image";
 
@@ -10,7 +9,7 @@ const MenuHeader: React.FC = () => (
         alt="Our Menu"
         className="object-cover"
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/10"></div>
+      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-background/5"></div>
     </div>
     <div className="relative container mx-auto px-4 flex flex-col justify-center h-full pt-24">
       <div className="transition-all duration-1000 transform translate-y-0 opacity-100">
