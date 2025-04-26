@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/ui/navbar';
@@ -152,50 +153,53 @@ const FindLocation: React.FC = () => {
         
         <section className="py-16">
           <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto space-y-6">
-              <LocationSearch 
-                searchQuery={searchQuery}
-                setSearchQuery={setSearchQuery}
-              />
+            <div className="flex flex-col lg:flex-row gap-8">
+              <div className="w-full lg:w-1/2 xl:w-2/5">
+                <LocationSearch 
+                  searchQuery={searchQuery}
+                  setSearchQuery={setSearchQuery}
+                  className="mb-6"
+                />
+                
+                <div className="space-y-4">
+                  {filteredLocations.length > 0 ? (
+                    enhancedLocations.map((location) => (
+                      <LocationCard
+                        key={location.id}
+                        location={location}
+                        isActive={activeLocation?.id === location.id}
+                        isFavorite={isFavoriteLocation(location.id)}
+                        onSelect={() => setActiveLocation(locations.find(loc => loc.id === location.id) || null)}
+                        onToggleFavorite={(e) => {
+                          e.stopPropagation();
+                          handleToggleFavorite(location.id);
+                        }}
+                      />
+                    ))
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-muted-foreground">No locations found matching your search.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
               
-              <div className="space-y-4">
-                {filteredLocations.length > 0 ? (
-                  enhancedLocations.map((location) => (
-                    <LocationCard
-                      key={location.id}
-                      location={location}
-                      isActive={activeLocation?.id === location.id}
-                      isFavorite={isFavoriteLocation(location.id)}
-                      onSelect={() => setActiveLocation(locations.find(loc => loc.id === location.id) || null)}
-                      onToggleFavorite={(e) => {
-                        e.stopPropagation();
-                        handleToggleFavorite(location.id);
-                      }}
-                    />
-                  ))
+              <div className="w-full lg:w-1/2 xl:w-3/5 lg:sticky lg:top-24 lg:self-start">
+                {activeLocation ? (
+                  <LocationDetails
+                    location={getEnhancedLocation(activeLocation)!}
+                    isFavorite={isFavoriteLocation(activeLocation.id)}
+                    onToggleFavorite={() => handleToggleFavorite(activeLocation.id)}
+                  />
                 ) : (
-                  <div className="text-center py-8">
-                    <p className="text-muted-foreground">No locations found matching your search.</p>
+                  <div className="text-center py-8 bg-secondary/30 rounded-lg">
+                    <p className="text-muted-foreground">Select a location to view details</p>
                   </div>
                 )}
               </div>
             </div>
           </div>
         </section>
-        
-        {activeLocation && (
-          <section className="py-8 bg-secondary/30">
-            <div className="container mx-auto px-4">
-              <div className="max-w-5xl mx-auto">
-                <LocationDetails
-                  location={getEnhancedLocation(activeLocation)!}
-                  isFavorite={isFavoriteLocation(activeLocation.id)}
-                  onToggleFavorite={() => handleToggleFavorite(activeLocation.id)}
-                />
-              </div>
-            </div>
-          </section>
-        )}
       </main>
       
       <Footer />
