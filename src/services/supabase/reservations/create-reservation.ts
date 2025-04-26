@@ -2,6 +2,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { ReservationInput, ReservationData } from "./types";
 import { ensureProfileExists } from "@/services/supabase-profiles";
+import { toast } from "@/components/ui/use-toast";
 
 export const createReservation = async (reservationData: ReservationInput) => {
   try {
@@ -50,6 +51,31 @@ export const createReservation = async (reservationData: ReservationInput) => {
     if (error) {
       console.error("Error creating reservation:", error);
       return { error, data: null };
+    }
+    
+    // Send confirmation email
+    try {
+      const response = await fetch("https://fxrkqggeqhsiroppqtok.supabase.co/functions/v1/send-reservation-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({
+          name: data.name,
+          email: data.email,
+          date: data.date,
+          time: data.time,
+          guests: data.guests,
+          status: 'confirmed'
+        }),
+      });
+
+      if (!response.ok) {
+        console.error("Failed to send confirmation email");
+      }
+    } catch (emailError) {
+      console.error("Error sending confirmation email:", emailError);
     }
     
     // Map database column names to our expected format

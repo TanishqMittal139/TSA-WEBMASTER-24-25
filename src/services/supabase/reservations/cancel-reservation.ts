@@ -26,6 +26,28 @@ export const cancelReservation = async (reservationId: string) => {
       console.error("Error cancelling reservation:", error);
       return { error, data: null };
     }
+
+    // Send cancellation email
+    try {
+      const response = await fetch("https://fxrkqggeqhsiroppqtok.supabase.co/functions/v1/send-reservation-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({
+          name: data.name,
+          email: data.email,
+          status: 'cancelled'
+        }),
+      });
+
+      if (!response.ok) {
+        console.error("Failed to send cancellation email");
+      }
+    } catch (emailError) {
+      console.error("Error sending cancellation email:", emailError);
+    }
     
     // Map database column names to our expected format
     const result: ReservationData = {
