@@ -1,9 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/ui/navbar';
 import Footer from '@/components/ui/footer';
 import BlurImage from '@/components/ui/blur-image';
 import AnimatedHeader from '@/components/ui/animated-header';
+import { cn } from '@/lib/utils';
 import {
   Tabs,
   TabsContent,
@@ -24,6 +26,15 @@ const Reservations = () => {
   const [activeTab, setActiveTab] = useState("new");
   const [myReservations, setMyReservations] = useState<ReservationData[]>([]);
   const { user, isLoading } = useAuth();
+  const [isVisible, setIsVisible] = useState(false);
+  
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsVisible(true);
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, []);
   
   useEffect(() => {
     const checkAuth = async () => {
@@ -125,7 +136,10 @@ const Reservations = () => {
             <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/10"></div>
           </div>
           <div className="relative container mx-auto px-4 flex flex-col justify-center h-full pt-24">
-            <div className="transition-all duration-1000 transform translate-y-0 opacity-100">
+            <div className={cn(
+              "transition-all duration-1000 transform",
+              isVisible ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"
+            )}>
               <div className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4">
                 Reserve a Table
               </div>
