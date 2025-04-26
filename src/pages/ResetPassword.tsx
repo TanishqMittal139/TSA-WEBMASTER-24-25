@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -18,7 +17,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { changePassword } from '@/services/supabase-auth';
+import { changePassword } from '@/services/auth';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -48,11 +47,9 @@ const ResetPassword = () => {
     },
   });
 
-  // Verify the reset token on load
   useEffect(() => {
     const checkResetToken = async () => {
       try {
-        // The URL should contain the token automatically handled by Supabase
         const { data, error } = await supabase.auth.getSession();
         
         if (error || !data?.session) {
@@ -82,7 +79,6 @@ const ResetPassword = () => {
         });
         setResetComplete(true);
         
-        // Redirect to sign in after a short delay
         setTimeout(() => {
           navigate('/sign-in');
         }, 3000);

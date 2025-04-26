@@ -18,7 +18,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { toast } from '@/components/ui/use-toast';
-import { signUp } from '@/services/supabase-auth';
+import { signUp } from '@/services/auth';
 import { useAuth } from '@/context/AuthContext';
 
 const formSchema = z.object({
