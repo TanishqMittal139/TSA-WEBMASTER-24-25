@@ -8,6 +8,7 @@ import InteractiveCard from '@/components/ui/interactive-card';
 import Timeline from '@/components/about/timeline';
 import ParallaxGallery from '@/components/ui/parallax-gallery';
 import PageHeader from '@/components/ui/page-header';
+import { Button } from '@/components/ui/button';
 
 const About = () => {
   const containerRef = useRef<HTMLDivElement>(null);

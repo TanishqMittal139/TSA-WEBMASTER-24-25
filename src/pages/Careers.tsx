@@ -1,12 +1,13 @@
 import React from 'react';
-import { Check, Clock, DollarSign, MapPin, Heart, Send } from 'lucide-react';
+import { Check, Clock, DollarSign, MapPin, Heart, Send, ArrowRight } from 'lucide-react';
 import Navbar from '@/components/ui/navbar';
 import Footer from '@/components/ui/footer';
+import PageHeader from '@/components/ui/page-header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
-import PageHeader from '@/components/ui/page-header';
+import { BlurImage } from '@/components/ui/blur-image';
 
 const Careers: React.FC = () => {
   const { toast } = useToast();
