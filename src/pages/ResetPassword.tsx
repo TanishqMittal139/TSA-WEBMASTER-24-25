@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -17,7 +18,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { changePassword } from '@/services/auth';
+import { changePassword } from '@/services/auth/password';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -70,6 +71,7 @@ const ResetPassword = () => {
     setIsSubmitting(true);
     
     try {
+      // Call changePassword with just the password
       const result = await changePassword(values.password);
       
       if (result.success) {
