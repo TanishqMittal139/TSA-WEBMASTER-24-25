@@ -1,6 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { UserProfile } from "@/services/supabase-auth";
+import { UserProfile } from "@/types/auth";
 import { toast } from "@/components/ui/use-toast";
 
 // Ensure profile exists for the current user

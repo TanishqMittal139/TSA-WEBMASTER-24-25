@@ -1,5 +1,8 @@
+
 import { supabase } from '@/integrations/supabase/client';
-import { UserProfile } from './supabase-profiles';
+import { UserProfile } from '@/types/auth';
+
+export type { UserProfile };
 
 export const signUp = async (name: string, email: string, password: string) => {
   try {
@@ -12,7 +15,6 @@ export const signUp = async (name: string, email: string, password: string) => {
           name, // Store name in user metadata
         },
         emailRedirectTo: '/', // Optional: set redirect after signup
-        skipConfirmation: true // This will bypass email verification
       }
     });
 
@@ -124,6 +126,44 @@ export const signIn = async (email: string, password: string) => {
       return { success: true, message: "Profile updated successfully", user: data as UserProfile };
     } catch (error: any) {
       console.error("Unexpected error updating profile:", error);
+      return { success: false, message: error.message || "An unexpected error occurred" };
+    }
+  };
+
+  // Add missing resetPassword function
+  export const resetPassword = async (email: string): Promise<{success: boolean; message: string}> => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/reset-password',
+      });
+  
+      if (error) {
+        console.error("Password reset error:", error);
+        return { success: false, message: error.message };
+      }
+  
+      return { success: true, message: "Password reset email sent successfully" };
+    } catch (error: any) {
+      console.error("Unexpected error in password reset:", error);
+      return { success: false, message: error.message || "An unexpected error occurred" };
+    }
+  };
+
+  // Add missing changePassword function  
+  export const changePassword = async (newPassword: string): Promise<{success: boolean; message: string}> => {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+  
+      if (error) {
+        console.error("Password change error:", error);
+        return { success: false, message: error.message };
+      }
+  
+      return { success: true, message: "Password changed successfully" };
+    } catch (error: any) {
+      console.error("Unexpected error in password change:", error);
       return { success: false, message: error.message || "An unexpected error occurred" };
     }
   };
