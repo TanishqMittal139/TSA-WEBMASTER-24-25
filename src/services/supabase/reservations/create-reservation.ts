@@ -1,11 +1,26 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { ReservationInput, ReservationData } from "./types";
+import { ensureProfileExists } from "@/services/supabase-profiles";
 
 export const createReservation = async (reservationData: ReservationInput) => {
   try {
     // Check if the user is authenticated
     const { data: { session } } = await supabase.auth.getSession();
+    
+    // If user is logged in, ensure their profile exists before creating the reservation
+    if (session?.user) {
+      // This will create a profile if it doesn't exist yet
+      const profileExists = await ensureProfileExists();
+      
+      if (!profileExists) {
+        console.error("Failed to ensure profile exists");
+        return { 
+          error: { message: "Could not create or verify user profile" }, 
+          data: null 
+        };
+      }
+    }
     
     // Create the reservation with or without user_id
     console.log("Creating reservation with data:", reservationData);
