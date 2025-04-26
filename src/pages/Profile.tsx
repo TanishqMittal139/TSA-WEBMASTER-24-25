@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -25,7 +26,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { toast } from '@/components/ui/use-toast';
-import { updateUserProfile } from '@/services/supabase-auth';
+import { updateUserProfile } from '@/services/auth';
 import { useAuth } from '@/context/AuthContext';
 
 const profileFormSchema = z.object({

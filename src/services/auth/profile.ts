@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { UserProfile } from './types';
+import { UserProfile, AuthResult } from './types';
 
 export const getUserProfile = async (): Promise<UserProfile | null> => {
   try {
@@ -29,7 +29,7 @@ export const getUserProfile = async (): Promise<UserProfile | null> => {
   }
 };
 
-export const updateUserProfile = async (profileData: Partial<UserProfile>): Promise<{success: boolean; message: string; user?: UserProfile}> => {
+export const updateUserProfile = async (profileData: Partial<UserProfile>): Promise<AuthResult> => {
   try {
     const { data: { session } } = await supabase.auth.getSession();
 

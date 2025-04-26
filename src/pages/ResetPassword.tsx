@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -70,6 +71,7 @@ const ResetPassword = () => {
     setIsSubmitting(true);
     
     try {
+      // The changePassword function in our new refactored code only expects one parameter - the new password
       const result = await changePassword(values.password);
       
       if (result.success) {
