@@ -2,6 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { useNavigate } from 'react-router-dom';
+import { User, Mail, Phone, MapPin, Book, Cake, CalendarIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import Navbar from '@/components/ui/navbar';
+import Footer from '@/components/ui/footer';
 import {
   Form,
   FormControl,
@@ -22,7 +27,6 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { toast } from '@/components/ui/use-toast';
-import { updateUserProfile } from '@/services/auth';
 import { useAuth } from '@/context/AuthContext';
 
 const profileFormSchema = z.object({
@@ -36,7 +40,7 @@ const profileFormSchema = z.object({
 
 const Profile = () => {
   const navigate = useNavigate();
-  const { user, profile, refreshProfile } = useAuth();
+  const { user, profile, refreshProfile, updateProfile } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const form = useForm<z.infer<typeof profileFormSchema>>({
@@ -68,7 +72,7 @@ const Profile = () => {
     setIsSubmitting(true);
     
     try {
-      const result = await updateUserProfile({
+      const result = await updateProfile({
         name: values.name,
         email: values.email,
         phone: values.phone,

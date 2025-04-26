@@ -1,9 +1,11 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { getUserProfile, updateUserProfile, UserProfile } from '@/services/auth';
+import { getUserProfile, updateUserProfile, UserProfile } from '@/services/auth/profile';
 import { ensureProfileExists } from '@/services/supabase-profiles';
 import { toast } from '@/components/ui/use-toast';
+import { signOut } from '@/services/auth/signout';
 
 type AuthContextType = {
   session: Session | null;
@@ -103,7 +105,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const updateProfile = async (profileData: Partial<UserProfile>): Promise<{success: boolean; message: string; user?: UserProfile}> => {
+  const handleUpdateProfile = async (profileData: Partial<UserProfile>): Promise<{success: boolean; message: string; user?: UserProfile}> => {
     try {
       const result = await updateUserProfile(profileData);
       if (result.success && result.user) {
@@ -121,9 +123,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const signOut = async () => {
+  const handleSignOut = async () => {
     try {
-      await supabase.auth.signOut();
+      await signOut();
       setUser(null);
       setProfile(null);
       setSession(null);
@@ -147,8 +149,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     profile,
     isLoading,
     refreshProfile,
-    signOut,
-    updateProfile,
+    signOut: handleSignOut,
+    updateProfile: handleUpdateProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
