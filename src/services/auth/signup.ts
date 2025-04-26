@@ -43,36 +43,49 @@ export const signUp = async (name: string, email: string, password: string): Pro
     if (data && data.user) {
       console.log('User created successfully, id:', data.user.id);
       
-      // Create a profile for the user
+      // Create a profile for the user - do this before returning the result
       const profileData = {
         id: data.user.id,
         email,
         name
       };
 
-      // Add debug logging to trace profile creation
       console.log('Creating profile with data:', JSON.stringify(profileData));
 
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert(profileData);
-
-      if (profileError) {
-        console.error('Error creating profile:', profileError);
-        
-        // Try upsert instead if insert failed
-        const { error: upsertError } = await supabase
+      try {
+        // Use insert first, then fall back to upsert if needed
+        const { error: profileError } = await supabase
           .from('profiles')
-          .upsert(profileData);
+          .insert(profileData);
+
+        if (profileError) {
+          console.error('Error inserting profile:', profileError);
           
-        if (upsertError) {
-          console.error('Error upserting profile:', upsertError);
-          // Continue even if profile creation fails, as the auth user was created
+          // Try upsert as a fallback
+          const { error: upsertError } = await supabase
+            .from('profiles')
+            .upsert(profileData);
+            
+          if (upsertError) {
+            console.error('Error upserting profile:', upsertError);
+            // Continue anyway since the auth user was created
+          } else {
+            console.log('Profile upserted successfully for user:', data.user.id);
+          }
         } else {
-          console.log('Profile upserted successfully for user:', data.user.id);
+          console.log('Profile inserted successfully for user:', data.user.id);
         }
-      } else {
-        console.log('Profile created successfully for user:', data.user.id);
+        
+        // Verify the profile was created
+        const { data: checkProfile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', data.user.id)
+          .single();
+        
+        console.log('Profile verification:', checkProfile ? 'Profile exists' : 'Profile not found');
+      } catch (profileCreateError) {
+        console.error('Unexpected error creating profile:', profileCreateError);
       }
 
       return { 

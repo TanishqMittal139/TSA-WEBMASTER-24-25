@@ -13,6 +13,8 @@ export const ensureProfileExists = async (): Promise<boolean> => {
       return false;
     }
     
+    console.log("Ensuring profile exists for user:", session.user.id);
+    
     // Check if profile exists
     const { data: existingProfile, error: checkError } = await supabase
       .from('profiles')
@@ -27,7 +29,7 @@ export const ensureProfileExists = async (): Promise<boolean> => {
     
     // If profile doesn't exist, create it with basic info
     if (!existingProfile) {
-      console.log("Creating new profile for user:", session.user.id);
+      console.log("No existing profile found, creating new profile");
       
       // Get user data from auth session
       const userData = {
@@ -38,13 +40,13 @@ export const ensureProfileExists = async (): Promise<boolean> => {
       
       console.log("Creating profile with data:", JSON.stringify(userData));
       
-      // Using insert to avoid existing profile issues
-      const { error: createError } = await supabase
+      // Try insert first
+      const { error: insertError } = await supabase
         .from('profiles')
         .insert(userData);
       
-      if (createError) {
-        console.error("Error creating profile with insert:", createError);
+      if (insertError) {
+        console.error("Error creating profile with insert:", insertError);
         
         // Try upsert as fallback
         const { error: upsertError } = await supabase
@@ -55,9 +57,25 @@ export const ensureProfileExists = async (): Promise<boolean> => {
           console.error("Error creating profile with upsert:", upsertError);
           return false;
         }
+        
+        console.log("Profile created with upsert");
+      } else {
+        console.log("Profile created with insert");
       }
       
-      console.log("Profile created successfully");
+      // Verify profile was created
+      const { data: verifyProfile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', session.user.id)
+        .single();
+        
+      if (!verifyProfile) {
+        console.error("Profile verification failed - profile not found after creation");
+        return false;
+      }
+      
+      console.log("Profile verified and exists");
     } else {
       console.log("Profile already exists for user:", session.user.id);
     }

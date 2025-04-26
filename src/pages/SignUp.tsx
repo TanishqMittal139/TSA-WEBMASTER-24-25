@@ -21,6 +21,7 @@ import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { toast } from '@/components/ui/use-toast';
 import { signUp } from '@/services/auth';
 import { useAuth } from '@/context/AuthContext';
+import { ensureProfileExists } from '@/services/supabase-profiles';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -67,8 +68,12 @@ const SignUp = () => {
       console.log("Sign up result:", result);
       
       if (result.success) {
-        // Add a small delay before refreshing the profile to ensure the auth state has updated
+        // Add a longer delay before refreshing the profile to ensure auth state has updated
+        // and the database has had time to process the new profile
         setTimeout(async () => {
+          console.log("Ensuring profile exists after signup");
+          await ensureProfileExists();
+          
           console.log("Refreshing profile after signup");
           await refreshProfile();
           
@@ -77,7 +82,7 @@ const SignUp = () => {
             description: "Your account has been successfully created and you're now logged in.",
           });
           navigate('/');
-        }, 500);
+        }, 1000);
       } else {
         console.error("Sign up failed:", result.message);
         setAuthError(result.message);
