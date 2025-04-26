@@ -61,7 +61,7 @@ const DishDetails = () => {
       addItem({
         id: dish.id,
         name: dish.name,
-        price: dish.price,
+        price: dish.price.toString(),
         image: String(dish.image || dish.imageUrl || '/placeholder.svg'),
         category: dish.category
       });
@@ -77,7 +77,7 @@ const DishDetails = () => {
       addFavoriteMeal({
         id: dish.id,
         name: dish.name,
-        price: dish.price,
+        price: dish.price.toString(),
         image: String(dish.image || dish.imageUrl || '/placeholder.svg'),
         category: dish.category
       });
