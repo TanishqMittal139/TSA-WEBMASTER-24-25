@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
-import { BlurImage } from '@/components/ui/blur-image';
+import BlurImage from '@/components/ui/blur-image';
 
 const Careers: React.FC = () => {
   const { toast } = useToast();
