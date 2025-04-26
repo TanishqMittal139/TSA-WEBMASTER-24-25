@@ -5,6 +5,7 @@ import { X, User, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { NavLink } from './nav-link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import type { Profile } from '@/types/profile';
 import { NAV_LINKS } from '@/constants/nav-links';
@@ -37,25 +38,13 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
   };
 
   return (
-    <>
-      {isOpen && (
-        <div 
-          className="fixed inset-0 bg-background/95 backdrop-blur-sm z-40 md:hidden"
-          onClick={() => setIsOpen(false)}
-        />
-      )}
-      
-      <div
-        className={cn(
-          "fixed inset-y-0 right-0 w-full max-w-xs bg-background z-50 transform transition-transform duration-300 ease-in-out shadow-lg md:hidden",
-          isOpen ? "translate-x-0" : "translate-x-full"
-        )}
-      >
-        <div className="flex flex-col h-full overflow-y-auto pb-20">
+    <Drawer open={isOpen} onOpenChange={setIsOpen}>
+      <DrawerContent className="h-[96vh] rounded-t-xl">
+        <div className="flex flex-col h-full overflow-y-auto">
           <div className="flex justify-end p-4">
             <button
               onClick={() => setIsOpen(false)}
-              className="p-2 focus:outline-none text-foreground hover:text-primary"
+              className="p-2 hover:bg-accent rounded-full transition-colors"
               aria-label="Close menu"
             >
               <X size={24} />
@@ -63,7 +52,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
           </div>
           
           {user && (
-            <div className="p-4 mb-4 border-b border-border">
+            <div className="px-6 mb-6 pb-6 border-b border-border">
               <div className="flex items-center space-x-3">
                 <Avatar className="h-10 w-10">
                   <AvatarImage src={profile?.avatar} alt={profile?.name || 'User'} />
@@ -79,30 +68,32 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
             </div>
           )}
           
-          <nav className="flex-1 px-4">
-            {NAV_LINKS.map((link) => (
-              <NavLink
-                key={link.path}
-                to={link.path}
-                onClick={() => setIsOpen(false)}
-                isActive={location.pathname === link.path}
-                icon={<link.icon size={18} />}
-                className="flex items-center space-x-3 py-4 text-lg border-b border-border"
-              >
-                {link.name}
-              </NavLink>
-            ))}
+          <nav className="flex-1 px-2">
+            <div className="space-y-1">
+              {NAV_LINKS.map((link) => (
+                <NavLink
+                  key={link.path}
+                  to={link.path}
+                  onClick={() => setIsOpen(false)}
+                  isActive={location.pathname === link.path}
+                  icon={<link.icon size={20} />}
+                  className="flex items-center w-full p-3 rounded-lg hover:bg-accent"
+                >
+                  {link.name}
+                </NavLink>
+              ))}
+            </div>
           </nav>
           
-          <div className="px-4 mt-auto mb-8">
+          <div className="p-6 mt-auto border-t border-border">
             {user ? (
-              <>
+              <div className="space-y-3">
                 <Link 
                   to="/profile" 
                   onClick={() => setIsOpen(false)}
-                  className="flex items-center space-x-3 py-4 text-lg border-b border-border hover:text-primary transition-colors"
+                  className="flex items-center space-x-3 p-3 rounded-lg hover:bg-accent transition-colors w-full"
                 >
-                  <User size={18} />
+                  <User size={20} />
                   <span>Profile</span>
                 </Link>
                 
@@ -111,26 +102,26 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                     handleSignOut();
                     setIsOpen(false);
                   }}
-                  className="w-full flex items-center space-x-3 py-4 text-lg text-destructive hover:text-destructive/80 transition-colors"
+                  className="flex items-center space-x-3 p-3 rounded-lg text-destructive hover:bg-destructive/10 transition-colors w-full"
                 >
-                  <LogOut size={18} />
+                  <LogOut size={20} />
                   <span>Sign Out</span>
                 </button>
-              </>
+              </div>
             ) : (
               <Link 
                 to="/sign-in" 
                 onClick={() => setIsOpen(false)}
-                className="flex items-center space-x-3 py-4 text-lg hover:text-primary transition-colors"
+                className="flex items-center space-x-3 p-3 rounded-lg hover:bg-accent transition-colors w-full"
               >
-                <User size={18} />
+                <User size={20} />
                 <span>Sign In</span>
               </Link>
             )}
           </div>
         </div>
-      </div>
-    </>
+      </DrawerContent>
+    </Drawer>
   );
 };
 
