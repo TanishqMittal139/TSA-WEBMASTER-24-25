@@ -62,7 +62,7 @@ const DishDetails = () => {
         id: dish.id,
         name: dish.name,
         price: dish.price,
-        image: String(dish.image || dish.imageUrl || ''),
+        image: String(dish.image || dish.imageUrl || '/placeholder.svg'),
         category: dish.category
       });
     }
@@ -78,7 +78,7 @@ const DishDetails = () => {
         id: dish.id,
         name: dish.name,
         price: dish.price,
-        image: String(dish.image || dish.imageUrl || ''),
+        image: String(dish.image || dish.imageUrl || '/placeholder.svg'),
         category: dish.category
       });
     }
@@ -138,7 +138,7 @@ const DishDetails = () => {
               className="relative h-[300px] md:h-full rounded-lg overflow-hidden"
             >
               <BlurImage
-                src={dish.image || dish.imageUrl}
+                src={String(dish.image || dish.imageUrl || '/placeholder.svg')}
                 alt={dish.name}
                 className="object-cover"
               />
