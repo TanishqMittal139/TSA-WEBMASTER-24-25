@@ -21,62 +21,56 @@ export const signUp = async (name: string, email: string, password: string) => {
       };
     }
 
-    // Use signInWithPassword directly instead of signUp to bypass verification
-    const { data, error } = await supabase.auth.signInWithPassword({
+    // Create the user with emailConfirm set to false
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        data: {
+          name,
+        },
+        emailRedirectTo: '/',
+      }
     });
 
-    // If user doesn't exist yet, create them first
-    if (error && error.message.includes('Invalid login credentials')) {
-      console.log('User does not exist, creating new account');
-      
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+    if (error) {
+      console.error('Sign-up error:', error);
+      return { success: false, message: error.message };
+    }
+
+    // If we successfully created the user, sign them in immediately
+    if (data && data.user) {
+      // Immediately sign in with the credentials
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
-        options: {
-          data: {
-            name,
-          },
-          emailRedirectTo: '/',
-        }
       });
 
-      if (signUpError) {
-        console.error('Sign-up error:', signUpError);
-        return { success: false, message: signUpError.message };
+      if (signInError) {
+        console.error('Immediate sign-in error:', signInError);
+        return { success: false, message: 'Account created but could not sign in automatically.' };
       }
 
-      // If we successfully created the user, their session should be active
-      if (signUpData && signUpData.user) {
-        // Ensure the profile is created
-        const profileData = {
-          id: signUpData.user.id,
-          email: email,
-          name: name
-        };
+      // Ensure the profile is created
+      const profileData = {
+        id: data.user.id,
+        email: email,
+        name: name
+      };
 
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .upsert(profileData);
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .upsert(profileData);
 
-        if (profileError) {
-          console.error('Error creating profile:', profileError);
-          // Still consider signup successful even if profile creation fails
-        }
-
-        return { 
-          success: true, 
-          message: 'Account created and signed in successfully', 
-          user: signUpData.user 
-        };
+      if (profileError) {
+        console.error('Error creating profile:', profileError);
+        // Still consider signup successful even if profile creation fails
       }
-    } else if (data && data.user) {
-      // Existing user successfully signed in
+
       return { 
         success: true, 
-        message: 'Signed in successfully', 
-        user: data.user 
+        message: 'Account created and signed in successfully', 
+        user: signInData.user 
       };
     }
 

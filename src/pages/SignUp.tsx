@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -22,7 +21,6 @@ import { toast } from '@/components/ui/use-toast';
 import { signUp } from '@/services/supabase-auth';
 import { useAuth } from '@/context/AuthContext';
 
-// Updated form schema - removed terms validation
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
   email: z.string().email({ message: 'Please enter a valid email address.' }),
@@ -51,7 +49,6 @@ const SignUp = () => {
     },
   });
 
-  // Check if user is already authenticated
   useEffect(() => {
     if (user) {
       navigate('/');
@@ -63,7 +60,9 @@ const SignUp = () => {
     setAuthError(null);
     
     try {
+      console.log("Attempting to sign up user:", values.email);
       const result = await signUp(values.name, values.email, values.password);
+      console.log("Sign up result:", result);
       
       if (result.success) {
         toast({
