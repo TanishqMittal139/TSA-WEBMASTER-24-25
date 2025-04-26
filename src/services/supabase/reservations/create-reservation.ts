@@ -7,31 +7,28 @@ export const createReservation = async (reservationData: ReservationInput) => {
     // Check if the user is authenticated
     const { data: { session } } = await supabase.auth.getSession();
     
-    if (!session) {
-      return {
-        error: { message: "User not authenticated" },
-        data: null
-      };
+    // Create the reservation with or without user_id
+    console.log("Creating reservation with data:", reservationData);
+    
+    const insertData: any = {
+      name: reservationData.name,
+      email: reservationData.email,
+      phone: reservationData.phone,
+      date: reservationData.date,
+      time: reservationData.time,
+      guests: reservationData.guests,
+      special_requests: reservationData.specialRequests,
+      status: reservationData.status
+    };
+    
+    // Only add user_id if user is logged in
+    if (session?.user) {
+      insertData.user_id = session.user.id;
     }
     
-    const userId = session.user.id;
-    
-    // Create the reservation with user_id and skip profile creation
-    // This approach works because we already loosened the foreign key constraint
-    console.log("Creating reservation with user_id:", userId);
     const { data, error } = await supabase
       .from('reservations')
-      .insert({
-        user_id: userId,
-        name: reservationData.name,
-        email: reservationData.email,
-        phone: reservationData.phone,
-        date: reservationData.date,
-        time: reservationData.time,
-        guests: reservationData.guests,
-        special_requests: reservationData.specialRequests,
-        status: reservationData.status
-      })
+      .insert(insertData)
       .select()
       .single();
     

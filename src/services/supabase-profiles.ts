@@ -28,9 +28,11 @@ export const ensureProfileExists = async (): Promise<boolean> => {
     // If profile doesn't exist, create it with basic info
     if (!existingProfile) {
       console.log("Creating new profile for user:", session.user.id);
+      
+      // Using upsert to avoid race conditions
       const { error: createError } = await supabase
         .from('profiles')
-        .insert({
+        .upsert({
           id: session.user.id,
           email: session.user.email,
           name: session.user.user_metadata?.name || ''
@@ -93,6 +95,14 @@ export const syncProfileFromReservation = async (reservationData: {
   phone: string;
 }): Promise<void> => {
   try {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    // Only sync if user is authenticated
+    if (!session?.user) {
+      console.log("No user session, skipping profile sync");
+      return;
+    }
+    
     // Make sure profile exists before attempting to sync
     await ensureProfileExists();
     
@@ -104,6 +114,8 @@ export const syncProfileFromReservation = async (reservationData: {
     
     if (!success) {
       console.warn("Failed to sync profile data from reservation");
+    } else {
+      console.log("Profile successfully synced from reservation data");
     }
   } catch (error) {
     console.error("Error syncing profile from reservation:", error);
