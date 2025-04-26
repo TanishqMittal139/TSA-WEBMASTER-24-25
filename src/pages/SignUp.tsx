@@ -51,6 +51,7 @@ const SignUp = () => {
 
   useEffect(() => {
     if (user) {
+      console.log("User already authenticated, redirecting to home");
       navigate('/');
     }
   }, [user, navigate]);
@@ -71,6 +72,7 @@ const SignUp = () => {
         });
         navigate('/');
       } else {
+        console.error("Sign up failed:", result.message);
         setAuthError(result.message);
       }
     } catch (error: any) {

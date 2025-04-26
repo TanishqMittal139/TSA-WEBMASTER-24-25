@@ -4,6 +4,7 @@ import { AuthResult } from './types';
 
 export const signIn = async (email: string, password: string): Promise<AuthResult> => {
   try {
+    console.log('Attempting to sign in with:', email);
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -14,6 +15,7 @@ export const signIn = async (email: string, password: string): Promise<AuthResul
       return { success: false, message: error.message };
     }
 
+    console.log('Sign-in successful, user:', data.user?.id);
     return { success: true, message: 'Signed in successfully', user: data.user };
   } catch (error: any) {
     console.error('Unexpected sign-in error:', error);

@@ -47,6 +47,7 @@ const SignIn = () => {
   // Check if user is already authenticated
   useEffect(() => {
     if (user) {
+      console.log("User is already logged in, redirecting to:", from);
       navigate(from, { replace: true });
     }
   }, [user, navigate, from]);
@@ -56,6 +57,7 @@ const SignIn = () => {
     setAuthError(null);
     
     try {
+      console.log("Attempting to sign in with:", values.email);
       const result = await signIn(values.email, values.password);
       
       if (result.success) {
@@ -63,11 +65,13 @@ const SignIn = () => {
           title: "Welcome back!",
           description: "You have successfully signed in.",
         });
+        console.log("Sign in successful, redirecting to:", from);
         navigate(from, { replace: true });
       } else {
+        console.error("Sign in failed:", result.message);
         setAuthError(result.message);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Sign in error:", error);
       setAuthError("An unexpected error occurred. Please try again.");
     } finally {

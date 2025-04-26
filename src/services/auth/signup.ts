@@ -4,7 +4,9 @@ import { AuthResult } from './types';
 
 export const signUp = async (name: string, email: string, password: string): Promise<AuthResult> => {
   try {
-    // First, we check if user already exists
+    console.log('Attempting to sign up user:', email);
+    
+    // First, check if user already exists
     const { data: existingUsers, error: checkError } = await supabase
       .from('profiles')
       .select('id')
@@ -20,13 +22,13 @@ export const signUp = async (name: string, email: string, password: string): Pro
       };
     }
 
-    // Create the user with email confirmation disabled
+    // Create the user
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: { name },
-        emailRedirectTo: '/',
+        emailRedirectTo: window.location.origin,
       }
     });
 
@@ -35,19 +37,12 @@ export const signUp = async (name: string, email: string, password: string): Pro
       return { success: false, message: error.message };
     }
 
-    // If we successfully created the user, sign them in immediately
+    // If we successfully created the user, immediately authenticate
     if (data && data.user) {
-      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (signInError) {
-        console.error('Immediate sign-in error:', signInError);
-        return { success: false, message: 'Account created but could not sign in automatically.' };
-      }
-
-      // Ensure the profile is created
+      console.log('User created successfully, id:', data.user.id);
+      
+      // No need to sign in again as signUp with Supabase automatically logs the user in
+      // Just ensure the profile is created
       const profileData = {
         id: data.user.id,
         email,
@@ -65,7 +60,7 @@ export const signUp = async (name: string, email: string, password: string): Pro
       return { 
         success: true, 
         message: 'Account created and signed in successfully', 
-        user: signInData.user 
+        user: data.user 
       };
     }
 

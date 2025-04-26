@@ -38,10 +38,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchUserProfile = async (userId: string) => {
     try {
+      console.log("Fetching user profile for:", userId);
       await ensureProfileExists();
       
       const userProfile = await getUserProfile();
       if (userProfile) {
+        console.log("User profile loaded:", userProfile.id);
         setProfile(userProfile);
       } else {
         console.error("No user profile found after ensuring it exists");
@@ -53,9 +55,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     console.log("Setting up auth state change listener");
+    
+    // First set up the auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
         console.log("Auth state changed:", event, currentSession?.user?.id);
+        
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
         
@@ -70,10 +75,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     );
 
+    // Then check for an existing session
     const initializeAuth = async () => {
       try {
         console.log("Initializing auth...");
-        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        const { data } = await supabase.auth.getSession();
+        const currentSession = data.session;
+        
         console.log("Initial session check:", currentSession?.user?.id);
         
         setSession(currentSession);
@@ -98,6 +106,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const refreshProfile = async () => {
     if (user) {
+      console.log("Refreshing user profile for:", user.id);
       await ensureProfileExists();
       const userProfile = await getUserProfile();
       if (userProfile) {

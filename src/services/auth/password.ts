@@ -4,6 +4,7 @@ import { AuthResult } from './types';
 
 export const resetPassword = async (email: string): Promise<AuthResult> => {
   try {
+    console.log('Attempting to reset password for:', email);
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: window.location.origin + '/reset-password',
     });
@@ -22,6 +23,7 @@ export const resetPassword = async (email: string): Promise<AuthResult> => {
 
 export const changePassword = async (newPassword: string): Promise<AuthResult> => {
   try {
+    console.log('Attempting to change password');
     const { error } = await supabase.auth.updateUser({
       password: newPassword,
     });
@@ -31,6 +33,7 @@ export const changePassword = async (newPassword: string): Promise<AuthResult> =
       return { success: false, message: error.message };
     }
 
+    console.log("Password changed successfully");
     return { success: true, message: "Password changed successfully" };
   } catch (error: any) {
     console.error("Unexpected error in password change:", error);
