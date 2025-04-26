@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -37,7 +38,7 @@ const SignUp = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
-  const { user } = useAuth();
+  const { user, refreshProfile } = useAuth();
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -66,6 +67,9 @@ const SignUp = () => {
       console.log("Sign up result:", result);
       
       if (result.success) {
+        // Refresh the profile to ensure it's loaded into the AuthContext
+        await refreshProfile();
+        
         toast({
           title: "Account created!",
           description: "Your account has been successfully created and you're now logged in.",
