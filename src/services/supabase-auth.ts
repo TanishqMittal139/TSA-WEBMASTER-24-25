@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { UserProfile } from '@/types/auth';
 
@@ -6,27 +5,77 @@ export type { UserProfile };
 
 export const signUp = async (name: string, email: string, password: string) => {
   try {
-    // Disable email confirmation and sign up directly
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          name, // Store name in user metadata
-        },
-        emailRedirectTo: '/', // Optional: set redirect after signup
-      }
-    });
+    // First, we check if user already exists
+    const { data: existingUsers, error: checkError } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('email', email)
+      .limit(1);
 
-    if (error) {
-      console.error('Sign-up error:', error);
-      return { success: false, message: error.message };
+    if (checkError) {
+      console.error('Error checking for existing user:', checkError);
+    } else if (existingUsers && existingUsers.length > 0) {
+      return { 
+        success: false, 
+        message: 'An account with this email already exists. Please sign in instead.' 
+      };
     }
 
-    if (data.user) {
+    // Use signInWithPassword directly instead of signUp to bypass verification
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    // If user doesn't exist yet, create them first
+    if (error && error.message.includes('Invalid login credentials')) {
+      console.log('User does not exist, creating new account');
+      
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name,
+          },
+          emailRedirectTo: '/',
+        }
+      });
+
+      if (signUpError) {
+        console.error('Sign-up error:', signUpError);
+        return { success: false, message: signUpError.message };
+      }
+
+      // If we successfully created the user, their session should be active
+      if (signUpData && signUpData.user) {
+        // Ensure the profile is created
+        const profileData = {
+          id: signUpData.user.id,
+          email: email,
+          name: name
+        };
+
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .upsert(profileData);
+
+        if (profileError) {
+          console.error('Error creating profile:', profileError);
+          // Still consider signup successful even if profile creation fails
+        }
+
+        return { 
+          success: true, 
+          message: 'Account created and signed in successfully', 
+          user: signUpData.user 
+        };
+      }
+    } else if (data && data.user) {
+      // Existing user successfully signed in
       return { 
         success: true, 
-        message: 'Account created successfully', 
+        message: 'Signed in successfully', 
         user: data.user 
       };
     }
@@ -130,7 +179,6 @@ export const signIn = async (email: string, password: string) => {
     }
   };
 
-  // Add missing resetPassword function
   export const resetPassword = async (email: string): Promise<{success: boolean; message: string}> => {
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -149,7 +197,6 @@ export const signIn = async (email: string, password: string) => {
     }
   };
 
-  // Add missing changePassword function  
   export const changePassword = async (newPassword: string): Promise<{success: boolean; message: string}> => {
     try {
       const { error } = await supabase.auth.updateUser({

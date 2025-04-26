@@ -58,6 +58,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(currentSession?.user ?? null);
         
         if (currentSession?.user) {
+          // Use setTimeout to avoid state update deadlock
           setTimeout(() => {
             fetchUserProfile(currentSession.user.id);
           }, 0);

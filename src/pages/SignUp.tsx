@@ -68,7 +68,7 @@ const SignUp = () => {
       if (result.success) {
         toast({
           title: "Account created!",
-          description: result.message || "Your account has been successfully created.",
+          description: "Your account has been successfully created and you're now logged in.",
         });
         navigate('/');
       } else {
