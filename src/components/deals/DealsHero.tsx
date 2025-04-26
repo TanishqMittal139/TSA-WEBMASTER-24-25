@@ -1,3 +1,4 @@
+
 import React from 'react';
 import BlurImage from '@/components/ui/blur-image';
 
@@ -10,7 +11,7 @@ const DealsHero = () => {
           alt="Special Deals"
           className="object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-background/5"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-background/10"></div>
       </div>
       
       <div className="relative container mx-auto px-4 flex flex-col justify-center h-full pt-24">
