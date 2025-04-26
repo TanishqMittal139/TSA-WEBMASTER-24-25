@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Check, Clock, DollarSign, MapPin, Heart, Send } from 'lucide-react';
 import Navbar from '@/components/ui/navbar';
@@ -7,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
-import BlurImage from '@/components/ui/blur-image';
+import PageHeader from '@/components/ui/page-header';
 
 const Careers: React.FC = () => {
   const { toast } = useToast();
@@ -68,7 +67,6 @@ const Careers: React.FC = () => {
     });
   };
   
-  // Scroll to top on component mount
   React.useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
@@ -77,8 +75,15 @@ const Careers: React.FC = () => {
     <div className="min-h-screen">
       <Navbar />
       
+      <PageHeader
+        title="Careers at Tasty Hub"
+        subtitle="Become part of our culinary family and help us create memorable dining experiences in a supportive and growth-oriented environment."
+        tag="Join Our Team"
+        imageSrc="https://images.unsplash.com/photo-1414235077428-338989a2e8c0"
+        imageAlt="Restaurant team at work"
+      />
+      
       <main>
-        {/* Hero section */}
         <section className="relative h-80">
           <div className="absolute inset-0">
             <BlurImage
@@ -102,7 +107,6 @@ const Careers: React.FC = () => {
           </div>
         </section>
         
-        {/* Benefits section */}
         <section className="py-16 bg-secondary">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
@@ -131,7 +135,6 @@ const Careers: React.FC = () => {
           </div>
         </section>
         
-        {/* Open positions section */}
         <section className="py-16">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
@@ -168,7 +171,6 @@ const Careers: React.FC = () => {
           </div>
         </section>
         
-        {/* Application form section */}
         <section className="py-16 bg-secondary">
           <div className="container mx-auto px-4">
             <div className="max-w-2xl mx-auto">

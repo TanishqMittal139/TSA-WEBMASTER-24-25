@@ -1,15 +1,13 @@
-
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import Navbar from '@/components/ui/navbar';
 import Footer from '@/components/ui/footer';
-import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Leaf, Award, Utensils, Wind, Recycle, UserCheck, ChefHat, Sun, Wand2, Globe, Users, Sparkles } from 'lucide-react';
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from '@/components/ui/carousel';
-import BlurImage from '@/components/ui/blur-image';
 import InteractiveCard from '@/components/ui/interactive-card';
 import Timeline from '@/components/about/timeline';
 import ParallaxGallery from '@/components/ui/parallax-gallery';
+import PageHeader from '@/components/ui/page-header';
 
 const About = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -93,31 +91,16 @@ const About = () => {
   ];
 
   return (
-    <div className="min-h-screen" ref={containerRef}>
+    <div className="min-h-screen">
       <Navbar />
       
-      <section className="relative h-80">
-        <div className="absolute inset-0">
-          <BlurImage
-            src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=2074&auto=format&fit=crop"
-            alt="About TastyHub"
-            className="object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/10"></div>
-        </div>
-        
-        <div className="relative container mx-auto px-4 flex flex-col justify-center h-full pt-24">
-          <div className="transition-all duration-1000 transform translate-y-0 opacity-100">
-            <div className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4">
-              Our Story
-            </div>
-            <h1 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">About TastyHub</h1>
-            <p className="text-muted-foreground max-w-xl">
-              We're not just a restaurant, we're a culinary journey focused on nutrition, sustainability, and exceptional taste.
-            </p>
-          </div>
-        </div>
-      </section>
+      <PageHeader
+        title="About TastyHub"
+        subtitle="We're not just a restaurant, we're a culinary journey focused on nutrition, sustainability, and exceptional taste."
+        tag="Our Story"
+        imageSrc="https://images.unsplash.com/photo-1555396273-367ea4eb4db5"
+        imageAlt="About TastyHub"
+      />
       
       <main className="container mx-auto px-4 py-12 overflow-hidden">
         <div className="max-w-6xl mx-auto">
