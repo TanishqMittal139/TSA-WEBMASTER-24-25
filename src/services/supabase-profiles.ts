@@ -29,21 +29,37 @@ export const ensureProfileExists = async (): Promise<boolean> => {
     if (!existingProfile) {
       console.log("Creating new profile for user:", session.user.id);
       
-      // Using upsert to avoid race conditions
+      // Get user data from auth session
+      const userData = {
+        id: session.user.id,
+        email: session.user.email,
+        name: session.user.user_metadata?.name || ''
+      };
+      
+      console.log("Creating profile with data:", JSON.stringify(userData));
+      
+      // Using insert to avoid existing profile issues
       const { error: createError } = await supabase
         .from('profiles')
-        .upsert({
-          id: session.user.id,
-          email: session.user.email,
-          name: session.user.user_metadata?.name || ''
-        });
+        .insert(userData);
       
       if (createError) {
-        console.error("Error creating new profile:", createError);
-        return false;
+        console.error("Error creating profile with insert:", createError);
+        
+        // Try upsert as fallback
+        const { error: upsertError } = await supabase
+          .from('profiles')
+          .upsert(userData);
+        
+        if (upsertError) {
+          console.error("Error creating profile with upsert:", upsertError);
+          return false;
+        }
       }
       
       console.log("Profile created successfully");
+    } else {
+      console.log("Profile already exists for user:", session.user.id);
     }
     
     return true;

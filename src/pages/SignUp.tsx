@@ -67,14 +67,17 @@ const SignUp = () => {
       console.log("Sign up result:", result);
       
       if (result.success) {
-        // Refresh the profile to ensure it's loaded into the AuthContext
-        await refreshProfile();
-        
-        toast({
-          title: "Account created!",
-          description: "Your account has been successfully created and you're now logged in.",
-        });
-        navigate('/');
+        // Add a small delay before refreshing the profile to ensure the auth state has updated
+        setTimeout(async () => {
+          console.log("Refreshing profile after signup");
+          await refreshProfile();
+          
+          toast({
+            title: "Account created!",
+            description: "Your account has been successfully created and you're now logged in.",
+          });
+          navigate('/');
+        }, 500);
       } else {
         console.error("Sign up failed:", result.message);
         setAuthError(result.message);

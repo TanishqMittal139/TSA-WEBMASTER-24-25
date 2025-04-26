@@ -27,7 +27,9 @@ export const signUp = async (name: string, email: string, password: string): Pro
       email,
       password,
       options: {
-        data: { name },
+        data: { 
+          name 
+        },
         emailRedirectTo: window.location.origin,
       }
     });
@@ -48,13 +50,27 @@ export const signUp = async (name: string, email: string, password: string): Pro
         name
       };
 
+      // Add debug logging to trace profile creation
+      console.log('Creating profile with data:', JSON.stringify(profileData));
+
       const { error: profileError } = await supabase
         .from('profiles')
-        .upsert(profileData);
+        .insert(profileData);
 
       if (profileError) {
         console.error('Error creating profile:', profileError);
-        // Continue even if profile creation fails, as the auth user was created
+        
+        // Try upsert instead if insert failed
+        const { error: upsertError } = await supabase
+          .from('profiles')
+          .upsert(profileData);
+          
+        if (upsertError) {
+          console.error('Error upserting profile:', upsertError);
+          // Continue even if profile creation fails, as the auth user was created
+        } else {
+          console.log('Profile upserted successfully for user:', data.user.id);
+        }
       } else {
         console.log('Profile created successfully for user:', data.user.id);
       }
