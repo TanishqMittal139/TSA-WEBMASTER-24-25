@@ -71,7 +71,7 @@ const ResetPassword = () => {
     setIsSubmitting(true);
     
     try {
-      // The changePassword function in our new refactored code only expects one parameter - the new password
+      // The changePassword function now only takes one parameter - the new password
       const result = await changePassword(values.password);
       
       if (result.success) {

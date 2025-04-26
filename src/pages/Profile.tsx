@@ -1,17 +1,11 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { format } from 'date-fns';
-import { CalendarIcon, User, Mail, Phone, MapPin, Book, Cake } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { cn } from '@/lib/utils';
-import Navbar from '@/components/ui/navbar';
-import Footer from '@/components/ui/footer';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -20,6 +14,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
+import { Textarea } from '@/components/ui/textarea';
+import { format } from 'date-fns';
 import {
   Popover,
   PopoverContent,
@@ -243,7 +239,7 @@ const Profile = () => {
                           Bio
                         </FormLabel>
                         <FormControl>
-                          <Input 
+                          <Textarea 
                             placeholder="Tell us a bit about yourself"
                             {...field}
                             className="glass-input transition-all duration-300"

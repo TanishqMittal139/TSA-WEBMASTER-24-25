@@ -20,6 +20,7 @@ export const resetPassword = async (email: string): Promise<AuthResult> => {
   }
 };
 
+// Updated to take only one parameter
 export const changePassword = async (newPassword: string): Promise<AuthResult> => {
   try {
     const { error } = await supabase.auth.updateUser({
