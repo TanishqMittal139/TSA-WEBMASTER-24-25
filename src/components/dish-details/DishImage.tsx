@@ -18,12 +18,13 @@ const DishImage = ({ imageUrl, name, isFavorite, onFavoriteToggle }: DishImagePr
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="relative h-[300px] md:h-full rounded-lg overflow-hidden"
+      className="relative h-full w-full rounded-lg overflow-hidden"
     >
       <BlurImage
         src={imageUrl}
         alt={name}
-        className="object-cover"
+        className="object-cover h-full w-full"
+        fallback="/placeholder.svg"
       />
       
       <Button 

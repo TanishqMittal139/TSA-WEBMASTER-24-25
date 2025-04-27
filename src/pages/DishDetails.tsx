@@ -62,7 +62,7 @@ const DishDetails = () => {
         id: dish.id,
         name: dish.name,
         price: dish.price.toString(),
-        image: String(dish.image || dish.imageUrl || '/placeholder.svg'),
+        image: dish.imageUrl || '/placeholder.svg',
         category: dish.category
       });
     }
@@ -78,7 +78,7 @@ const DishDetails = () => {
         id: dish.id,
         name: dish.name,
         price: dish.price.toString(),
-        image: String(dish.image || dish.imageUrl || '/placeholder.svg'),
+        image: dish.imageUrl || '/placeholder.svg',
         category: dish.category
       });
     }
@@ -138,9 +138,9 @@ const DishDetails = () => {
               className="h-[400px] lg:h-[500px] rounded-lg overflow-hidden sticky top-24"
             >
               <DishImage
-                imageUrl={String(dish.image || dish.imageUrl || '/placeholder.svg')}
-                name={dish.name}
-                isFavorite={isFavoriteMeal(dish.id)}
+                imageUrl={dish?.imageUrl || '/placeholder.svg'}
+                name={dish?.name || ''}
+                isFavorite={dish ? isFavoriteMeal(dish.id) : false}
                 onFavoriteToggle={handleFavoriteToggle}
               />
             </motion.div>
@@ -151,13 +151,13 @@ const DishDetails = () => {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="flex flex-col space-y-6"
             >
-              <DishHeader dish={dish} />
+              {dish && <DishHeader dish={dish} />}
               
-              <p className="text-muted-foreground">{dish.description}</p>
+              {dish && <p className="text-muted-foreground">{dish.description}</p>}
               
-              <DietaryBadges dish={dish} />
+              {dish && <DietaryBadges dish={dish} />}
               
-              {dish.allergens && dish.allergens.length > 0 && (
+              {dish?.allergens && dish.allergens.length > 0 && (
                 <div className="flex items-center p-3 bg-yellow-50 border border-yellow-200 rounded-md text-yellow-800 dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-300">
                   <AlertTriangle className="h-5 w-5 mr-2 flex-shrink-0" />
                   <div className="text-sm">
@@ -177,7 +177,7 @@ const DishDetails = () => {
                 </Button>
               </div>
               
-              <DishTabs dish={dish} />
+              {dish && <DishTabs dish={dish} />}
             </motion.div>
           </div>
         </section>
