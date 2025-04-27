@@ -15,8 +15,10 @@ function Calendar({
   showOutsideDays = true,
   ...props
 }: CalendarProps) {
-  const [year, setYear] = React.useState(props.selected ? new Date(props.selected).getFullYear() : new Date().getFullYear())
-  const [month, setMonth] = React.useState(props.selected ? new Date(props.selected).getMonth() : new Date().getMonth())
+  // Fix the type checking for the selected date to avoid TypeScript errors
+  const initialDate = props.selected instanceof Date ? props.selected : new Date()
+  const [year, setYear] = React.useState(initialDate.getFullYear())
+  const [month, setMonth] = React.useState(initialDate.getMonth())
 
   return (
     <DayPicker
