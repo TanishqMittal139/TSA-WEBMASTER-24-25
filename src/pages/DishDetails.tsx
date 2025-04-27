@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ShoppingBag, AlertTriangle } from 'lucide-react';
@@ -137,12 +138,14 @@ const DishDetails = () => {
               transition={{ duration: 0.5 }}
               className="h-[400px] lg:h-[500px] rounded-lg overflow-hidden sticky top-24"
             >
-              <DishImage
-                imageUrl={dish?.imageUrl || '/placeholder.svg'}
-                name={dish?.name || ''}
-                isFavorite={dish ? isFavoriteMeal(dish.id) : false}
-                onFavoriteToggle={handleFavoriteToggle}
-              />
+              {dish && (
+                <DishImage
+                  imageUrl={dish.imageUrl || '/placeholder.svg'}
+                  name={dish.name}
+                  isFavorite={isFavoriteMeal(dish.id)}
+                  onFavoriteToggle={handleFavoriteToggle}
+                />
+              )}
             </motion.div>
             
             <motion.div

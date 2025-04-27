@@ -21,10 +21,9 @@ const DishImage = ({ imageUrl, name, isFavorite, onFavoriteToggle }: DishImagePr
       className="relative h-full w-full rounded-lg overflow-hidden"
     >
       <BlurImage
-        src={imageUrl}
+        src={imageUrl || '/placeholder.svg'}
         alt={name}
         className="object-cover h-full w-full"
-        fallback="/placeholder.svg"
       />
       
       <Button 
