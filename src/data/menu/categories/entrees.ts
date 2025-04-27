@@ -16,8 +16,14 @@ export const entreeItems: MenuItem[] = [
       calories: 850,
       protein: '30g',
       carbs: '95g',
-      fat: '28g'
-    }
+      fat: '28g',
+      sodium: '1200mg',
+      fiber: '4g',
+      sugar: '8g'
+    },
+    ingredients: ['Pizza dough', 'San Marzano tomatoes', 'Fresh mozzarella', 'Fresh basil', 'Extra virgin olive oil', 'Sea salt'],
+    preparationTime: '15-20 min',
+    allergens: ['Wheat', 'Dairy']
   },
   {
     id: '5',
@@ -27,7 +33,19 @@ export const entreeItems: MenuItem[] = [
     imageUrl: 'https://images.unsplash.com/photo-1674492153593-5f9a9727899f?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8c3BhZ2hldHRpJTIwYm9sb2duZXNlfGVufDB8fDB8fDA=',
     category: 'entrees',
     cuisineType: 'italian',
-    tags: ['pasta', 'italian']
+    tags: ['pasta', 'italian'],
+    nutrition: {
+      calories: 780,
+      protein: '35g',
+      carbs: '88g',
+      fat: '32g',
+      sodium: '980mg',
+      fiber: '5g',
+      sugar: '6g'
+    },
+    ingredients: ['Spaghetti', 'Ground beef', 'Tomato sauce', 'Onions', 'Garlic', 'Italian herbs', 'Parmesan cheese'],
+    preparationTime: '20-25 min',
+    allergens: ['Wheat', 'Dairy']
   },
   {
     id: '9',
@@ -37,6 +55,18 @@ export const entreeItems: MenuItem[] = [
     imageUrl: 'https://images.unsplash.com/photo-1550304943-4f24f54ddde9?w=400&auto=format&fit=crop&q=60',
     category: 'entrees',
     cuisineType: 'american',
-    tags: ['salad', 'healthy', 'chicken']
+    tags: ['salad', 'healthy', 'chicken'],
+    nutrition: {
+      calories: 440,
+      protein: '38g',
+      carbs: '22g',
+      fat: '24g',
+      sodium: '850mg',
+      fiber: '4g',
+      sugar: '3g'
+    },
+    ingredients: ['Romaine lettuce', 'Grilled chicken breast', 'Parmesan cheese', 'Croutons', 'Caesar dressing', 'Black pepper'],
+    preparationTime: '10-15 min',
+    allergens: ['Wheat', 'Dairy', 'Eggs']
   }
 ];

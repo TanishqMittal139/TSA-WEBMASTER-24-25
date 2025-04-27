@@ -130,27 +130,35 @@ const DishDetails = () => {
             Back to Menu
           </Button>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <DishImage
-              imageUrl={String(dish.image || dish.imageUrl || '/placeholder.svg')}
-              name={dish.name}
-              isFavorite={isFavoriteMeal(dish.id)}
-              onFavoriteToggle={handleFavoriteToggle}
-            />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="h-[400px] lg:h-[500px] rounded-lg overflow-hidden sticky top-24"
+            >
+              <DishImage
+                imageUrl={String(dish.image || dish.imageUrl || '/placeholder.svg')}
+                name={dish.name}
+                isFavorite={isFavoriteMeal(dish.id)}
+                onFavoriteToggle={handleFavoriteToggle}
+              />
+            </motion.div>
             
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
+              className="flex flex-col space-y-6"
             >
               <DishHeader dish={dish} />
               
-              <p className="text-muted-foreground mb-6">{dish.description}</p>
+              <p className="text-muted-foreground">{dish.description}</p>
               
               <DietaryBadges dish={dish} />
               
               {dish.allergens && dish.allergens.length > 0 && (
-                <div className="flex items-center mb-6 p-3 bg-yellow-50 border border-yellow-200 rounded-md text-yellow-800 dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-300">
+                <div className="flex items-center p-3 bg-yellow-50 border border-yellow-200 rounded-md text-yellow-800 dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-300">
                   <AlertTriangle className="h-5 w-5 mr-2 flex-shrink-0" />
                   <div className="text-sm">
                     <span className="font-medium">Allergens:</span> {dish.allergens.join(', ')}
@@ -158,7 +166,7 @@ const DishDetails = () => {
                 </div>
               )}
               
-              <div className="flex space-x-2 mb-8">
+              <div className="flex space-x-2">
                 <Button 
                   onClick={handleAddToCart}
                   className="flex-1 flex items-center justify-center"
