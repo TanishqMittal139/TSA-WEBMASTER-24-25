@@ -2,15 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { format } from 'date-fns';
+import { CalendarIcon, User, Mail, Phone, MapPin, Book, Cake } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { User, Mail, Phone, MapPin, Book, Cake, CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Navbar from '@/components/ui/navbar';
 import Footer from '@/components/ui/footer';
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -19,14 +19,13 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
-import { Textarea } from '@/components/ui/textarea';
-import { format } from 'date-fns';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { toast } from '@/components/ui/use-toast';
+import { updateUserProfile } from '@/services/supabase-auth';
 import { useAuth } from '@/context/AuthContext';
 
 const profileFormSchema = z.object({
@@ -40,7 +39,7 @@ const profileFormSchema = z.object({
 
 const Profile = () => {
   const navigate = useNavigate();
-  const { user, profile, refreshProfile, updateProfile } = useAuth();
+  const { user, profile, refreshProfile } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const form = useForm<z.infer<typeof profileFormSchema>>({
@@ -72,7 +71,7 @@ const Profile = () => {
     setIsSubmitting(true);
     
     try {
-      const result = await updateProfile({
+      const result = await updateUserProfile({
         name: values.name,
         email: values.email,
         phone: values.phone,
@@ -243,7 +242,7 @@ const Profile = () => {
                           Bio
                         </FormLabel>
                         <FormControl>
-                          <Textarea 
+                          <Input 
                             placeholder="Tell us a bit about yourself"
                             {...field}
                             className="glass-input transition-all duration-300"

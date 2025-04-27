@@ -2,18 +2,16 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { getUserProfile, updateUserProfile } from '@/services/auth/profile';
-import { UserProfile } from '@/services/auth/types';
+import { getUserProfile, updateUserProfile, UserProfile } from '@/services/supabase-auth';
 import { ensureProfileExists } from '@/services/supabase-profiles';
 import { toast } from '@/components/ui/use-toast';
-import { signOut } from '@/services/auth/signout';
 
 type AuthContextType = {
   session: Session | null;
   user: User | null;
   profile: UserProfile | null;
   isLoading: boolean;
-  refreshProfile: () => Promise<UserProfile | null>;
+  refreshProfile: () => Promise<void>;
   signOut: () => Promise<void>;
   updateProfile: (data: Partial<UserProfile>) => Promise<{success: boolean; message: string; user?: UserProfile}>;
 };
@@ -23,7 +21,7 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   profile: null,
   isLoading: true,
-  refreshProfile: async () => null,
+  refreshProfile: async () => {},
   signOut: async () => {},
   updateProfile: async () => ({ success: false, message: 'Not implemented' }),
 });
@@ -38,12 +36,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchUserProfile = async (userId: string) => {
     try {
-      console.log("Fetching user profile for:", userId);
       await ensureProfileExists();
       
       const userProfile = await getUserProfile();
       if (userProfile) {
-        console.log("User profile loaded:", userProfile.id);
         setProfile(userProfile);
       } else {
         console.error("No user profile found after ensuring it exists");
@@ -55,19 +51,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     console.log("Setting up auth state change listener");
-    
-    // First set up the auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, currentSession) => {
+      async (event, currentSession) => {
         console.log("Auth state changed:", event, currentSession?.user?.id);
-        
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
         
         if (currentSession?.user) {
-          // Use setTimeout to avoid state update deadlock
           setTimeout(() => {
-            fetchUserProfile(currentSession.user!.id);
+            fetchUserProfile(currentSession.user.id);
           }, 0);
         } else {
           setProfile(null);
@@ -75,19 +67,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     );
 
-    // Then check for an existing session
     const initializeAuth = async () => {
       try {
         console.log("Initializing auth...");
-        const { data, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error("Error getting session:", error);
-          setIsLoading(false);
-          return;
-        }
-        
-        const currentSession = data.session;
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
         console.log("Initial session check:", currentSession?.user?.id);
         
         setSession(currentSession);
@@ -112,18 +95,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const refreshProfile = async () => {
     if (user) {
-      console.log("Refreshing user profile for:", user.id);
       await ensureProfileExists();
       const userProfile = await getUserProfile();
       if (userProfile) {
         setProfile(userProfile);
-        return userProfile;
       }
     }
-    return null;
   };
 
-  const handleUpdateProfile = async (profileData: Partial<UserProfile>): Promise<{success: boolean; message: string; user?: UserProfile}> => {
+  const updateProfile = async (profileData: Partial<UserProfile>) => {
     try {
       const result = await updateUserProfile(profileData);
       if (result.success && result.user) {
@@ -141,9 +121,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const handleSignOut = async () => {
+  const signOut = async () => {
     try {
-      await signOut();
+      await supabase.auth.signOut();
       setUser(null);
       setProfile(null);
       setSession(null);
@@ -167,8 +147,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     profile,
     isLoading,
     refreshProfile,
-    signOut: handleSignOut,
-    updateProfile: handleUpdateProfile,
+    signOut,
+    updateProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

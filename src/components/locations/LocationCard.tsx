@@ -43,7 +43,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
           <img 
             src={location.image} 
             alt={location.name}
-            className="h-full w-full object-cover aspect-square rounded-l-lg" // Added rounded-l-lg
+            className="h-full w-full object-cover aspect-square"
           />
         </div>
         <div className="w-2/3 p-4">

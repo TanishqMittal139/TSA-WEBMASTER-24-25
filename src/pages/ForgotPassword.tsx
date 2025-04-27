@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -17,7 +18,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { resetPassword } from '@/services/auth';
+import { resetPassword } from '@/services/supabase-auth';
 import { toast } from '@/components/ui/use-toast';
 
 const formSchema = z.object({

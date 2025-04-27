@@ -18,7 +18,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { changePassword } from '@/services/auth/password';
+import { changePassword } from '@/services/supabase-auth';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -48,9 +48,11 @@ const ResetPassword = () => {
     },
   });
 
+  // Verify the reset token on load
   useEffect(() => {
     const checkResetToken = async () => {
       try {
+        // The URL should contain the token automatically handled by Supabase
         const { data, error } = await supabase.auth.getSession();
         
         if (error || !data?.session) {
@@ -71,7 +73,6 @@ const ResetPassword = () => {
     setIsSubmitting(true);
     
     try {
-      // Call changePassword with just the password
       const result = await changePassword(values.password);
       
       if (result.success) {
@@ -81,6 +82,7 @@ const ResetPassword = () => {
         });
         setResetComplete(true);
         
+        // Redirect to sign in after a short delay
         setTimeout(() => {
           navigate('/sign-in');
         }, 3000);

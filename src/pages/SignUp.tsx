@@ -19,10 +19,10 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { toast } from '@/components/ui/use-toast';
-import { signUp } from '@/services/auth';
+import { signUp } from '@/services/supabase-auth';
 import { useAuth } from '@/context/AuthContext';
-import { ensureProfileExists } from '@/services/supabase-profiles';
 
+// Updated form schema - removed terms validation
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
   email: z.string().email({ message: 'Please enter a valid email address.' }),
@@ -39,7 +39,7 @@ const SignUp = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
-  const { user, refreshProfile } = useAuth();
+  const { user } = useAuth();
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -51,9 +51,9 @@ const SignUp = () => {
     },
   });
 
+  // Check if user is already authenticated
   useEffect(() => {
     if (user) {
-      console.log("User already authenticated, redirecting to home");
       navigate('/');
     }
   }, [user, navigate]);
@@ -63,28 +63,15 @@ const SignUp = () => {
     setAuthError(null);
     
     try {
-      console.log("Attempting to sign up user:", values.email);
       const result = await signUp(values.name, values.email, values.password);
-      console.log("Sign up result:", result);
       
       if (result.success) {
-        // Add a longer delay before refreshing the profile to ensure auth state has updated
-        // and the database has had time to process the new profile
-        setTimeout(async () => {
-          console.log("Ensuring profile exists after signup");
-          await ensureProfileExists();
-          
-          console.log("Refreshing profile after signup");
-          await refreshProfile();
-          
-          toast({
-            title: "Account created!",
-            description: "Your account has been successfully created and you're now logged in.",
-          });
-          navigate('/');
-        }, 1000);
+        toast({
+          title: "Account created!",
+          description: result.message || "Your account has been successfully created.",
+        });
+        navigate('/');
       } else {
-        console.error("Sign up failed:", result.message);
         setAuthError(result.message);
       }
     } catch (error: any) {

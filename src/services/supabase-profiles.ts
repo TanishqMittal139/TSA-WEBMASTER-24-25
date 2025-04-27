@@ -1,6 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { UserProfile } from "@/services/auth/types";
+import { UserProfile } from "@/types/auth";
+import { toast } from "@/components/ui/use-toast";
 
 // Ensure profile exists for the current user
 export const ensureProfileExists = async (): Promise<boolean> => {
@@ -11,8 +12,6 @@ export const ensureProfileExists = async (): Promise<boolean> => {
       console.error("No active session found");
       return false;
     }
-    
-    console.log("Ensuring profile exists for user:", session.user.id);
     
     // Check if profile exists
     const { data: existingProfile, error: checkError } = await supabase
@@ -28,55 +27,23 @@ export const ensureProfileExists = async (): Promise<boolean> => {
     
     // If profile doesn't exist, create it with basic info
     if (!existingProfile) {
-      console.log("No existing profile found, creating new profile");
+      console.log("Creating new profile for user:", session.user.id);
       
-      // Get user data from auth session
-      const userData = {
-        id: session.user.id,
-        email: session.user.email,
-        name: session.user.user_metadata?.name || ''
-      };
-      
-      console.log("Creating profile with data:", JSON.stringify(userData));
-      
-      // Try insert first
-      const { error: insertError } = await supabase
+      // Using upsert to avoid race conditions
+      const { error: createError } = await supabase
         .from('profiles')
-        .insert(userData);
+        .upsert({
+          id: session.user.id,
+          email: session.user.email,
+          name: session.user.user_metadata?.name || ''
+        });
       
-      if (insertError) {
-        console.error("Error creating profile with insert:", insertError);
-        
-        // Try upsert as fallback
-        const { error: upsertError } = await supabase
-          .from('profiles')
-          .upsert(userData);
-        
-        if (upsertError) {
-          console.error("Error creating profile with upsert:", upsertError);
-          return false;
-        }
-        
-        console.log("Profile created with upsert");
-      } else {
-        console.log("Profile created with insert");
-      }
-      
-      // Verify profile was created
-      const { data: verifyProfile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', session.user.id)
-        .single();
-        
-      if (!verifyProfile) {
-        console.error("Profile verification failed - profile not found after creation");
+      if (createError) {
+        console.error("Error creating new profile:", createError);
         return false;
       }
       
-      console.log("Profile verified and exists");
-    } else {
-      console.log("Profile already exists for user:", session.user.id);
+      console.log("Profile created successfully");
     }
     
     return true;

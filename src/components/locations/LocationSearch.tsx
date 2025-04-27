@@ -2,21 +2,15 @@
 import React from 'react';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
 
 interface LocationSearchProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
-  className?: string; // Added optional className prop
 }
 
-const LocationSearch: React.FC<LocationSearchProps> = ({ 
-  searchQuery, 
-  setSearchQuery, 
-  className 
-}) => {
+const LocationSearch: React.FC<LocationSearchProps> = ({ searchQuery, setSearchQuery }) => {
   return (
-    <div className={cn("relative", className)}>
+    <div className="relative">
       <Input
         type="search"
         placeholder="Search by city, zip code, or location name..."
