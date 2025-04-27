@@ -288,6 +288,10 @@ const Profile = () => {
                               onSelect={field.onChange}
                               disabled={(date) => date > new Date()}
                               initialFocus
+                              fromYear={1900}
+                              toYear={new Date().getFullYear()}
+                              captionLayout="dropdown-buttons"
+                              className={cn("p-3 pointer-events-auto")}
                             />
                           </PopoverContent>
                         </Popover>
