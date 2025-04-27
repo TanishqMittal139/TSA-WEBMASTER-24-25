@@ -14,7 +14,7 @@ const SignIn = () => {
   const location = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
-  const { user } = useAuth();
+  const { user, refreshProfile } = useAuth();
   
   // Get the return URL from location state or default to home
   const from = (location.state as { from?: string })?.from || '/';
@@ -36,12 +36,18 @@ const SignIn = () => {
       const result = await signIn(values.email, values.password);
       
       if (result.success) {
-        toast({
-          title: "Welcome back!",
-          description: "You have successfully signed in.",
-        });
-        console.log("Sign in successful, redirecting to:", from);
-        navigate(from, { replace: true });
+        // Delay to ensure auth state has been updated
+        setTimeout(async () => {
+          await refreshProfile();
+          
+          toast({
+            title: "Welcome back!",
+            description: "You have successfully signed in.",
+          });
+          
+          console.log("Sign in successful, redirecting to:", from);
+          navigate(from, { replace: true });
+        }, 500);
       } else {
         console.error("Sign in failed:", result.message);
         setAuthError(result.message);

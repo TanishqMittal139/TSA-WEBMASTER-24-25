@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -57,7 +58,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     // First set up the auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, currentSession) => {
+      (event, currentSession) => {
         console.log("Auth state changed:", event, currentSession?.user?.id);
         
         setSession(currentSession);
@@ -66,7 +67,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (currentSession?.user) {
           // Use setTimeout to avoid state update deadlock
           setTimeout(() => {
-            fetchUserProfile(currentSession.user.id);
+            fetchUserProfile(currentSession.user!.id);
           }, 0);
         } else {
           setProfile(null);
@@ -78,9 +79,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const initializeAuth = async () => {
       try {
         console.log("Initializing auth...");
-        const { data } = await supabase.auth.getSession();
-        const currentSession = data.session;
+        const { data, error } = await supabase.auth.getSession();
         
+        if (error) {
+          console.error("Error getting session:", error);
+          setIsLoading(false);
+          return;
+        }
+        
+        const currentSession = data.session;
         console.log("Initial session check:", currentSession?.user?.id);
         
         setSession(currentSession);

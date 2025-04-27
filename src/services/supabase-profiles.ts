@@ -1,7 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { UserProfile } from "@/types/auth";
-import { toast } from "@/components/ui/use-toast";
+import { UserProfile } from "@/services/auth/types";
 
 // Ensure profile exists for the current user
 export const ensureProfileExists = async (): Promise<boolean> => {

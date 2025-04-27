@@ -15,6 +15,11 @@ export const signIn = async (email: string, password: string): Promise<AuthResul
       return { success: false, message: error.message };
     }
 
+    if (!data.user) {
+      console.error('Sign-in returned no user');
+      return { success: false, message: 'Authentication failed' };
+    }
+
     console.log('Sign-in successful, user:', data.user?.id);
     return { success: true, message: 'Signed in successfully', user: data.user };
   } catch (error: any) {
