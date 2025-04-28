@@ -68,18 +68,6 @@ const deals: DealData[] = [
     items: ['sandwich-veggie-deluxe', 'sandwich-mushroom', 'sandwich-mediterranean', 'bowl-chicken-rice', 'salad-greek', 'tacos-beef'],
     image: 'https://images.unsplash.com/photo-1627309302198-09a50ae1b209?q=80&w=1374&auto=format&fit=crop',
     isPopular: true
-  },
-  {
-    id: 'combo-meal',
-    title: 'Combo Meal Deal',
-    description: 'Choose one sandwich, one coffee, and one soup for a special combo price',
-    discount: '15% OFF',
-    discountType: 'percentage',
-    discountAmount: 15,
-    code: 'COMBO15',
-    validUntil: '2025-12-31',
-    appliesTo: 'all',
-    image: 'https://images.unsplash.com/photo-1565299507177-b0ac66763828?q=80&w=1064&auto=format&fit=crop'
   }
 ];
 

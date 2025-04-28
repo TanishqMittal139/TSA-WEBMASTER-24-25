@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
@@ -70,28 +71,7 @@ export const useDealLogic = (dealId: string | undefined) => {
       ));
     }
 
-    if (parsedDeal.id === 'combo-meal') {
-      const sandwiches = menuItems.filter(item => 
-        item.tags?.includes('sandwich') || item.name.toLowerCase().includes('sandwich')
-      );
-      
-      const coffee = menuItems.filter(item => 
-        item.category === 'beverages' && 
-        (item.name.toLowerCase().includes('coffee') || item.tags?.includes('coffee'))
-      );
-      
-      const sides = menuItems.filter(item => 
-        item.category === 'sides' || item.tags?.includes('soup')
-      );
-      
-      setCategorizedItems({
-        sandwiches,
-        sides,
-        coffee,
-        breakfast: [],
-        other: []
-      });
-    } else if (parsedDeal.id === 'lunch-special') {
+    if (parsedDeal.id === 'lunch-special') {
       const sandwiches = menuItems.filter(item => 
         item.tags?.includes('sandwich') || item.name.toLowerCase().includes('sandwich')
       );
@@ -214,16 +194,6 @@ export const useDealLogic = (dealId: string | undefined) => {
       } else {
         setSelectedItems([...selectedItems, item]);
       }
-    } else if (deal.id === 'combo-meal') {
-      const hasCategory = selectedItems.some(i => i.category === item.category);
-      if (hasCategory) {
-        setSelectedItems([
-          ...selectedItems.filter(i => i.category !== item.category),
-          item
-        ]);
-      } else {
-        setSelectedItems([...selectedItems, item]);
-      }
     } else {
       setSelectedItems([...selectedItems, item]);
     }
@@ -261,7 +231,6 @@ export const useDealLogic = (dealId: string | undefined) => {
         break;
         
       case 'breakfast-bundle':
-      case 'combo-meal':
         selectedItems.forEach(item => {
           total += item.price;
         });
@@ -350,27 +319,6 @@ export const useDealLogic = (dealId: string | undefined) => {
           return;
         }
         break;
-        
-      case 'combo-meal':
-        const hasComboSandwich = selectedItems.some(item => 
-          item.tags?.includes('sandwich') || item.name.toLowerCase().includes('sandwich')
-        );
-        const hasComboSoup = selectedItems.some(item => 
-          item.tags?.includes('soup') || item.category === 'sides'
-        );
-        const hasComboCoffee = selectedItems.some(item => 
-          item.category === 'beverages' && item.name.toLowerCase().includes('coffee')
-        );
-        
-        if (!hasComboSandwich || !hasComboSoup || !hasComboCoffee) {
-          toast({
-            title: "Combo Items Required",
-            description: "Please select a sandwich, a coffee, and a soup/side",
-            variant: "destructive"
-          });
-          return;
-        }
-        break;
     }
     
     const hasDiscountedItems = items.some(item => item.hasDiscount);
@@ -399,7 +347,6 @@ export const useDealLogic = (dealId: string | undefined) => {
           }
           break;
         case 'breakfast-bundle':
-        case 'combo-meal':
           discountedPrice = item.price * (1 - (deal.discountAmount / 100)); // Apply percentage discount
           break;
       }
@@ -427,10 +374,6 @@ export const useDealLogic = (dealId: string | undefined) => {
 
   const getValidationMessage = () => {
     if (!deal) return "";
-    
-    if (deal.id === 'combo-meal' && selectedItems.length < 3) {
-      return `Choose ${3 - selectedItems.length} more items to complete your combo`;
-    }
     
     if (deal.id === 'lunch-special') {
       if (!selectedItems.some(item => item.tags?.includes('sandwich') || item.name.toLowerCase().includes('sandwich'))) {
@@ -467,8 +410,6 @@ export const useDealLogic = (dealId: string | undefined) => {
   const isValid = () => {
     if (selectedItems.length === 0) return false;
     if (!deal) return false;
-    
-    if (deal.id === 'combo-meal' && selectedItems.length < 3) return false;
     
     if (deal.id === 'lunch-special') {
       const hasSandwich = selectedItems.some(item => 

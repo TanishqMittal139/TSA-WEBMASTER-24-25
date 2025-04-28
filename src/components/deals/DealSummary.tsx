@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -38,7 +39,7 @@ const DealSummary: React.FC<DealSummaryProps> = ({
       );
     } 
     
-    if (['happy-hour', 'breakfast-bundle', 'combo-meal'].includes(deal.id)) {
+    if (['happy-hour', 'breakfast-bundle'].includes(deal.id)) {
       const discountedPrice = deal.id === 'happy-hour' 
         ? item.price * 0.8 
         : item.price * (1 - (deal.discountAmount / 100));

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import Navbar from '../components/ui/navbar';
@@ -88,37 +89,6 @@ const DealUse: React.FC = () => {
           )}
         </>
       );
-    } else if (deal.id === 'combo-meal') {
-      return (
-        <>
-          {categorizedItems.sandwiches.length > 0 && (
-            <DealMenuItems
-              items={categorizedItems.sandwiches}
-              selectedItems={selectedItems}
-              onItemSelect={handleItemSelect}
-              title="Select a Sandwich"
-            />
-          )}
-          
-          {categorizedItems.coffee.length > 0 && (
-            <DealMenuItems
-              items={categorizedItems.coffee}
-              selectedItems={selectedItems}
-              onItemSelect={handleItemSelect}
-              title="Select a Coffee"
-            />
-          )}
-          
-          {categorizedItems.sides.length > 0 && (
-            <DealMenuItems
-              items={categorizedItems.sides}
-              selectedItems={selectedItems}
-              onItemSelect={handleItemSelect}
-              title="Select a Soup or Side"
-            />
-          )}
-        </>
-      );
     }
     
     return (
@@ -141,12 +111,6 @@ const DealUse: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
             <div className="mb-6">
-              {deal.id === 'combo-meal' && (
-                <p className="text-sm text-muted-foreground mb-4">
-                  Choose items to complete your combo
-                </p>
-              )}
-
               {deal.id === 'lunch-special' && (
                 <p className="text-sm text-muted-foreground mb-4">
                   Select one sandwich and get a free side or soup
