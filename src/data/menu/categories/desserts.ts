@@ -11,7 +11,19 @@ export const dessertItems: MenuItem[] = [
     category: 'desserts',
     cuisineType: 'american',
     tags: ['chocolate', 'cake'],
-    vegetarian: true
+    vegetarian: true,
+    nutrition: {
+      calories: 380,
+      protein: '6g',
+      carbs: '48g',
+      fat: '18g',
+      sodium: '220mg',
+      fiber: '2g',
+      sugar: '32g'
+    },
+    ingredients: ['Dark chocolate', 'Butter', 'Eggs', 'Sugar', 'Flour', 'Vanilla extract'],
+    preparationTime: '15-20 min',
+    allergens: ['Eggs', 'Dairy', 'Wheat']
   },
   {
     id: '7',
@@ -22,7 +34,19 @@ export const dessertItems: MenuItem[] = [
     category: 'desserts',
     cuisineType: 'italian',
     tags: ['tiramisu', 'coffee'],
-    vegetarian: true
+    vegetarian: true,
+    nutrition: {
+      calories: 420,
+      protein: '7g',
+      carbs: '46g',
+      fat: '22g',
+      sodium: '180mg',
+      fiber: '1g',
+      sugar: '28g'
+    },
+    ingredients: ['Ladyfingers', 'Mascarpone cheese', 'Coffee', 'Eggs', 'Sugar', 'Cocoa powder'],
+    preparationTime: '20-25 min',
+    allergens: ['Eggs', 'Dairy', 'Wheat']
   },
   {
     id: '11',
@@ -33,6 +57,18 @@ export const dessertItems: MenuItem[] = [
     category: 'desserts',
     cuisineType: 'american',
     tags: ['ice cream', 'vanilla'],
-    vegetarian: true
+    vegetarian: true,
+    nutrition: {
+      calories: 280,
+      protein: '4g',
+      carbs: '28g',
+      fat: '16g',
+      sodium: '95mg',
+      fiber: '0g',
+      sugar: '24g'
+    },
+    ingredients: ['Cream', 'Milk', 'Sugar', 'Vanilla extract', 'Egg yolks'],
+    preparationTime: '5-10 min',
+    allergens: ['Dairy', 'Eggs']
   }
 ];

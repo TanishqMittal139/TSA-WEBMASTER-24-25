@@ -12,7 +12,19 @@ export const beverageItems: MenuItem[] = [
     cuisineType: 'american',
     tags: ['coffee', 'iced'],
     vegetarian: true,
-    vegan: true
+    vegan: true,
+    nutrition: {
+      calories: 120,
+      protein: '1g',
+      carbs: '24g',
+      fat: '0g',
+      sodium: '15mg',
+      fiber: '0g',
+      sugar: '22g'
+    },
+    ingredients: ['Coffee', 'Ice', 'Choice of syrup', 'Optional milk'],
+    preparationTime: '3-5 min',
+    allergens: []
   },
   {
     id: '8',
@@ -25,7 +37,19 @@ export const beverageItems: MenuItem[] = [
     tags: ['lemonade', 'refreshing'],
     vegetarian: true,
     vegan: true,
-    glutenFree: true
+    glutenFree: true,
+    nutrition: {
+      calories: 160,
+      protein: '0g',
+      carbs: '40g',
+      fat: '0g',
+      sodium: '10mg',
+      fiber: '0g',
+      sugar: '38g'
+    },
+    ingredients: ['Fresh lemons', 'Water', 'Sugar', 'Ice'],
+    preparationTime: '5 min',
+    allergens: []
   },
   {
     id: '12',
@@ -38,6 +62,18 @@ export const beverageItems: MenuItem[] = [
     tags: ['juice', 'orange'],
     vegetarian: true,
     vegan: true,
-    glutenFree: true
+    glutenFree: true,
+    nutrition: {
+      calories: 110,
+      protein: '2g',
+      carbs: '26g',
+      fat: '0g',
+      sodium: '2mg',
+      fiber: '0.5g',
+      sugar: '22g'
+    },
+    ingredients: ['Fresh oranges'],
+    preparationTime: '3-5 min',
+    allergens: []
   }
 ];

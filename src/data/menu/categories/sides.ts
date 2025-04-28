@@ -12,7 +12,19 @@ export const sideItems: MenuItem[] = [
     cuisineType: 'american',
     tags: ['salad', 'healthy'],
     vegetarian: true,
-    glutenFree: true
+    glutenFree: true,
+    nutrition: {
+      calories: 320,
+      protein: '10g',
+      carbs: '12g',
+      fat: '28g',
+      sodium: '580mg',
+      fiber: '3g',
+      sugar: '2g'
+    },
+    ingredients: ['Romaine lettuce', 'Parmesan cheese', 'Croutons', 'Caesar dressing', 'Black pepper'],
+    preparationTime: '10-15 min',
+    allergens: ['Dairy', 'Eggs']
   },
   {
     id: '6',
@@ -23,7 +35,19 @@ export const sideItems: MenuItem[] = [
     category: 'sides',
     cuisineType: 'american',
     tags: ['bread', 'garlic'],
-    vegetarian: true
+    vegetarian: true,
+    nutrition: {
+      calories: 240,
+      protein: '6g',
+      carbs: '36g',
+      fat: '8g',
+      sodium: '420mg',
+      fiber: '2g',
+      sugar: '1g'
+    },
+    ingredients: ['French bread', 'Butter', 'Garlic', 'Parsley', 'Italian seasoning'],
+    preparationTime: '8-10 min',
+    allergens: ['Wheat', 'Dairy']
   },
   {
     id: '10',
@@ -35,6 +59,18 @@ export const sideItems: MenuItem[] = [
     cuisineType: 'american',
     tags: ['potatoes', 'creamy'],
     vegetarian: true,
-    glutenFree: true
+    glutenFree: true,
+    nutrition: {
+      calories: 280,
+      protein: '4g',
+      carbs: '42g',
+      fat: '12g',
+      sodium: '340mg',
+      fiber: '3g',
+      sugar: '2g'
+    },
+    ingredients: ['Potatoes', 'Butter', 'Milk', 'Salt', 'Black pepper', 'Fresh herbs'],
+    preparationTime: '15-20 min',
+    allergens: ['Dairy']
   }
 ];
