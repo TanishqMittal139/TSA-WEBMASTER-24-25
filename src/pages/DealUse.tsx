@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import Navbar from '../components/ui/navbar';
@@ -85,6 +84,37 @@ const DealUse: React.FC = () => {
               selectedItems={selectedItems}
               onItemSelect={handleItemSelect}
               title="Select a Coffee"
+            />
+          )}
+        </>
+      );
+    } else if (deal.id === 'combo-meal') {
+      return (
+        <>
+          {categorizedItems.sandwiches.length > 0 && (
+            <DealMenuItems
+              items={categorizedItems.sandwiches}
+              selectedItems={selectedItems}
+              onItemSelect={handleItemSelect}
+              title="Select a Sandwich"
+            />
+          )}
+          
+          {categorizedItems.coffee.length > 0 && (
+            <DealMenuItems
+              items={categorizedItems.coffee}
+              selectedItems={selectedItems}
+              onItemSelect={handleItemSelect}
+              title="Select a Coffee"
+            />
+          )}
+          
+          {categorizedItems.sides.length > 0 && (
+            <DealMenuItems
+              items={categorizedItems.sides}
+              selectedItems={selectedItems}
+              onItemSelect={handleItemSelect}
+              title="Select a Soup or Side"
             />
           )}
         </>

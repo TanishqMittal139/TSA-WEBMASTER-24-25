@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
@@ -16,15 +15,15 @@ export const useDealLogic = (dealId: string | undefined) => {
   const [categorizedItems, setCategorizedItems] = useState<{
     sandwiches: MenuItem[];
     sides: MenuItem[];
-    other: MenuItem[];
-    breakfast: MenuItem[];
     coffee: MenuItem[];
+    breakfast: MenuItem[];
+    other: MenuItem[];
   }>({
     sandwiches: [],
     sides: [],
-    other: [],
+    coffee: [],
     breakfast: [],
-    coffee: []
+    other: []
   });
   
   const { user, session } = useAuth();
@@ -71,7 +70,28 @@ export const useDealLogic = (dealId: string | undefined) => {
       ));
     }
 
-    if (parsedDeal.id === 'lunch-special') {
+    if (parsedDeal.id === 'combo-meal') {
+      const sandwiches = menuItems.filter(item => 
+        item.tags?.includes('sandwich') || item.name.toLowerCase().includes('sandwich')
+      );
+      
+      const coffee = menuItems.filter(item => 
+        item.category === 'beverages' && 
+        (item.name.toLowerCase().includes('coffee') || item.tags?.includes('coffee'))
+      );
+      
+      const sides = menuItems.filter(item => 
+        item.category === 'sides' || item.tags?.includes('soup')
+      );
+      
+      setCategorizedItems({
+        sandwiches,
+        sides,
+        coffee,
+        breakfast: [],
+        other: []
+      });
+    } else if (parsedDeal.id === 'lunch-special') {
       const sandwiches = menuItems.filter(item => 
         item.tags?.includes('sandwich') || item.name.toLowerCase().includes('sandwich')
       );
@@ -123,9 +143,7 @@ export const useDealLogic = (dealId: string | undefined) => {
 
     if (!deal) return;
 
-    // Special handling for Happy Hour deal - only allow one beverage
     if (deal.id === 'happy-hour') {
-      // Replace any existing selection with the new one
       setSelectedItems([item]);
       return;
     }
