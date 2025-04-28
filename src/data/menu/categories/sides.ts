@@ -31,7 +31,7 @@ export const sideItems: MenuItem[] = [
     name: 'Garlic Bread',
     description: 'Toasted bread with garlic and herbs.',
     price: 5.99,
-    imageUrl: 'https://images.unsplash.com/photo-1619535795319-8ce35ca526cc?w=800&auto=format&fit=crop&q=60',
+    imageUrl: 'https://images.unsplash.com/photo-1573140401552-3fab0b24306f?w=700&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Z2FybGljJTIwYnJlYWR8ZW58MHx8MHx8fDA%3D',
     category: 'sides',
     cuisineType: 'american',
     tags: ['bread', 'garlic'],
