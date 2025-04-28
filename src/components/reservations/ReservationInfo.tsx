@@ -10,7 +10,7 @@ const ReservationInfo = () => {
         <h3 className="text-lg font-medium mb-2">Opening Hours</h3>
         <p className="text-sm text-muted-foreground">
           Monday-Saturday: 7:00 AM - 9:00 PM<br />
-          Sunday: 8:30 AM - 5:00 PM
+          Sunday: 8:30 AM - 9:00 PM
         </p>
       </div>
       
@@ -18,7 +18,7 @@ const ReservationInfo = () => {
         <Users className="text-primary mb-4" size={32} />
         <h3 className="text-lg font-medium mb-2">Group Bookings</h3>
         <p className="text-sm text-muted-foreground">
-          For parties of 8 or more, please contact us directly at (555) 123-4567.
+          For parties of 8 or more, please contact us directly at (703) 555-1234.
         </p>
       </div>
       
