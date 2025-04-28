@@ -33,8 +33,8 @@ const LocationDetails: React.FC<LocationDetailsProps> = ({
   const navigate = useNavigate();
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="overflow-hidden shadow-md">
+      <CardHeader className="pb-4">
         <div className="flex justify-between items-center">
           <CardTitle>{location.name}</CardTitle>
           <Button
@@ -48,30 +48,32 @@ const LocationDetails: React.FC<LocationDetailsProps> = ({
           </Button>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-4 pb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div>
-            <img 
-              src={location.image}
-              alt={location.name}
-              className="w-full h-60 object-cover rounded-lg mb-4"
-            />
+          <div className="space-y-4">
+            <div className="rounded-lg overflow-hidden">
+              <img 
+                src={location.image}
+                alt={location.name}
+                className="w-full h-60 object-cover"
+              />
+            </div>
             
-            <div className="space-y-2">
-              <div className="flex items-start space-x-2">
-                <MapPin size={18} className="text-primary mt-0.5 flex-shrink-0" />
-                <p>{location.address}, {location.city}, {location.state} {location.zip}</p>
+            <div className="space-y-3">
+              <div className="flex items-start gap-2">
+                <MapPin size={18} className="text-primary mt-1 flex-shrink-0" />
+                <span>{location.address}, {location.city}, {location.state} {location.zip}</span>
               </div>
               
-              <div className="flex items-center space-x-2">
-                <Phone size={18} className="text-primary flex-shrink-0" />
-                <p>{location.phone}</p>
+              <div className="flex items-start gap-2">
+                <Phone size={18} className="text-primary mt-0.5 flex-shrink-0" />
+                <span>{location.phone}</span>
               </div>
               
-              <div className="flex items-start space-x-2">
-                <Info size={18} className="text-primary mt-0.5 flex-shrink-0" />
+              <div className="flex items-start gap-2">
+                <Info size={18} className="text-primary mt-1 flex-shrink-0" />
                 <div>
-                  <p className="font-medium mb-1">Features</p>
+                  <p className="font-medium mb-2">Features</p>
                   <div className="flex flex-wrap gap-2">
                     {location.features.map((feature, index) => (
                       <span key={index} className="text-xs bg-secondary px-2 py-1 rounded">
@@ -84,12 +86,12 @@ const LocationDetails: React.FC<LocationDetailsProps> = ({
             </div>
           </div>
           
-          <div>
-            <div className="flex items-start space-x-2 mb-4">
-              <Clock size={18} className="text-primary mt-0.5 flex-shrink-0" />
-              <div className="flex-grow">
+          <div className="space-y-6">
+            <div className="flex items-start gap-2">
+              <Clock size={18} className="text-primary mt-1 flex-shrink-0" />
+              <div className="w-full">
                 <p className="font-medium mb-2">Hours of Operation</p>
-                <div className="space-y-1">
+                <div className="space-y-2 w-full">
                   <div className="flex justify-between text-sm">
                     <span>Monday - Friday</span>
                     <span>7:00 AM - 9:00 PM</span>
@@ -106,14 +108,18 @@ const LocationDetails: React.FC<LocationDetailsProps> = ({
               </div>
             </div>
             
-            <div className="flex justify-end space-x-3">
+            <div className="flex flex-col sm:flex-row gap-3 justify-end mt-auto pt-4">
               <Button 
                 variant="outline" 
                 onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${location.coordinates[1]},${location.coordinates[0]}`, '_blank')}
+                className="w-full sm:w-auto"
               >
                 Get Directions
               </Button>
-              <Button onClick={() => navigate('/reservations', { state: { locationId: location.id } })}>
+              <Button 
+                onClick={() => navigate('/reservations', { state: { locationId: location.id } })}
+                className="w-full sm:w-auto"
+              >
                 Make a Reservation
               </Button>
             </div>
