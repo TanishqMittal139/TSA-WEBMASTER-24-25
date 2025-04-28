@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -29,6 +28,32 @@ const DealSummary: React.FC<DealSummaryProps> = ({
   const isSideItem = (item: MenuItem) => 
     item.category === 'sides' || item.tags?.includes('soup') || item.tags?.includes('salad');
 
+  const getDisplayPrice = (item: MenuItem) => {
+    if (deal.id === 'lunch-special' && isSideItem(item)) {
+      return (
+        <>
+          <span className="line-through text-muted-foreground text-xs">{formatPrice(item.price)}</span>
+          <span className="text-primary font-medium">FREE</span>
+        </>
+      );
+    } 
+    
+    if (['happy-hour', 'breakfast-bundle', 'combo-meal'].includes(deal.id)) {
+      const discountedPrice = deal.id === 'happy-hour' 
+        ? item.price * 0.8 
+        : item.price * (1 - (deal.discountAmount / 100));
+        
+      return (
+        <>
+          <span className="line-through text-muted-foreground text-xs">{formatPrice(item.price)}</span>
+          <span className="text-primary font-medium">{formatPrice(discountedPrice)}</span>
+        </>
+      );
+    }
+    
+    return <span>{formatPrice(item.price)}</span>;
+  };
+
   return (
     <div className="bg-card rounded-xl shadow-md p-6 sticky top-24">
       <h3 className="text-xl font-semibold mb-4">Your Selection</h3>
@@ -52,19 +77,7 @@ const DealSummary: React.FC<DealSummaryProps> = ({
                   </div>
                 </div>
                 <div className="flex flex-col items-end">
-                  {deal.id === 'lunch-special' && isSideItem(item) ? (
-                    <>
-                      <span className="line-through text-muted-foreground text-xs">{formatPrice(item.price)}</span>
-                      <span className="text-primary font-medium">FREE</span>
-                    </>
-                  ) : deal.id === 'happy-hour' ? (
-                    <>
-                      <span className="line-through text-muted-foreground text-xs">{formatPrice(item.price)}</span>
-                      <span className="text-primary font-medium">{formatPrice(item.price * 0.8)}</span>
-                    </>
-                  ) : (
-                    <span>{formatPrice(item.price)}</span>
-                  )}
+                  {getDisplayPrice(item)}
                 </div>
               </div>
             ))}

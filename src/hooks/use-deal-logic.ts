@@ -159,42 +159,44 @@ export const useDealLogic = (dealId: string | undefined) => {
     
     let total = 0;
     
-    if (deal.id === 'lunch-special') {
-      const sandwich = selectedItems.find(item => 
-        item.tags?.includes('sandwich') || item.name.toLowerCase().includes('sandwich')
-      );
-      
-      if (sandwich) {
-        total += sandwich.price;
-      }
-      
-      selectedItems.forEach(item => {
-        const isSandwich = item.tags?.includes('sandwich') || item.name.toLowerCase().includes('sandwich');
-        const isSide = item.category === 'sides' || item.tags?.includes('soup') || item.tags?.includes('salad');
+    switch (deal.id) {
+      case 'lunch-special':
+        const sandwich = selectedItems.find(item => 
+          item.tags?.includes('sandwich') || item.name.toLowerCase().includes('sandwich')
+        );
         
-        if (!isSandwich && !isSide) {
-          total += item.price;
+        if (sandwich) {
+          total += sandwich.price;
         }
-      });
-      
-      return total;
-    }
-    
-    // Happy Hour Special calculation
-    if (deal.id === 'happy-hour' && selectedItems.length === 1) {
-      // Apply 20% discount to the single beverage
-      const price = selectedItems[0].price;
-      return price * 0.8; // 20% off
-    }
-    
-    selectedItems.forEach(item => {
-      total += item.price;
-    });
-    
-    if (deal.discountType === 'percentage') {
-      total = total * (1 - (deal.discountAmount / 100));
-    } else if (deal.discountType === 'fixed' && deal.appliesTo === 'all') {
-      total = Math.max(0, total - deal.discountAmount);
+        
+        selectedItems.forEach(item => {
+          const isSandwich = item.tags?.includes('sandwich') || item.name.toLowerCase().includes('sandwich');
+          const isSide = item.category === 'sides' || item.tags?.includes('soup') || item.tags?.includes('salad');
+          
+          if (!isSandwich && !isSide) {
+            total += item.price;
+          }
+        });
+        break;
+        
+      case 'happy-hour':
+        if (selectedItems.length === 1) {
+          total = selectedItems[0].price * 0.8; // 20% off
+        }
+        break;
+        
+      case 'breakfast-bundle':
+      case 'combo-meal':
+        selectedItems.forEach(item => {
+          total += item.price;
+        });
+        total = total * (1 - (deal.discountAmount / 100)); // Apply percentage discount
+        break;
+        
+      default:
+        selectedItems.forEach(item => {
+          total += item.price;
+        });
     }
     
     return total;
@@ -210,40 +212,81 @@ export const useDealLogic = (dealId: string | undefined) => {
       return;
     }
     
-    if (deal?.id === 'lunch-special') {
-      const hasSandwich = selectedItems.some(item => 
-        item.tags?.includes('sandwich') || item.name.toLowerCase().includes('sandwich')
-      );
-      const hasSide = selectedItems.some(item => 
-        item.category === 'sides' || item.tags?.includes('soup') || item.tags?.includes('salad')
-      );
-      
-      if (!hasSandwich) {
-        toast({
-          title: "Sandwich Required",
-          description: "Please select a sandwich for your lunch special",
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      if (!hasSide) {
-        toast({
-          title: "Side Required",
-          description: "Please select a free side or soup for your lunch special",
-          variant: "destructive"
-        });
-        return;
-      }
-    }
-    
-    if (deal?.id === 'happy-hour' && selectedItems.length !== 1) {
-      toast({
-        title: "Single Beverage Required",
-        description: "Please select exactly one beverage for the Happy Hour special",
-        variant: "destructive"
-      });
-      return;
+    switch (deal?.id) {
+      case 'lunch-special':
+        const hasSandwich = selectedItems.some(item => 
+          item.tags?.includes('sandwich') || item.name.toLowerCase().includes('sandwich')
+        );
+        const hasSide = selectedItems.some(item => 
+          item.category === 'sides' || item.tags?.includes('soup') || item.tags?.includes('salad')
+        );
+        
+        if (!hasSandwich) {
+          toast({
+            title: "Sandwich Required",
+            description: "Please select a sandwich for your lunch special",
+            variant: "destructive"
+          });
+          return;
+        }
+        
+        if (!hasSide) {
+          toast({
+            title: "Side Required",
+            description: "Please select a free side or soup for your lunch special",
+            variant: "destructive"
+          });
+          return;
+        }
+        break;
+        
+      case 'happy-hour':
+        if (selectedItems.length !== 1) {
+          toast({
+            title: "Single Beverage Required",
+            description: "Please select exactly one beverage for the Happy Hour special",
+            variant: "destructive"
+          });
+          return;
+        }
+        break;
+        
+      case 'breakfast-bundle':
+        const hasBreakfast = selectedItems.some(item => item.category === 'breakfast');
+        const hasCoffee = selectedItems.some(item => 
+          item.category === 'beverages' && item.name.toLowerCase().includes('coffee')
+        );
+        
+        if (!hasBreakfast || !hasCoffee) {
+          toast({
+            title: "Bundle Items Required",
+            description: "Please select a breakfast item and a coffee",
+            variant: "destructive"
+          });
+          return;
+        }
+        break;
+        
+      case 'combo-meal':
+        const hasComboSandwich = selectedItems.some(item => 
+          item.tags?.includes('sandwich') || item.name.toLowerCase().includes('sandwich')
+        );
+        const hasComboSoup = selectedItems.some(item => 
+          item.tags?.includes('soup') || item.category === 'sides'
+        );
+        const hasComboCoffee = selectedItems.some(item => 
+          item.category === 'beverages' && item.name.toLowerCase().includes('coffee')
+        );
+        
+        if (!hasComboSandwich || !hasComboSoup || !hasComboCoffee) {
+          toast({
+            title: "Combo Items Required",
+            description: "Please select a sandwich, a coffee, and a soup/side",
+            variant: "destructive"
+          });
+          return;
+        }
+        break;
     }
     
     const hasDiscountedItems = items.some(item => item.hasDiscount);
@@ -261,14 +304,20 @@ export const useDealLogic = (dealId: string | undefined) => {
     selectedItems.forEach(item => {
       let discountedPrice = item.price;
       
-      // Apply discount for happy hour
-      if (deal?.id === 'happy-hour') {
-        discountedPrice = item.price * 0.8; // 20% off
-      } else if (deal?.id === 'lunch-special') {
-        const isSide = item.category === 'sides' || item.tags?.includes('soup') || item.tags?.includes('salad');
-        if (isSide) {
-          discountedPrice = 0; // Free side for lunch special
-        }
+      switch (deal?.id) {
+        case 'happy-hour':
+          discountedPrice = item.price * 0.8; // 20% off
+          break;
+        case 'lunch-special':
+          const isSide = item.category === 'sides' || item.tags?.includes('soup') || item.tags?.includes('salad');
+          if (isSide) {
+            discountedPrice = 0; // Free side
+          }
+          break;
+        case 'breakfast-bundle':
+        case 'combo-meal':
+          discountedPrice = item.price * (1 - (deal.discountAmount / 100)); // Apply percentage discount
+          break;
       }
       
       addItem({
@@ -278,7 +327,7 @@ export const useDealLogic = (dealId: string | undefined) => {
         image: item.imageUrl,
         category: item.category,
         hasDiscount: true,
-        dealName: deal?.title // Add the deal name
+        dealName: deal?.title
       });
     });
     
