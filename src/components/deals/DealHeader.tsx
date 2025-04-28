@@ -2,7 +2,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Tag } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
 import { DealData } from '@/pages/Deals';
 import { useNavigate } from 'react-router-dom';
 
@@ -34,7 +33,6 @@ const DealHeader: React.FC<DealHeaderProps> = ({ deal }) => {
           <div>
             <h2 className="text-xl font-semibold">{deal.title}</h2>
             <p className="text-muted-foreground">{deal.description}</p>
-            <Badge variant="secondary" className="mt-2">{deal.discount}</Badge>
           </div>
         </div>
       </div>
@@ -43,3 +41,4 @@ const DealHeader: React.FC<DealHeaderProps> = ({ deal }) => {
 };
 
 export default DealHeader;
+
