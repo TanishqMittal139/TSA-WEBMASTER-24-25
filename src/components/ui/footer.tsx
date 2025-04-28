@@ -18,7 +18,7 @@ const Footer: React.FC = () => {
             </div>
             <p className="text-muted-foreground">
               A modern dining experience focused on fresh ingredients, sustainability, 
-              and plant-based options. Serving Virginia since 2008.
+              and plant-based options. Serving Virginia since 2015.
             </p>
             <div className="flex space-x-4 pt-2">
               <a href="https://facebook.com/tastyhub_va" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors" aria-label="Facebook">
@@ -87,15 +87,15 @@ const Footer: React.FC = () => {
             <ul className="space-y-2">
               <li className="flex justify-between text-muted-foreground">
                 <span>Monday - Friday</span>
-                <span>7:00 AM - 5:00 PM</span>
+                <span>7:00 AM - 9:00 PM</span>
               </li>
               <li className="flex justify-between text-muted-foreground">
                 <span>Saturday</span>
-                <span>7:00 AM - 5:00 PM</span>
+                <span>7:00 AM - 9:00 PM</span>
               </li>
               <li className="flex justify-between text-muted-foreground">
                 <span>Sunday</span>
-                <span>8:30 AM - 5:00 PM</span>
+                <span>8:30 AM - 9:00 PM</span>
               </li>
             </ul>
           </div>
