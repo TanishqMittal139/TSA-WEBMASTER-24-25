@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '@/components/ui/navbar';
@@ -249,17 +248,6 @@ const References = () => {
                     <ExternalLink className="h-4 w-4 ml-auto text-muted-foreground group-hover:text-primary transition-colors duration-300" />
                   </Button>
                 </Link>
-              </div>
-              
-              <div className="mt-8 p-6 bg-background/30 backdrop-blur-sm rounded-xl border border-white/10">
-                <h3 className="text-xl font-bold mb-3 flex items-center gap-2">
-                  <Shield className="h-5 w-5 text-primary" />
-                  Confidentiality Notice
-                </h3>
-                <p className="text-foreground/80">
-                  These documents contain confidential academic information and are intended for evaluation purposes only. 
-                  Please refer to the documents for detailed information about copyright compliance and work distribution.
-                </p>
               </div>
             </CardContent>
           </Card>
