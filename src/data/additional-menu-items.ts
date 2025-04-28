@@ -1,3 +1,4 @@
+
 import { MenuItem } from '@/types/menu';
 
 export const additionalMenuItems: MenuItem[] = [
@@ -85,8 +86,8 @@ export const additionalMenuItems: MenuItem[] = [
     description: "Fresh mozzarella, tomatoes, basil, and balsamic glaze pressed in ciabatta bread",
     price: 11.99,
     category: "lunch",
-    image: "https://images.unsplash.com/photo-1539252554936-80a1679cbb38?q=80&w=1964&auto=format&fit=crop",
-    imageUrl: "https://images.unsplash.com/photo-1539252554936-80a1679cbb38?q=80&w=1964&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1528736235302-52922df5c122?w=800&auto=format&fit=crop&q=60",
+    imageUrl: "https://images.unsplash.com/photo-1528736235302-52922df5c122?w=800&auto=format&fit=crop&q=60",
     tags: ["Italian", "Vegetarian", "Hot"],
     allergens: ["Gluten", "Dairy"],
     preparationTime: "10 min",
@@ -110,8 +111,8 @@ export const additionalMenuItems: MenuItem[] = [
     description: "Baked sweet potato topped with black beans, corn, avocado, and lime-cilantro sauce",
     price: 10.99,
     category: "lunch",
-    image: "https://images.unsplash.com/photo-1543352634-a1c51d9f1fa7?q=80&w=2070&auto=format&fit=crop",
-    imageUrl: "https://images.unsplash.com/photo-1543352634-a1c51d9f1fa7?q=80&w=2070&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1543352634-a1c51d9f1fa7?w=800&auto=format&fit=crop&q=60",
+    imageUrl: "https://images.unsplash.com/photo-1543352634-a1c51d9f1fa7?w=800&auto=format&fit=crop&q=60",
     tags: ["Vegan", "Gluten-Free", "Healthy"],
     allergens: [],
     preparationTime: "20 min",
@@ -137,8 +138,8 @@ export const additionalMenuItems: MenuItem[] = [
     description: "Brown rice, roasted vegetables, chickpeas, avocado, and tahini dressing",
     price: 13.99,
     category: "lunch",
-    image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=1160&auto=format&fit=crop",
-    imageUrl: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=1160&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1593001872095-7d5b3868dd20?w=800&auto=format&fit=crop&q=60",
+    imageUrl: "https://images.unsplash.com/photo-1593001872095-7d5b3868dd20?w=800&auto=format&fit=crop&q=60",
     tags: ["Vegan", "Gluten-Free", "Healthy"],
     allergens: ["Sesame"],
     preparationTime: "15 min",
