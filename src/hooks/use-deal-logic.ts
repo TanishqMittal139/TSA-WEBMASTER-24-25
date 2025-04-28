@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
@@ -16,10 +17,14 @@ export const useDealLogic = (dealId: string | undefined) => {
     sandwiches: MenuItem[];
     sides: MenuItem[];
     other: MenuItem[];
+    breakfast: MenuItem[];
+    coffee: MenuItem[];
   }>({
     sandwiches: [],
     sides: [],
-    other: []
+    other: [],
+    breakfast: [],
+    coffee: []
   });
   
   const { user, session } = useAuth();
@@ -84,7 +89,26 @@ export const useDealLogic = (dealId: string | undefined) => {
       setCategorizedItems({
         sandwiches,
         sides,
-        other
+        other,
+        breakfast: [],
+        coffee: []
+      });
+    } else if (parsedDeal.id === 'breakfast-bundle') {
+      const breakfast = menuItems.filter(item => 
+        item.category === 'breakfast'
+      );
+      
+      const coffee = menuItems.filter(item => 
+        item.category === 'beverages' && 
+        (item.name.toLowerCase().includes('coffee') || item.tags?.includes('coffee'))
+      );
+      
+      setCategorizedItems({
+        sandwiches: [],
+        sides: [],
+        other: [],
+        breakfast,
+        coffee
       });
     }
   }, [dealId, navigate, user, session]);
@@ -131,6 +155,39 @@ export const useDealLogic = (dealId: string | undefined) => {
         if (currentSide) {
           setSelectedItems([
             ...selectedItems.filter(i => !(i.category === 'sides' || i.tags?.includes('soup') || i.tags?.includes('salad'))),
+            item
+          ]);
+        } else {
+          setSelectedItems([...selectedItems, item]);
+        }
+      } else {
+        setSelectedItems([...selectedItems, item]);
+      }
+    } else if (deal.id === 'breakfast-bundle') {
+      const isBreakfast = item.category === 'breakfast';
+      const isCoffee = item.category === 'beverages' && (item.name.toLowerCase().includes('coffee') || item.tags?.includes('coffee'));
+      
+      if (isBreakfast) {
+        const currentBreakfast = selectedItems.find(i => i.category === 'breakfast');
+        
+        if (currentBreakfast) {
+          setSelectedItems([
+            ...selectedItems.filter(i => i.category !== 'breakfast'),
+            item
+          ]);
+        } else {
+          setSelectedItems([...selectedItems, item]);
+        }
+      } else if (isCoffee) {
+        const currentCoffee = selectedItems.find(i => 
+          i.category === 'beverages' && (i.name.toLowerCase().includes('coffee') || i.tags?.includes('coffee'))
+        );
+        
+        if (currentCoffee) {
+          setSelectedItems([
+            ...selectedItems.filter(i => 
+              !(i.category === 'beverages' && (i.name.toLowerCase().includes('coffee') || i.tags?.includes('coffee')))
+            ),
             item
           ]);
         } else {
@@ -254,13 +311,22 @@ export const useDealLogic = (dealId: string | undefined) => {
       case 'breakfast-bundle':
         const hasBreakfast = selectedItems.some(item => item.category === 'breakfast');
         const hasCoffee = selectedItems.some(item => 
-          item.category === 'beverages' && item.name.toLowerCase().includes('coffee')
+          item.category === 'beverages' && (item.name.toLowerCase().includes('coffee') || item.tags?.includes('coffee'))
         );
         
-        if (!hasBreakfast || !hasCoffee) {
+        if (!hasBreakfast) {
           toast({
-            title: "Bundle Items Required",
-            description: "Please select a breakfast item and a coffee",
+            title: "Breakfast Item Required",
+            description: "Please select a breakfast item",
+            variant: "destructive"
+          });
+          return;
+        }
+        
+        if (!hasCoffee) {
+          toast({
+            title: "Coffee Required",
+            description: "Please select a coffee",
             variant: "destructive"
           });
           return;
@@ -366,6 +432,17 @@ export const useDealLogic = (dealId: string | undefined) => {
       }
     }
     
+    if (deal.id === 'breakfast-bundle') {
+      if (!selectedItems.some(item => item.category === 'breakfast')) {
+        return "Please select a breakfast item";
+      }
+      if (!selectedItems.some(item => 
+        item.category === 'beverages' && (item.name.toLowerCase().includes('coffee') || item.tags?.includes('coffee'))
+      )) {
+        return "Please select a coffee";
+      }
+    }
+    
     return "";
   };
 
@@ -388,6 +465,15 @@ export const useDealLogic = (dealId: string | undefined) => {
     
     if (deal.id === 'happy-hour') {
       return selectedItems.length === 1;
+    }
+    
+    if (deal.id === 'breakfast-bundle') {
+      const hasBreakfast = selectedItems.some(item => item.category === 'breakfast');
+      const hasCoffee = selectedItems.some(item => 
+        item.category === 'beverages' && (item.name.toLowerCase().includes('coffee') || item.tags?.includes('coffee'))
+      );
+      
+      return hasBreakfast && hasCoffee;
     }
     
     return true;

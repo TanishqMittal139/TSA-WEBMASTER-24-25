@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import Navbar from '../components/ui/navbar';
@@ -66,6 +67,28 @@ const DealUse: React.FC = () => {
           )}
         </>
       );
+    } else if (deal.id === 'breakfast-bundle') {
+      return (
+        <>
+          {categorizedItems.breakfast.length > 0 && (
+            <DealMenuItems
+              items={categorizedItems.breakfast}
+              selectedItems={selectedItems}
+              onItemSelect={handleItemSelect}
+              title="Select a Breakfast Item"
+            />
+          )}
+          
+          {categorizedItems.coffee.length > 0 && (
+            <DealMenuItems
+              items={categorizedItems.coffee}
+              selectedItems={selectedItems}
+              onItemSelect={handleItemSelect}
+              title="Select a Coffee"
+            />
+          )}
+        </>
+      );
     }
     
     return (
@@ -103,6 +126,12 @@ const DealUse: React.FC = () => {
               {deal.id === 'happy-hour' && (
                 <p className="text-sm text-muted-foreground mb-4">
                   Select ONE beverage for 20% off Monday through Friday
+                </p>
+              )}
+              
+              {deal.id === 'breakfast-bundle' && (
+                <p className="text-sm text-muted-foreground mb-4">
+                  Select a breakfast item and coffee for 15% off
                 </p>
               )}
               

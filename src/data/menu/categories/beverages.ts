@@ -75,5 +75,76 @@ export const beverageItems: MenuItem[] = [
     ingredients: ['Fresh oranges'],
     preparationTime: '3-5 min',
     allergens: []
+  },
+  {
+    id: 'coffee-1',
+    name: 'Hot Coffee',
+    description: 'Freshly brewed hot coffee from locally roasted beans.',
+    price: 2.99,
+    imageUrl: 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?w=400&auto=format&fit=crop&q=60',
+    category: 'beverages',
+    cuisineType: 'american',
+    tags: ['coffee', 'hot'],
+    vegetarian: true,
+    vegan: true,
+    glutenFree: true,
+    nutrition: {
+      calories: 5,
+      protein: '0g',
+      carbs: '0g',
+      fat: '0g',
+      sodium: '5mg',
+      fiber: '0g',
+      sugar: '0g'
+    },
+    ingredients: ['Coffee beans', 'Filtered water'],
+    preparationTime: '2 min',
+    allergens: []
+  },
+  {
+    id: 'coffee-2',
+    name: 'Cappuccino',
+    description: 'Espresso with steamed milk and a frothy top.',
+    price: 4.49,
+    imageUrl: 'https://images.unsplash.com/photo-1534778101976-62847782c213?w=400&auto=format&fit=crop&q=60',
+    category: 'beverages',
+    cuisineType: 'italian',
+    tags: ['coffee', 'espresso', 'milk'],
+    vegetarian: true,
+    nutrition: {
+      calories: 120,
+      protein: '6g',
+      carbs: '12g',
+      fat: '4g',
+      sodium: '100mg',
+      fiber: '0g',
+      sugar: '10g'
+    },
+    ingredients: ['Espresso', 'Steamed milk', 'Milk foam'],
+    preparationTime: '4 min',
+    allergens: ['Dairy']
+  },
+  {
+    id: 'coffee-3',
+    name: 'Latte',
+    description: 'Espresso with steamed milk and a light layer of foam.',
+    price: 4.99,
+    imageUrl: 'https://images.unsplash.com/photo-1570968915860-54d5c301fa9f?w=400&auto=format&fit=crop&q=60',
+    category: 'beverages',
+    cuisineType: 'italian',
+    tags: ['coffee', 'espresso', 'milk'],
+    vegetarian: true,
+    nutrition: {
+      calories: 150,
+      protein: '8g',
+      carbs: '14g',
+      fat: '6g',
+      sodium: '115mg',
+      fiber: '0g',
+      sugar: '13g'
+    },
+    ingredients: ['Espresso', 'Steamed milk', 'Light milk foam'],
+    preparationTime: '4 min',
+    allergens: ['Dairy']
   }
 ];
