@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -10,7 +11,17 @@ interface MealCardProps {
 }
 
 const MealCard: React.FC<MealCardProps> = ({ meal }) => {
-  // Array of fallback images for different categories
+  const [imageError, setImageError] = useState(false);
+  
+  // Reliable placeholder images that work well with resizing
+  const reliableImages = [
+    "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=800&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=800&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1721322800607-8c38375eef04?w=800&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1535268647677-300dbf3d78d1?w=800&auto=format&fit=crop"
+  ];
+  
+  // Category-specific fallback images
   const categoryFallbacks: Record<string, string> = {
     entrees: "https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?w=800&auto=format&fit=crop",
     sides: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop",
@@ -22,7 +33,20 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
   };
   
   const getImageUrl = (item: MenuItem): string => {
-    return item.imageUrl || item.image || categoryFallbacks[item.category.toLowerCase()] || "/placeholder.svg";
+    if (imageError) {
+      // If there was an error loading the image, use a reliable fallback
+      return categoryFallbacks[item.category.toLowerCase()] || 
+             reliableImages[Math.floor(Math.random() * reliableImages.length)];
+    }
+    
+    let imageUrl = item.imageUrl || item.image || categoryFallbacks[item.category.toLowerCase()];
+    
+    // Ensure unsplash images have proper sizing parameters
+    if (imageUrl && imageUrl.includes('unsplash.com') && !imageUrl.includes('w=')) {
+      imageUrl = `${imageUrl}?w=800&auto=format&fit=crop`;
+    }
+    
+    return imageUrl || "/placeholder.svg";
   };
   
   console.log("Rendering MealCard for:", meal.id, meal.name, "Image:", getImageUrl(meal));
@@ -39,9 +63,9 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
               src={getImageUrl(meal)}
               alt={meal.name}
               className="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.src = categoryFallbacks[meal.category.toLowerCase()] || "/placeholder.svg";
+              onError={() => {
+                console.log("Image error for:", meal.name);
+                setImageError(true);
               }}
             />
             {meal.hasDiscount && (

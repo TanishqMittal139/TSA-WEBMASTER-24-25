@@ -3,6 +3,14 @@ import { MenuItem } from '@/types/menu';
 import { menuItems } from './menu-items';
 import { additionalMenuItems } from './additional-menu-items';
 
+// Set of reliable placeholder images that work well with resizing
+const RELIABLE_IMAGES = [
+  "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=800&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=800&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1721322800607-8c38375eef04?w=800&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1535268647677-300dbf3d78d1?w=800&auto=format&fit=crop"
+];
+
 // Get all menu items
 export const getAllMeals = (): MenuItem[] => {
   const allItems = [...menuItems, ...additionalMenuItems];
@@ -10,8 +18,21 @@ export const getAllMeals = (): MenuItem[] => {
   // Ensure all items have valid image URLs
   return allItems.map(item => ({
     ...item,
-    image: item.imageUrl || item.image || getCategoryFallbackImage(item.category)
+    image: getValidImageUrl(item)
   }));
+};
+
+// Get a valid image URL for a menu item
+export const getValidImageUrl = (item: MenuItem): string => {
+  // Prioritize any available image source
+  const imageSource = item.imageUrl || item.image || getCategoryFallbackImage(item.category);
+  
+  // If the image URL contains "unsplash" and doesn't have size parameters, add them
+  if (imageSource && imageSource.includes('unsplash.com') && !imageSource.includes('w=')) {
+    return `${imageSource}?w=800&auto=format&fit=crop`;
+  }
+  
+  return imageSource;
 };
 
 // Get a fallback image based on category
@@ -23,7 +44,7 @@ const getCategoryFallbackImage = (category: string): string => {
     beverages: "https://images.unsplash.com/photo-1544145945-f90425340c7e?w=800&auto=format&fit=crop"
   };
   
-  return categoryFallbacks[category.toLowerCase()] || '/placeholder.svg';
+  return categoryFallbacks[category.toLowerCase()] || RELIABLE_IMAGES[Math.floor(Math.random() * RELIABLE_IMAGES.length)];
 };
 
 export const getMealsByCategory = (category: string): MenuItem[] => {
@@ -34,7 +55,7 @@ export const getMealsByCategory = (category: string): MenuItem[] => {
   // Ensure all items have valid image URLs
   return items.map(item => ({
     ...item,
-    image: item.imageUrl || item.image || getCategoryFallbackImage(item.category)
+    image: getValidImageUrl(item)
   }));
 };
 
@@ -42,18 +63,10 @@ export const getMealsByCategory = (category: string): MenuItem[] => {
 export const getPopularMeals = (): MenuItem[] => {
   const popular: MenuItem[] = [...menuItems, ...additionalMenuItems].slice(0, 4);
 
-  // Unique fallback images from the provided placeholder set
-  const fallbacks = [
-    "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=800&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1721322800607-8c38375eef04?w=800&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=800&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1535268647677-300dbf3d78d1?w=800&auto=format&fit=crop"
-  ];
-
-  // Ensure each meal gets a unique fallback if they lack image/imageUrl
+  // Use the reliable fallbacks
   return popular.map((meal, i) => ({
     ...meal,
-    image: meal.image || meal.imageUrl || fallbacks[i % fallbacks.length]
+    image: getValidImageUrl(meal) || RELIABLE_IMAGES[i % RELIABLE_IMAGES.length]
   }));
 };
 
@@ -65,7 +78,7 @@ export const getMenuItemById = (id: string): MenuItem | undefined => {
   if (foundItem) {
     const enhancedItem = {
       ...foundItem,
-      image: foundItem.imageUrl || foundItem.image || getCategoryFallbackImage(foundItem.category)
+      image: getValidImageUrl(foundItem)
     };
     console.log("Found item:", enhancedItem.name, "with image:", enhancedItem.image);
     return enhancedItem;
