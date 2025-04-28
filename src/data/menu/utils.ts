@@ -22,7 +22,7 @@ export const getAllMeals = (): MenuItem[] => {
   }));
 };
 
-// Get a valid image URL for a menu item
+// Get a valid image URL for a menu item - this is the single source of truth for image URLs
 export const getValidImageUrl = (item: MenuItem): string => {
   // Prioritize any available image source
   const imageSource = item.imageUrl || item.image || getCategoryFallbackImage(item.category);
@@ -41,7 +41,10 @@ const getCategoryFallbackImage = (category: string): string => {
     entrees: "https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?w=800&auto=format&fit=crop",
     sides: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop",
     desserts: "https://images.unsplash.com/photo-1551024506-0bccd828d307?w=800&auto=format&fit=crop",
-    beverages: "https://images.unsplash.com/photo-1544145945-f90425340c7e?w=800&auto=format&fit=crop"
+    beverages: "https://images.unsplash.com/photo-1544145945-f90425340c7e?w=800&auto=format&fit=crop",
+    breakfast: "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=800&auto=format&fit=crop",
+    lunch: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop",
+    dinner: "https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?w=800&auto=format&fit=crop"
   };
   
   return categoryFallbacks[category.toLowerCase()] || RELIABLE_IMAGES[Math.floor(Math.random() * RELIABLE_IMAGES.length)];
