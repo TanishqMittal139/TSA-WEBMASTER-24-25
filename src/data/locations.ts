@@ -1,3 +1,4 @@
+
 // Location data for the app
 
 export interface Location {
@@ -22,7 +23,7 @@ export const locations: Location[] = [
     name: 'Glen Allen - Virginia',
     address: '4350 Pouncey Tract Rd, Glen Allen, VA 23060',
     phone: '(804) 555-7821',
-    hours: 'Mon-Fri: 7:00 AM - 9:00 PM | Sat-Sun: 8:30 AM - 10:00 PM',
+    hours: 'Monday-Friday: 7:00 AM - 9:00 PM | Saturday: 7:00 AM - 9:00 PM | Sunday: 8:30 AM - 9:00 PM',
     coordinates: [-77.6082, 37.6651],
     popular: true,
     region: 'East Coast',
@@ -36,7 +37,7 @@ export const locations: Location[] = [
     name: 'Hampton - Virginia',
     address: '2150 Cunningham Dr, Hampton, VA 23666',
     phone: '(757) 555-3492',
-    hours: 'Mon-Fri: 7:00 AM - 9:00 PM | Sat-Sun: 8:30 AM - 10:00 PM',
+    hours: 'Monday-Friday: 7:00 AM - 9:00 PM | Saturday: 7:00 AM - 9:00 PM | Sunday: 8:30 AM - 9:00 PM',
     coordinates: [-76.3968, 37.0311],
     popular: false,
     region: 'East Coast',
@@ -50,7 +51,7 @@ export const locations: Location[] = [
     name: 'Richmond - Virginia',
     address: '901 E Cary St, Richmond, VA 23219',
     phone: '(804) 555-9072',
-    hours: 'Mon-Fri: 7:00 AM - 9:00 PM | Sat-Sun: 8:30 AM - 10:00 PM',
+    hours: 'Monday-Friday: 7:00 AM - 9:00 PM | Saturday: 7:00 AM - 9:00 PM | Sunday: 8:30 AM - 9:00 PM',
     coordinates: [-77.4360, 37.5407],
     popular: true,
     region: 'East Coast',
@@ -64,7 +65,7 @@ export const locations: Location[] = [
     name: 'Norfolk - Virginia',
     address: '300 Monticello Ave, Norfolk, VA 23510',
     phone: '(757) 555-2123',
-    hours: 'Mon-Fri: 7:00 AM - 9:00 PM | Sat-Sun: 8:30 AM - 10:00 PM',
+    hours: 'Monday-Friday: 7:00 AM - 9:00 PM | Saturday: 7:00 AM - 9:00 PM | Sunday: 8:30 AM - 9:00 PM',
     coordinates: [-76.2859, 36.8508],
     popular: false,
     region: 'East Coast',
@@ -78,7 +79,7 @@ export const locations: Location[] = [
     name: 'Alexandria - Virginia',
     address: '277 S Washington St, Alexandria, VA 22314',
     phone: '(703) 555-8901',
-    hours: 'Mon-Fri: 7:00 AM - 9:00 PM | Sat-Sun: 8:30 AM - 10:00 PM',
+    hours: 'Monday-Friday: 7:00 AM - 9:00 PM | Saturday: 7:00 AM - 9:00 PM | Sunday: 8:30 AM - 9:00 PM',
     coordinates: [-77.0469, 38.8048],
     popular: false,
     region: 'East Coast',

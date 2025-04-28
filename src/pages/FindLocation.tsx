@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/ui/navbar';
@@ -80,7 +79,6 @@ const FindLocation: React.FC = () => {
     }
   };
 
-  // Create enhanced location objects for our components
   const enhancedLocations = filteredLocations.map(loc => ({
     id: loc.id,
     name: loc.name,
@@ -94,7 +92,6 @@ const FindLocation: React.FC = () => {
     image: loc.image
   }));
 
-  // Create enhanced details for the active location
   const getEnhancedLocation = (loc: typeof locations[0]) => {
     if (!loc) return null;
     return {
@@ -112,8 +109,8 @@ const FindLocation: React.FC = () => {
         wednesday: "7:00 AM - 9:00 PM",
         thursday: "7:00 AM - 9:00 PM",
         friday: "7:00 AM - 9:00 PM",
-        saturday: "8:30 AM - 10:00 PM",
-        sunday: "8:30 AM - 10:00 PM"
+        saturday: "7:00 AM - 9:00 PM",
+        sunday: "8:30 AM - 9:00 PM"
       },
       features: ["Dine-in", "Takeout", "Delivery", "Outdoor Seating", "Wi-Fi"],
       coordinates: loc.coordinates
@@ -154,7 +151,6 @@ const FindLocation: React.FC = () => {
         <section className="py-16">
           <div className="container mx-auto px-4">
             <div className="flex flex-col lg:flex-row gap-8">
-              {/* Left side - Location cards */}
               <div className="w-full lg:w-1/2 xl:w-2/5">
                 <LocationSearch 
                   searchQuery={searchQuery}
@@ -184,7 +180,6 @@ const FindLocation: React.FC = () => {
                 </div>
               </div>
 
-              {/* Right side - Location details */}
               <div className="w-full lg:w-1/2 xl:w-3/5 lg:sticky lg:top-4 lg:self-start">
                 {activeLocation ? (
                   <div className="bg-secondary/30 rounded-lg p-6">
@@ -213,4 +208,3 @@ const FindLocation: React.FC = () => {
 };
 
 export default FindLocation;
-

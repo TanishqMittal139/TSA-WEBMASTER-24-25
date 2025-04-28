@@ -90,12 +90,18 @@ const LocationDetails: React.FC<LocationDetailsProps> = ({
               <div className="flex-grow">
                 <p className="font-medium mb-2">Hours of Operation</p>
                 <div className="space-y-1">
-                  {Object.entries(location.hours).map(([day, hours]) => (
-                    <div key={day} className="flex justify-between text-sm">
-                      <span>{day.charAt(0).toUpperCase() + day.slice(1)}</span>
-                      <span>{hours}</span>
-                    </div>
-                  ))}
+                  <div className="flex justify-between text-sm">
+                    <span>Monday - Friday</span>
+                    <span>7:00 AM - 9:00 PM</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Saturday</span>
+                    <span>7:00 AM - 9:00 PM</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Sunday</span>
+                    <span>8:30 AM - 9:00 PM</span>
+                  </div>
                 </div>
               </div>
             </div>
