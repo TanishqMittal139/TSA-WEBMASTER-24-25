@@ -294,14 +294,14 @@ const About = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                   <div className="p-6 bg-background/40 backdrop-blur-md rounded-xl border border-white/10 hover:border-primary/50 transition-colors duration-300">
                     <h3 className="text-xl font-bold mb-3">General Inquiries</h3>
-                    <p className="text-foreground/80 hover:text-primary transition-colors">info@tastyhub.com</p>
-                    <p className="text-foreground/80 hover:text-primary transition-colors">(804) 123-4567</p>
+                    <p className="text-foreground/80 hover:text-primary transition-colors">contact@tastyhub-va.com</p>
+                    <p className="text-foreground/80 hover:text-primary transition-colors">(703) 555-1234</p>
                   </div>
                   
                   <div className="p-6 bg-background/40 backdrop-blur-md rounded-xl border border-white/10 hover:border-primary/50 transition-colors duration-300">
                     <h3 className="text-xl font-bold mb-3">Visit Our Headquarters</h3>
-                    <p className="text-foreground/80">123 Nutrition Avenue</p>
-                    <p className="text-foreground/80">Richmond, VA 23219</p>
+                    <p className="text-foreground/80">456 Wilson Blvd</p>
+                    <p className="text-foreground/80">Arlington, VA 22203</p>
                   </div>
                 </div>
                 
