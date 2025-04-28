@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Navbar from '../components/ui/navbar';
 import Footer from '../components/ui/footer';
@@ -15,12 +14,10 @@ const Cart: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   
-  // Calculate tax and delivery fee
   const tax = totalAmount * 0.08;
   const deliveryFee = 3.99;
   const finalTotal = totalAmount + tax + deliveryFee;
   
-  // Handle checkout
   const handleProceedToCheckout = () => {
     if (items.length === 0) {
       toast({
@@ -54,7 +51,6 @@ const Cart: React.FC = () => {
           
           {itemCount > 0 ? (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-              {/* Cart Items */}
               <div className="lg:col-span-2">
                 <div className="bg-card rounded-lg shadow-md overflow-hidden">
                   <div className="p-4 border-b border-border flex items-center justify-between">
@@ -80,14 +76,14 @@ const Cart: React.FC = () => {
                         
                         <div className="ml-4 flex-1">
                           <div className="flex justify-between">
-                            <h3 className="font-medium">{item.name}</h3>
+                            <div>
+                              <h3 className="font-medium">{item.name}</h3>
+                              {item.dealName && (
+                                <span className="text-sm text-primary">{item.dealName}</span>
+                              )}
+                            </div>
                             <p className="font-semibold">{item.price}</p>
                           </div>
-                          {item.category && (
-                            <p className="text-sm text-muted-foreground mb-2">
-                              Category: {item.category}
-                            </p>
-                          )}
                           
                           <div className="flex items-center justify-between mt-2">
                             <div className="flex items-center">
@@ -133,7 +129,6 @@ const Cart: React.FC = () => {
                 </div>
               </div>
               
-              {/* Order Summary */}
               <div className="lg:col-span-1">
                 <div className="bg-card rounded-lg shadow-md overflow-hidden">
                   <div className="p-4 border-b border-border">

@@ -1,8 +1,6 @@
-
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/context/AuthContext';
-import { useNavigate } from 'react-router-dom';
 
 type CartItem = {
   id: string;
@@ -12,6 +10,7 @@ type CartItem = {
   quantity: number;
   category?: string;
   hasDiscount?: boolean;
+  dealName?: string;
 };
 
 type CartContextType = {
@@ -124,7 +123,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
   
   const checkAuthBeforeCheckout = (): boolean => {
-    // Check if the user is logged in using session from useAuth
     console.log("Checking auth before checkout:", !!user, !!session);
     
     if (!session || !user) {

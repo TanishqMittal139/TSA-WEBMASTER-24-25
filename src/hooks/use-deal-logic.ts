@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
@@ -278,7 +277,8 @@ export const useDealLogic = (dealId: string | undefined) => {
         price: `$${discountedPrice.toFixed(2)}`,
         image: item.imageUrl,
         category: item.category,
-        hasDiscount: true
+        hasDiscount: true,
+        dealName: deal?.title // Add the deal name
       });
     });
     
