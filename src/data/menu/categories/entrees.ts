@@ -68,5 +68,74 @@ export const entreeItems: MenuItem[] = [
     ingredients: ['Romaine lettuce', 'Grilled chicken breast', 'Parmesan cheese', 'Croutons', 'Caesar dressing', 'Black pepper'],
     preparationTime: '10-15 min',
     allergens: ['Wheat', 'Dairy', 'Eggs']
+  },
+  {
+    id: 'entree-11',
+    name: 'Grilled Salmon',
+    description: 'Fresh Atlantic salmon fillet grilled to perfection with lemon herb butter.',
+    price: 18.99,
+    imageUrl: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=400&auto=format&fit=crop&q=60',
+    category: 'entrees',
+    cuisineType: 'american',
+    tags: ['seafood', 'healthy', 'grilled'],
+    nutrition: {
+      calories: 420,
+      protein: '38g',
+      carbs: '2g',
+      fat: '28g',
+      sodium: '320mg',
+      fiber: '0g',
+      sugar: '0g'
+    },
+    ingredients: ['Salmon fillet', 'Lemon', 'Butter', 'Garlic', 'Fresh herbs', 'Sea salt', 'Black pepper'],
+    preparationTime: '18-22 min',
+    allergens: ['Fish', 'Dairy']
+  },
+  {
+    id: 'entree-12',
+    name: 'Vegetable Curry',
+    description: 'A rich, aromatic curry with seasonal vegetables served with basmati rice.',
+    price: 13.99,
+    imageUrl: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&auto=format&fit=crop&q=60',
+    category: 'entrees',
+    cuisineType: 'indian',
+    tags: ['curry', 'vegetarian', 'spicy'],
+    vegetarian: true,
+    vegan: true,
+    glutenFree: true,
+    nutrition: {
+      calories: 380,
+      protein: '9g',
+      carbs: '65g',
+      fat: '12g',
+      sodium: '640mg',
+      fiber: '8g',
+      sugar: '10g'
+    },
+    ingredients: ['Seasonal vegetables', 'Coconut milk', 'Curry spices', 'Garlic', 'Ginger', 'Basmati rice', 'Fresh cilantro'],
+    preparationTime: '25-30 min',
+    allergens: []
+  },
+  {
+    id: 'entree-13',
+    name: 'Beef Tacos',
+    description: 'Three soft corn tortillas with seasoned beef, pico de gallo, and avocado cream.',
+    price: 15.99,
+    imageUrl: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=400&auto=format&fit=crop&q=60',
+    category: 'entrees',
+    cuisineType: 'mexican',
+    tags: ['tacos', 'mexican', 'beef'],
+    nutrition: {
+      calories: 580,
+      protein: '28g',
+      carbs: '45g',
+      fat: '32g',
+      sodium: '720mg',
+      fiber: '6g',
+      sugar: '4g'
+    },
+    ingredients: ['Corn tortillas', 'Ground beef', 'Mexican spices', 'Pico de gallo', 'Avocado', 'Sour cream', 'Lime'],
+    preparationTime: '15-20 min',
+    allergens: ['Dairy']
   }
 ];
