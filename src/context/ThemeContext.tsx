@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext, useEffect } from 'react';
 
 type Theme = 'light' | 'dark';
@@ -14,9 +13,8 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Check if user has a preference stored in localStorage
   const [theme, setTheme] = useState<Theme>(() => {
     const savedTheme = localStorage.getItem('tastyHubTheme') as Theme;
-    // Check if user has system preference for dark mode
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    return savedTheme || (prefersDark ? 'dark' : 'light');
+    // If no saved theme, default to dark mode
+    return savedTheme || 'dark';
   });
   
   useEffect(() => {
