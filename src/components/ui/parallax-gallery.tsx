@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Card } from '@/components/ui/card';
 
 interface ParallaxGalleryProps {
@@ -8,31 +8,130 @@ interface ParallaxGalleryProps {
 
 const ParallaxGallery: React.FC<ParallaxGalleryProps> = ({ images }) => {
   const galleryRef = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+  const animationFrameRef = useRef<number | null>(null);
   
   useEffect(() => {
-    const handleScroll = () => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        setIsVisible(entry.isIntersecting);
+      },
+      { threshold: 0.1 }
+    );
+    
+    if (galleryRef.current) {
+      observer.observe(galleryRef.current);
+    }
+    
+    return () => {
+      if (galleryRef.current) {
+        observer.unobserve(galleryRef.current);
+      }
+    };
+  }, []);
+  
+  useEffect(() => {
+    // Elements and their positions
+    const elements: HTMLElement[] = [];
+    const elementPositions: { top: number; height: number }[] = [];
+    let lastScrollY = window.scrollY;
+    
+    const initializeElements = () => {
       if (!galleryRef.current) return;
       
       const galleryElements = galleryRef.current.querySelectorAll('.parallax-image');
-      const viewportHeight = window.innerHeight;
+      elements.length = 0;
+      elementPositions.length = 0;
       
-      galleryElements.forEach((element, index) => {
-        // Get the element's position relative to the viewport
+      galleryElements.forEach((el) => {
+        const element = el as HTMLElement;
         const rect = element.getBoundingClientRect();
         
-        // Only apply parallax if the element is in view
-        if (rect.top < viewportHeight && rect.bottom > 0) {
-          const distanceFromCenter = (rect.top + rect.height / 2 - viewportHeight / 2) / viewportHeight;
-          const speed = 0.01 + (index % 3 * 0.002); // Lower speed for smoother effect
-          const yPos = distanceFromCenter * speed * viewportHeight;
-          (element as HTMLElement).style.transform = `translateY(${yPos}px)`;
-        }
+        elements.push(element);
+        elementPositions.push({
+          top: rect.top + window.scrollY,
+          height: rect.height
+        });
+        
+        // Initialize with opacity 0 and transform
+        element.style.opacity = '0';
+        element.style.transform = 'translateY(30px)';
       });
     };
     
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    const updateElementStyles = () => {
+      if (!isVisible) return;
+      
+      const viewportHeight = window.innerHeight;
+      const scrollY = window.scrollY;
+      
+      elements.forEach((element, index) => {
+        const position = elementPositions[index];
+        if (!position) return;
+        
+        // Calculate position relative to viewport
+        const relativeTop = position.top - scrollY;
+        const elementMiddle = relativeTop + position.height / 2;
+        const viewportMiddle = viewportHeight / 2;
+        
+        // Calculate visibility (0 when out of view, 1 when in view)
+        const distanceFromTop = relativeTop - viewportHeight;
+        const distanceFromBottom = relativeTop + position.height;
+        
+        // Only apply effects if the element is in or near the viewport
+        if (distanceFromTop < 200 && distanceFromBottom > -200) {
+          // Calculate parallax effect - smoother with lower multiplier
+          const distance = elementMiddle - viewportMiddle;
+          const parallaxMultiplier = 0.03; // Lower value for subtler effect
+          const yPos = distance * parallaxMultiplier * -1; // Inverse movement
+          
+          // Determine opacity based on position in viewport
+          let opacity = 1;
+          if (relativeTop > viewportHeight) {
+            opacity = 0;
+          } else if (relativeTop > viewportHeight - 200) {
+            opacity = (viewportHeight - relativeTop) / 200;
+          } else if (relativeTop + position.height < 0) {
+            opacity = 0;
+          } else if (relativeTop + position.height < 200) {
+            opacity = (relativeTop + position.height) / 200;
+          }
+          
+          // Apply smooth transitions for both transform and opacity
+          element.style.transition = 'transform 0.3s ease-out, opacity 0.5s ease-out';
+          element.style.transform = `translateY(${yPos}px)`;
+          element.style.opacity = opacity.toString();
+        }
+      });
+      
+      lastScrollY = scrollY;
+    };
+    
+    const handleScroll = () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+      
+      animationFrameRef.current = requestAnimationFrame(updateElementStyles);
+    };
+    
+    // Initialize when component becomes visible
+    if (isVisible) {
+      initializeElements();
+      updateElementStyles();
+      window.addEventListener('scroll', handleScroll, { passive: true });
+      window.addEventListener('resize', initializeElements);
+    }
+    
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', initializeElements);
+    };
+  }, [isVisible]);
   
   return (
     <div ref={galleryRef} className="grid grid-cols-1 md:grid-cols-3 gap-8 relative py-12">
@@ -44,7 +143,12 @@ const ParallaxGallery: React.FC<ParallaxGalleryProps> = ({ images }) => {
               <Card 
                 key={`${colIndex}-${imgIndex}`} 
                 className="overflow-hidden h-80 bg-transparent border-white/10 shadow-xl parallax-image"
-                style={{ position: 'relative', zIndex: imgIndex }}
+                style={{ 
+                  position: 'relative', 
+                  zIndex: imgIndex,
+                  opacity: 0,
+                  transform: 'translateY(30px)'
+                }}
               >
                 <div className="relative w-full h-full">
                   <img 
