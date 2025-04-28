@@ -30,7 +30,7 @@ const deals: DealData[] = [
   {
     id: 'happy-hour',
     title: 'Happy Hour Special',
-    description: '20% off all beverages between 3pm and 6pm, Monday through Friday',
+    description: '20% off one beverage Monday through Friday',
     discount: '20% OFF',
     discountType: 'percentage',
     discountAmount: 20,
