@@ -270,17 +270,6 @@ const References = () => {
                   Our development process is iterative and user-focused. We're constantly improving the TastyHub experience based on customer feedback and emerging technologies.
                 </p>
                 
-                <div className="flex flex-wrap justify-center gap-4 mt-8">
-                  <Button className="bg-primary hover:bg-primary/90 text-white rounded-full px-6 transition-transform duration-300 hover:scale-105">
-                    <Shield className="mr-2 h-4 w-4" />
-                    Privacy Policy
-                  </Button>
-                  <Button variant="outline" className="rounded-full px-6 border-primary/20 hover:border-primary/60 transition-transform duration-300 hover:scale-105">
-                    <FileText className="mr-2 h-4 w-4" />
-                    Terms of Service
-                  </Button>
-                </div>
-                
                 <div className="absolute -bottom-16 -right-16 w-48 h-48 bg-primary/10 blur-3xl rounded-full"></div>
               </CardContent>
             </Card>
