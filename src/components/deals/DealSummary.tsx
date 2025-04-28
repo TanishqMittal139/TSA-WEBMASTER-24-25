@@ -57,6 +57,11 @@ const DealSummary: React.FC<DealSummaryProps> = ({
                       <span className="line-through text-muted-foreground text-xs">{formatPrice(item.price)}</span>
                       <span className="text-primary font-medium">FREE</span>
                     </>
+                  ) : deal.id === 'happy-hour' ? (
+                    <>
+                      <span className="line-through text-muted-foreground text-xs">{formatPrice(item.price)}</span>
+                      <span className="text-primary font-medium">{formatPrice(item.price * 0.8)}</span>
+                    </>
                   ) : (
                     <span>{formatPrice(item.price)}</span>
                   )}

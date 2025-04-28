@@ -265,9 +265,9 @@ export const useDealLogic = (dealId: string | undefined) => {
       // Apply discount for happy hour
       if (deal?.id === 'happy-hour') {
         discountedPrice = item.price * 0.8; // 20% off
-      } else {
+      } else if (deal?.id === 'lunch-special') {
         const isSide = item.category === 'sides' || item.tags?.includes('soup') || item.tags?.includes('salad');
-        if (deal?.id === 'lunch-special' && isSide) {
+        if (isSide) {
           discountedPrice = 0; // Free side for lunch special
         }
       }
