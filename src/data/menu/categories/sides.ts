@@ -78,7 +78,7 @@ export const sideItems: MenuItem[] = [
     name: 'Sweet Potato Fries',
     description: 'Crispy sweet potato fries with a hint of rosemary and sea salt.',
     price: 7.99,
-    imageUrl: 'https://images.unsplash.com/photo-1604183667964-bce80268h110DE?w=800&auto=format&fit=crop&q=60',
+    imageUrl: 'https://images.unsplash.com/photo-1598679253544-2c97992403ea?w=700&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8c3dlZXQlMjBwb3RhdG8lMjBmcmllc3xlbnwwfHwwfHx8MA%3D%3D',
     category: 'sides',
     cuisineType: 'american',
     tags: ['fries', 'vegetarian', 'sweet potato'],
