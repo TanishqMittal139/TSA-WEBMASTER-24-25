@@ -103,7 +103,7 @@ export const sideItems: MenuItem[] = [
     name: 'Grilled Vegetables',
     description: 'Seasonal vegetables grilled with olive oil, garlic, and herbs.',
     price: 8.99,
-    imageUrl: 'https://images.unsplash.com/photo-1533777168198-6c87e4717f74?w=800&auto=format&fit=crop&q=60',
+    imageUrl: 'https://images.unsplash.com/photo-1625944227313-4f7f68e6b3fa?w=700&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Z3JpbGxlZCUyMHZlZ2V0YWJsZXN8ZW58MHx8MHx8fDA%3D',
     category: 'sides',
     cuisineType: 'mediterranean',
     tags: ['vegetables', 'healthy', 'grilled'],
