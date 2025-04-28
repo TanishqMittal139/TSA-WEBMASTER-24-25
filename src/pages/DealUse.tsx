@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import Navbar from '../components/ui/navbar';
@@ -89,8 +88,6 @@ const DealUse: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
             <div className="mb-6">
-              <h3 className="text-lg font-medium mb-4">Select Items for Your Deal</h3>
-              
               {deal.id === 'combo-meal' && (
                 <p className="text-sm text-muted-foreground mb-4">
                   Choose items to complete your combo
