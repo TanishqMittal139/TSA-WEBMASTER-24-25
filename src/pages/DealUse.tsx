@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import Navbar from '../components/ui/navbar';
@@ -97,6 +98,12 @@ const DealUse: React.FC = () => {
               {deal.id === 'lunch-special' && (
                 <p className="text-sm text-muted-foreground mb-4">
                   Select one sandwich and get a free side or soup
+                </p>
+              )}
+              
+              {deal.id === 'happy-hour' && (
+                <p className="text-sm text-muted-foreground mb-4">
+                  Select ONE beverage for 20% off between 3pm and 6pm, Monday through Friday
                 </p>
               )}
               

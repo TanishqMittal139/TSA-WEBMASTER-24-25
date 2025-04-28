@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
@@ -99,6 +100,13 @@ export const useDealLogic = (dealId: string | undefined) => {
 
     if (!deal) return;
 
+    // Special handling for Happy Hour deal - only allow one beverage
+    if (deal.id === 'happy-hour') {
+      // Replace any existing selection with the new one
+      setSelectedItems([item]);
+      return;
+    }
+
     if (deal.id === 'lunch-special') {
       const isSandwich = item.tags?.includes('sandwich') || item.name.toLowerCase().includes('sandwich');
       const isSide = item.category === 'sides' || item.tags?.includes('soup') || item.tags?.includes('salad');
@@ -173,6 +181,13 @@ export const useDealLogic = (dealId: string | undefined) => {
       return total;
     }
     
+    // Happy Hour Special calculation
+    if (deal.id === 'happy-hour' && selectedItems.length === 1) {
+      // Apply 20% discount to the single beverage
+      const price = selectedItems[0].price;
+      return price * 0.8; // 20% off
+    }
+    
     selectedItems.forEach(item => {
       total += item.price;
     });
@@ -223,6 +238,15 @@ export const useDealLogic = (dealId: string | undefined) => {
       }
     }
     
+    if (deal?.id === 'happy-hour' && selectedItems.length !== 1) {
+      toast({
+        title: "Single Beverage Required",
+        description: "Please select exactly one beverage for the Happy Hour special",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     const hasDiscountedItems = items.some(item => item.hasDiscount);
     
     if (hasDiscountedItems) {
@@ -236,13 +260,22 @@ export const useDealLogic = (dealId: string | undefined) => {
     }
     
     selectedItems.forEach(item => {
-      const isSide = item.category === 'sides' || item.tags?.includes('soup') || item.tags?.includes('salad');
-      const price = deal?.id === 'lunch-special' && isSide ? 0 : item.price;
+      let discountedPrice = item.price;
+      
+      // Apply discount for happy hour
+      if (deal?.id === 'happy-hour') {
+        discountedPrice = item.price * 0.8; // 20% off
+      } else {
+        const isSide = item.category === 'sides' || item.tags?.includes('soup') || item.tags?.includes('salad');
+        if (deal?.id === 'lunch-special' && isSide) {
+          discountedPrice = 0; // Free side for lunch special
+        }
+      }
       
       addItem({
         id: item.id,
         name: item.name,
-        price: `$${price.toFixed(2)}`,
+        price: `$${discountedPrice.toFixed(2)}`,
         image: item.imageUrl,
         category: item.category,
         hasDiscount: true
@@ -253,7 +286,7 @@ export const useDealLogic = (dealId: string | undefined) => {
     
     toast({
       title: "Deal Applied",
-      description: `${selectedItems.length} items added to your cart with ${deal?.discount} discount`,
+      description: `${selectedItems.length} item(s) added to your cart with ${deal?.discount} discount`,
     });
     
     navigate('/cart');
@@ -275,6 +308,15 @@ export const useDealLogic = (dealId: string | undefined) => {
       }
     }
     
+    if (deal.id === 'happy-hour') {
+      if (selectedItems.length === 0) {
+        return "Please select one beverage";
+      }
+      if (selectedItems.length > 1) {
+        return "Only one beverage can be selected for this deal";
+      }
+    }
+    
     return "";
   };
 
@@ -293,6 +335,10 @@ export const useDealLogic = (dealId: string | undefined) => {
       );
       
       return hasSandwich && hasSide;
+    }
+    
+    if (deal.id === 'happy-hour') {
+      return selectedItems.length === 1;
     }
     
     return true;
