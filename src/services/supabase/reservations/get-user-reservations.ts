@@ -17,6 +17,7 @@ export const getUserReservations = async () => {
       .from('reservations')
       .select('*')
       .eq('user_id', session.user.id)
+      .neq('status', 'cancelled') // Exclude cancelled reservations
       .order('date', { ascending: true });
       
     if (error) {
@@ -48,3 +49,4 @@ export const getUserReservations = async () => {
     };
   }
 };
+
