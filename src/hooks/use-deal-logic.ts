@@ -72,8 +72,7 @@ export const useDealLogic = (dealId: string | undefined) => {
 
     if (parsedDeal.id === 'combo-meal') {
       const sandwiches = menuItems.filter(item => 
-        item.tags?.includes('sandwich') || 
-        item.name.toLowerCase().includes('sandwich')
+        item.tags?.includes('sandwich') || item.name.toLowerCase().includes('sandwich')
       );
       
       const coffee = menuItems.filter(item => 
@@ -92,10 +91,6 @@ export const useDealLogic = (dealId: string | undefined) => {
         breakfast: [],
         other: []
       });
-      
-      console.log('Combo meal sandwiches:', sandwiches.length);
-      console.log('Combo meal coffee:', coffee.length);
-      console.log('Combo meal sides:', sides.length);
     } else if (parsedDeal.id === 'lunch-special') {
       const sandwiches = menuItems.filter(item => 
         item.tags?.includes('sandwich') || item.name.toLowerCase().includes('sandwich')
