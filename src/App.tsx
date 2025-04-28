@@ -29,7 +29,6 @@ import DishDetails from "./pages/DishDetails";
 import Profile from "./pages/Profile";
 import History from "./pages/History";
 import NotFound from "./pages/NotFound";
-import Careers from "./pages/Careers";
 import References from "./pages/References";
 
 document.title = "TastyHub - Nutrition Made Delicious";
@@ -140,7 +139,6 @@ const App = () => {
                           <FavoriteLocations />
                         </ProtectedRoute>
                       } />
-                      <Route path="/careers" element={<Careers />} />
                       <Route path="/profile" element={
                         <ProtectedRoute>
                           <Profile />
