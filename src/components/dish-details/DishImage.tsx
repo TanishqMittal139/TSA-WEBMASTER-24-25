@@ -13,6 +13,8 @@ interface DishImageProps {
 }
 
 const DishImage = ({ imageUrl, name, isFavorite, onFavoriteToggle }: DishImageProps) => {
+  console.log("DishImage rendering with image URL:", imageUrl);
+  
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
