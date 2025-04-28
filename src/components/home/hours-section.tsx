@@ -5,13 +5,13 @@ import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
 const hours = [
-  { day: 'Sunday', hours: '8:30 AM - 5:00 PM' },
-  { day: 'Monday', hours: '7:00 AM - 5:00 PM' },
-  { day: 'Tuesday', hours: '7:00 AM - 5:00 PM' },
-  { day: 'Wednesday', hours: '7:00 AM - 5:00 PM' },
-  { day: 'Thursday', hours: '7:00 AM - 5:00 PM' },
-  { day: 'Friday', hours: '7:00 AM - 5:00 PM' },
-  { day: 'Saturday', hours: '7:00 AM - 5:00 PM' }
+  { day: 'Sunday', hours: '8:30 AM - 9:00 PM' },
+  { day: 'Monday', hours: '7:00 AM - 9:00 PM' },
+  { day: 'Tuesday', hours: '7:00 AM - 9:00 PM' },
+  { day: 'Wednesday', hours: '7:00 AM - 9:00 PM' },
+  { day: 'Thursday', hours: '7:00 AM - 9:00 PM' },
+  { day: 'Friday', hours: '7:00 AM - 9:00 PM' },
+  { day: 'Saturday', hours: '7:00 AM - 9:00 PM' }
 ];
 
 const HoursSection: React.FC = () => {
@@ -90,7 +90,7 @@ const HoursSection: React.FC = () => {
                     <Phone size={20} />
                     <span>Contact Us</span>
                   </div>
-                  <p className="text-muted-foreground dark:text-gray-300">(555) 123-4567</p>
+                  <p className="text-muted-foreground dark:text-gray-300">(703) 555-1234</p>
                 </div>
                 
                 <div className="p-4 border border-border dark:border-gray-700 rounded-xl stagger-item dark:bg-gray-800/80">
