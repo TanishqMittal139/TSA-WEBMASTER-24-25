@@ -57,11 +57,6 @@ const Footer: React.FC = () => {
                   Reservations
                 </Link>
               </li>
-              <li>
-                <Link to="/careers" className="text-muted-foreground hover:text-primary transition-colors">
-                  Join Our Team
-                </Link>
-              </li>
             </ul>
           </div>
           
