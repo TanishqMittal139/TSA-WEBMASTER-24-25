@@ -128,7 +128,7 @@ export const sideItems: MenuItem[] = [
     name: 'Truffle Parmesan Fries',
     description: 'Crispy fries tossed with truffle oil and grated Parmesan cheese.',
     price: 9.99,
-    imageUrl: 'https://images.unsplash.com/photo-1630384060421-cb20d0e70989?w=800&auto=format&fit=crop&q=60',
+    imageUrl: 'https://images.unsplash.com/photo-1619158411623-f6e5b94bef0e?w=700&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8dHJ1ZmZsZSUyMHBhcm1lc2VhbiUyMGZyaWVzfGVufDB8fDB8fHww',
     category: 'sides',
     cuisineType: 'italian',
     tags: ['fries', 'truffle', 'cheese'],
