@@ -54,7 +54,7 @@ export const sideItems: MenuItem[] = [
     name: 'Mashed Potatoes',
     description: 'Creamy mashed potatoes with butter and herbs.',
     price: 6.99,
-    imageUrl: 'https://images.unsplash.com/photo-1633436375153-d7045cb93e0b?w=800&auto=format&fit=crop&q=60',
+    imageUrl: 'https://plus.unsplash.com/premium_photo-1696835870634-e6484e8ed4d7?w=700&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8bWFzaGVkJTIwcG90YXRvZXN8ZW58MHx8MHx8fDA%3D',
     category: 'sides',
     cuisineType: 'american',
     tags: ['potatoes', 'creamy'],
