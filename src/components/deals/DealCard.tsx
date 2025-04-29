@@ -1,11 +1,10 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CalendarDays, Tag, ArrowRight, ImageOff } from 'lucide-react';
+import { CalendarDays, Tag, ArrowRight } from 'lucide-react';
 import { DealData } from '@/pages/Deals';
-import BlurImage from '@/components/ui/blur-image';
 
 interface DealCardProps {
   deal: DealData;
@@ -13,27 +12,14 @@ interface DealCardProps {
 }
 
 const DealCard: React.FC<DealCardProps> = ({ deal, onActivate }) => {
-  const [imageError, setImageError] = useState(false);
-  
-  // Fallback image in case the deal image fails to load
-  const fallbackImage = "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&auto=format&fit=crop";
-  
   return (
     <Card className="overflow-hidden h-full flex flex-col">
       <div className="relative h-48">
-        {imageError ? (
-          <div className="w-full h-full bg-muted flex flex-col items-center justify-center">
-            <ImageOff size={32} className="text-muted-foreground mb-2" />
-            <p className="text-sm text-muted-foreground">Image not available</p>
-          </div>
-        ) : (
-          <BlurImage 
-            src={deal.image || fallbackImage}
-            alt={deal.title}
-            className="w-full h-full object-cover"
-            onError={() => setImageError(true)}
-          />
-        )}
+        <img 
+          src={deal.image} 
+          alt={deal.title}
+          className="w-full h-full object-cover"
+        />
         {deal.isPopular && (
           <Badge className="absolute top-2 right-2 bg-primary text-primary-foreground">
             Popular
