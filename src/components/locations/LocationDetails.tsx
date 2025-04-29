@@ -108,19 +108,19 @@ const LocationDetails: React.FC<LocationDetailsProps> = ({
               </div>
             </div>
             
-            <div className="flex flex-col sm:flex-row gap-3 justify-end mt-auto pt-4">
+            <div className="flex flex-col gap-3 justify-end mt-auto pt-4">
+              <Button 
+                onClick={() => navigate('/reservations', { state: { locationId: location.id } })}
+                className="w-full"
+              >
+                Make a Reservation
+              </Button>
               <Button 
                 variant="outline" 
                 onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${location.coordinates[1]},${location.coordinates[0]}`, '_blank')}
-                className="w-full sm:w-auto"
+                className="w-full"
               >
                 Get Directions
-              </Button>
-              <Button 
-                onClick={() => navigate('/reservations', { state: { locationId: location.id } })}
-                className="w-full sm:w-auto"
-              >
-                Make a Reservation
               </Button>
             </div>
           </div>
