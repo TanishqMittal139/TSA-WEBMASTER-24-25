@@ -280,38 +280,6 @@ const About = () => {
               </TabsContent>
             </Tabs>
           </div>
-          
-          <div className="my-20 relative overflow-hidden rounded-2xl border border-white/20 dark:border-white/10 fade-up">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-primary/10 pointer-events-none"></div>
-            <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-primary/20 blur-3xl rounded-full pointer-events-none"></div>
-            <div className="absolute -top-20 -left-20 w-64 h-64 bg-primary/10 blur-3xl rounded-full pointer-events-none"></div>
-            
-            <div className="relative z-10 p-8 md:p-12">
-              <div className="max-w-3xl mx-auto text-center">
-                <h2 className="text-3xl font-bold mb-4">Connect With Us</h2>
-                <p className="text-lg mb-8">We'd love to hear from you! Reach out with questions or to learn more about TastyHub.</p>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                  <div className="p-6 bg-background/40 backdrop-blur-md rounded-xl border border-white/10 hover:border-primary/50 transition-colors duration-300">
-                    <h3 className="text-xl font-bold mb-3">General Inquiries</h3>
-                    <p className="text-foreground/80 hover:text-primary transition-colors">contact@tastyhub-va.com</p>
-                    <p className="text-foreground/80 hover:text-primary transition-colors">(703) 555-1234</p>
-                  </div>
-                  
-                  <div className="p-6 bg-background/40 backdrop-blur-md rounded-xl border border-white/10 hover:border-primary/50 transition-colors duration-300">
-                    <h3 className="text-xl font-bold mb-3">Visit Our Headquarters</h3>
-                    <p className="text-foreground/80">456 Wilson Blvd</p>
-                    <p className="text-foreground/80">Arlington, VA 22203</p>
-                  </div>
-                </div>
-                
-                <Button className="bg-primary hover:bg-primary/90 text-white px-8 py-6 h-auto text-lg rounded-full">
-                  Send Us a Message
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
       </main>
       
       <Footer />
