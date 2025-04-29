@@ -30,17 +30,24 @@ export interface DealData {
 
 // Get menu items that match deal items
 const getDealImage = (dealId: string): string => {
+  // Fallback images if menu item images aren't available
+  const fallbackImages = {
+    "happy-hour": "https://images.unsplash.com/photo-1551024709-8f23befc6f87?q=80&w=1257&auto=format&fit=crop",
+    "breakfast-bundle": "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?q=80&w=1470&auto=format&fit=crop",
+    "lunch-special": "https://images.unsplash.com/photo-1627309302198-09a50ae1b209?q=80&w=1374&auto=format&fit=crop",
+  };
+  
   // Use existing menu items as reference for images
   switch(dealId) {
     case 'happy-hour':
       const beverage = getMenuItemById('drink-9'); // Blue Spirulina Latte
-      return beverage ? getValidImageUrl(beverage) : "https://images.unsplash.com/photo-1551024709-8f23befc6f87?q=80&w=1257&auto=format&fit=crop";
+      return beverage && beverage.imageUrl ? getValidImageUrl(beverage) : fallbackImages["happy-hour"];
     case 'breakfast-bundle':
       const breakfast = getMenuItemById('breakfast-12'); // Protein Power Bowl
-      return breakfast ? getValidImageUrl(breakfast) : "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?q=80&w=1470&auto=format&fit=crop";
+      return breakfast && breakfast.imageUrl ? getValidImageUrl(breakfast) : fallbackImages["breakfast-bundle"];
     case 'lunch-special':
       const sandwich = getMenuItemById('lunch-11'); // Caprese Panini
-      return sandwich ? getValidImageUrl(sandwich) : "https://images.unsplash.com/photo-1627309302198-09a50ae1b209?q=80&w=1374&auto=format&fit=crop";
+      return sandwich && sandwich.imageUrl ? getValidImageUrl(sandwich) : fallbackImages["lunch-special"];
     default:
       return "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&auto=format&fit=crop";
   }
@@ -91,12 +98,18 @@ const deals: DealData[] = [
   }
 ];
 
+// Validate all deal images and ensure they have fallbacks
+const validateDeals = deals.map(deal => ({
+  ...deal,
+  image: deal.image || "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&auto=format&fit=crop"
+}));
+
 const Deals: React.FC = () => {
   const [activeTab, setActiveTab] = useState("current");
   const navigate = useNavigate();
   const { user, session } = useAuth();
   
-  const currentDeals = deals;
+  const currentDeals = validateDeals;
   const upcomingDeals: DealData[] = [];
 
   const handleActivateDeal = (deal: DealData) => {
