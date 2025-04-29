@@ -107,7 +107,7 @@ const DealUse: React.FC = () => {
               
               {deal.id === 'dessert-special' && (
                 <p className="text-sm text-muted-foreground mb-4">
-                  Select a dessert to receive 10% off
+                  Select ONE dessert to receive 10% off
                 </p>
               )}
               
