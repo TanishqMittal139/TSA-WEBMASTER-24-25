@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
@@ -256,69 +255,51 @@ export const useDealLogic = (dealId: string | undefined) => {
       return;
     }
     
-    switch (deal?.id) {
-      case 'lunch-special':
-        const hasSandwich = selectedItems.some(item => 
-          item.tags?.includes('sandwich') || item.name.toLowerCase().includes('sandwich')
-        );
-        const hasSide = selectedItems.some(item => 
-          item.category === 'sides' || item.tags?.includes('soup') || item.tags?.includes('salad')
-        );
-        
-        if (!hasSandwich) {
-          toast({
-            title: "Sandwich Required",
-            description: "Please select a sandwich for your lunch special",
-            variant: "destructive"
-          });
-          return;
-        }
-        
-        if (!hasSide) {
-          toast({
-            title: "Side Required",
-            description: "Please select a free side or soup for your lunch special",
-            variant: "destructive"
-          });
-          return;
-        }
-        break;
-        
-      case 'happy-hour':
-        if (selectedItems.length !== 1) {
-          toast({
-            title: "Single Beverage Required",
-            description: "Please select exactly one beverage for the Happy Hour special",
-            variant: "destructive"
-          });
-          return;
-        }
-        break;
-        
-      case 'breakfast-bundle':
-        const hasBreakfast = selectedItems.some(item => item.category === 'breakfast');
-        const hasCoffee = selectedItems.some(item => 
-          item.category === 'beverages' && (item.name.toLowerCase().includes('coffee') || item.tags?.includes('coffee'))
-        );
-        
-        if (!hasBreakfast) {
-          toast({
-            title: "Breakfast Item Required",
-            description: "Please select a breakfast item",
-            variant: "destructive"
-          });
-          return;
-        }
-        
-        if (!hasCoffee) {
-          toast({
-            title: "Coffee Required",
-            description: "Please select a coffee",
-            variant: "destructive"
-          });
-          return;
-        }
-        break;
+    if (deal?.id === 'lunch-special') {
+      const hasSandwich = selectedItems.some(item => 
+        item.tags?.includes('sandwich') || item.name.toLowerCase().includes('sandwich')
+      );
+      
+      if (!hasSandwich) {
+        toast({
+          title: "Sandwich Required",
+          description: "Please select a sandwich for your lunch special",
+          variant: "destructive"
+        });
+        return;
+      }
+    } else if (deal?.id === 'happy-hour') {
+      if (selectedItems.length !== 1) {
+        toast({
+          title: "Single Beverage Required",
+          description: "Please select exactly one beverage for the Happy Hour special",
+          variant: "destructive"
+        });
+        return;
+      }
+    } else if (deal?.id === 'breakfast-bundle') {
+      const hasBreakfast = selectedItems.some(item => item.category === 'breakfast');
+      const hasCoffee = selectedItems.some(item => 
+        item.category === 'beverages' && (item.name.toLowerCase().includes('coffee') || item.tags?.includes('coffee'))
+      );
+      
+      if (!hasBreakfast) {
+        toast({
+          title: "Breakfast Item Required",
+          description: "Please select a breakfast item",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      if (!hasCoffee) {
+        toast({
+          title: "Coffee Required",
+          description: "Please select a coffee",
+          variant: "destructive"
+        });
+        return;
+      }
     }
     
     const hasDiscountedItems = items.some(item => item.hasDiscount);
@@ -379,9 +360,7 @@ export const useDealLogic = (dealId: string | undefined) => {
       if (!selectedItems.some(item => item.tags?.includes('sandwich') || item.name.toLowerCase().includes('sandwich'))) {
         return "Please select a sandwich";
       }
-      if (!selectedItems.some(item => item.category === 'sides' || item.tags?.includes('soup') || item.tags?.includes('salad'))) {
-        return "Please select a free side or soup";
-      }
+      return "";
     }
     
     if (deal.id === 'happy-hour') {
@@ -415,11 +394,8 @@ export const useDealLogic = (dealId: string | undefined) => {
       const hasSandwich = selectedItems.some(item => 
         item.tags?.includes('sandwich') || item.name.toLowerCase().includes('sandwich')
       );
-      const hasSide = selectedItems.some(item => 
-        item.category === 'sides' || item.tags?.includes('soup') || item.tags?.includes('salad')
-      );
       
-      return hasSandwich && hasSide;
+      return hasSandwich;
     }
     
     if (deal.id === 'happy-hour') {

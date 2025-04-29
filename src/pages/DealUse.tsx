@@ -52,7 +52,7 @@ const DealUse: React.FC = () => {
               items={categorizedItems.sides}
               selectedItems={selectedItems}
               onItemSelect={handleItemSelect}
-              title="Select a Free Side"
+              title="Select a Free Side (Optional)"
               showFreeLabel
             />
           )}
@@ -113,7 +113,7 @@ const DealUse: React.FC = () => {
             <div className="mb-6">
               {deal.id === 'lunch-special' && (
                 <p className="text-sm text-muted-foreground mb-4">
-                  Select one sandwich and get a free side or soup
+                  Select one sandwich and optionally add a free side or soup
                 </p>
               )}
               
