@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import Navbar from '../components/ui/navbar';
@@ -38,22 +37,12 @@ const DealUse: React.FC = () => {
     if (deal.id === 'lunch-special') {
       return (
         <>
-          {categorizedItems.sandwiches.length > 0 && (
-            <DealMenuItems
-              items={categorizedItems.sandwiches}
-              selectedItems={selectedItems}
-              onItemSelect={handleItemSelect}
-              title="Select a Sandwich"
-            />
-          )}
-          
           {categorizedItems.sides.length > 0 && (
             <DealMenuItems
               items={categorizedItems.sides}
               selectedItems={selectedItems}
               onItemSelect={handleItemSelect}
-              title="Select a Free Side (Optional)"
-              showFreeLabel
+              title="Select a Side"
             />
           )}
           
@@ -62,7 +51,16 @@ const DealUse: React.FC = () => {
               items={categorizedItems.other}
               selectedItems={selectedItems}
               onItemSelect={handleItemSelect}
-              title="Other Items (Regular Price)"
+              title="Select a Lunch Item"
+            />
+          )}
+          
+          {categorizedItems.sandwiches.length > 0 && (
+            <DealMenuItems
+              items={categorizedItems.sandwiches}
+              selectedItems={selectedItems}
+              onItemSelect={handleItemSelect}
+              title="Additional Sandwiches (Regular Price)"
             />
           )}
         </>
@@ -113,7 +111,7 @@ const DealUse: React.FC = () => {
             <div className="mb-6">
               {deal.id === 'lunch-special' && (
                 <p className="text-sm text-muted-foreground mb-4">
-                  Select one sandwich and optionally add a free side or soup
+                  Select one side and one lunch item to complete the lunch special
                 </p>
               )}
               

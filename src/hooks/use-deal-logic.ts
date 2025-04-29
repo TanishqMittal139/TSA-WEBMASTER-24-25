@@ -72,11 +72,12 @@ export const useDealLogic = (dealId: string | undefined) => {
 
     if (parsedDeal.id === 'lunch-special') {
       const sandwiches = menuItems.filter(item => 
-        item.tags?.includes('sandwich') || item.name.toLowerCase().includes('sandwich')
+        (item.tags?.includes('sandwich') || item.name.toLowerCase().includes('sandwich')) && 
+        item.category.toLowerCase() !== 'sides'
       );
       
       const sides = menuItems.filter(item => 
-        item.category === 'sides' || item.tags?.includes('soup') || item.tags?.includes('salad')
+        item.category.toLowerCase() === 'sides' || item.tags?.includes('soup') || item.tags?.includes('salad')
       );
       
       const other = menuItems.filter(item => 
@@ -128,36 +129,41 @@ export const useDealLogic = (dealId: string | undefined) => {
     }
 
     if (deal.id === 'lunch-special') {
+      const isSide = item.category.toLowerCase() === 'sides' || item.tags?.includes('soup') || item.tags?.includes('salad');
+      const isLunchItem = !isSide && !item.tags?.includes('sandwich') && !item.name.toLowerCase().includes('sandwich');
       const isSandwich = item.tags?.includes('sandwich') || item.name.toLowerCase().includes('sandwich');
-      const isSide = item.category === 'sides' || item.tags?.includes('soup') || item.tags?.includes('salad');
       
-      if (isSandwich) {
-        const currentSandwich = selectedItems.find(i => 
-          i.tags?.includes('sandwich') || i.name.toLowerCase().includes('sandwich')
-        );
-        
-        if (currentSandwich) {
-          setSelectedItems([
-            ...selectedItems.filter(i => !(i.tags?.includes('sandwich') || i.name.toLowerCase().includes('sandwich'))),
-            item
-          ]);
-        } else {
-          setSelectedItems([...selectedItems, item]);
-        }
-      } else if (isSide) {
+      if (isSide) {
         const currentSide = selectedItems.find(i => 
-          i.category === 'sides' || i.tags?.includes('soup') || i.tags?.includes('salad')
+          i.category.toLowerCase() === 'sides' || i.tags?.includes('soup') || i.tags?.includes('salad')
         );
         
         if (currentSide) {
           setSelectedItems([
-            ...selectedItems.filter(i => !(i.category === 'sides' || i.tags?.includes('soup') || i.tags?.includes('salad'))),
+            ...selectedItems.filter(i => !(i.category.toLowerCase() === 'sides' || i.tags?.includes('soup') || i.tags?.includes('salad'))),
             item
           ]);
         } else {
           setSelectedItems([...selectedItems, item]);
         }
-      } else {
+      } else if (isLunchItem) {
+        const currentLunchItem = selectedItems.find(i => 
+          !(i.category.toLowerCase() === 'sides' || i.tags?.includes('soup') || i.tags?.includes('salad') || 
+            i.tags?.includes('sandwich') || i.name.toLowerCase().includes('sandwich'))
+        );
+        
+        if (currentLunchItem) {
+          setSelectedItems([
+            ...selectedItems.filter(i => 
+              i.category.toLowerCase() === 'sides' || i.tags?.includes('soup') || i.tags?.includes('salad') ||
+              i.tags?.includes('sandwich') || i.name.toLowerCase().includes('sandwich')
+            ),
+            item
+          ]);
+        } else {
+          setSelectedItems([...selectedItems, item]);
+        }
+      } else if (isSandwich) {
         setSelectedItems([...selectedItems, item]);
       }
     } else if (deal.id === 'breakfast-bundle') {
@@ -205,22 +211,19 @@ export const useDealLogic = (dealId: string | undefined) => {
     
     switch (deal.id) {
       case 'lunch-special':
-        const sandwich = selectedItems.find(item => 
-          item.tags?.includes('sandwich') || item.name.toLowerCase().includes('sandwich')
-        );
-        
-        if (sandwich) {
-          total += sandwich.price;
-        }
-        
         selectedItems.forEach(item => {
+          const isSide = item.category.toLowerCase() === 'sides' || item.tags?.includes('soup') || item.tags?.includes('salad');
+          const isLunchItem = !isSide && !item.tags?.includes('sandwich') && !item.name.toLowerCase().includes('sandwich');
           const isSandwich = item.tags?.includes('sandwich') || item.name.toLowerCase().includes('sandwich');
-          const isSide = item.category === 'sides' || item.tags?.includes('soup') || item.tags?.includes('salad');
           
-          if (!isSandwich && !isSide) {
+          if (isSide || isLunchItem) {
+            total += 0;
+          } else if (isSandwich) {
             total += item.price;
           }
         });
+        
+        total += 10.99;
         break;
         
       case 'happy-hour':
@@ -256,14 +259,28 @@ export const useDealLogic = (dealId: string | undefined) => {
     }
     
     if (deal?.id === 'lunch-special') {
-      const hasSandwich = selectedItems.some(item => 
-        item.tags?.includes('sandwich') || item.name.toLowerCase().includes('sandwich')
+      const hasSide = selectedItems.some(item => 
+        item.category.toLowerCase() === 'sides' || item.tags?.includes('soup') || item.tags?.includes('salad')
       );
       
-      if (!hasSandwich) {
+      const hasLunchItem = selectedItems.some(item => 
+        !(item.category.toLowerCase() === 'sides' || item.tags?.includes('soup') || item.tags?.includes('salad') || 
+          item.tags?.includes('sandwich') || item.name.toLowerCase().includes('sandwich'))
+      );
+      
+      if (!hasSide) {
         toast({
-          title: "Sandwich Required",
-          description: "Please select a sandwich for your lunch special",
+          title: "Side Required",
+          description: "Please select a side for your lunch special",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      if (!hasLunchItem) {
+        toast({
+          title: "Lunch Item Required",
+          description: "Please select a lunch item for your lunch special",
           variant: "destructive"
         });
         return;
@@ -318,14 +335,16 @@ export const useDealLogic = (dealId: string | undefined) => {
       let discountedPrice = item.price;
       
       switch (deal?.id) {
+        case 'lunch-special':
+          const isSide = item.category.toLowerCase() === 'sides' || item.tags?.includes('soup') || item.tags?.includes('salad');
+          const isLunchItem = !isSide && !item.tags?.includes('sandwich') && !item.name.toLowerCase().includes('sandwich');
+          
+          if (isSide || isLunchItem) {
+            discountedPrice = 10.99 / 2; // Split the fixed price between side and lunch item
+          }
+          break;
         case 'happy-hour':
           discountedPrice = item.price * 0.8; // 20% off
-          break;
-        case 'lunch-special':
-          const isSide = item.category === 'sides' || item.tags?.includes('soup') || item.tags?.includes('salad');
-          if (isSide) {
-            discountedPrice = 0; // Free side
-          }
           break;
         case 'breakfast-bundle':
           discountedPrice = item.price * (1 - (deal.discountAmount / 100)); // Apply percentage discount
@@ -357,9 +376,23 @@ export const useDealLogic = (dealId: string | undefined) => {
     if (!deal) return "";
     
     if (deal.id === 'lunch-special') {
-      if (!selectedItems.some(item => item.tags?.includes('sandwich') || item.name.toLowerCase().includes('sandwich'))) {
-        return "Please select a sandwich";
+      const hasSide = selectedItems.some(item => 
+        item.category.toLowerCase() === 'sides' || item.tags?.includes('soup') || item.tags?.includes('salad')
+      );
+      
+      const hasLunchItem = selectedItems.some(item => 
+        !(item.category.toLowerCase() === 'sides' || item.tags?.includes('soup') || item.tags?.includes('salad') || 
+          item.tags?.includes('sandwich') || item.name.toLowerCase().includes('sandwich'))
+      );
+      
+      if (!hasSide) {
+        return "Please select a side";
       }
+      
+      if (!hasLunchItem) {
+        return "Please select a lunch item";
+      }
+      
       return "";
     }
     
@@ -391,11 +424,16 @@ export const useDealLogic = (dealId: string | undefined) => {
     if (!deal) return false;
     
     if (deal.id === 'lunch-special') {
-      const hasSandwich = selectedItems.some(item => 
-        item.tags?.includes('sandwich') || item.name.toLowerCase().includes('sandwich')
+      const hasSide = selectedItems.some(item => 
+        item.category.toLowerCase() === 'sides' || item.tags?.includes('soup') || item.tags?.includes('salad')
       );
       
-      return hasSandwich;
+      const hasLunchItem = selectedItems.some(item => 
+        !(item.category.toLowerCase() === 'sides' || item.tags?.includes('soup') || item.tags?.includes('salad') || 
+          item.tags?.includes('sandwich') || item.name.toLowerCase().includes('sandwich'))
+      );
+      
+      return hasSide && hasLunchItem;
     }
     
     if (deal.id === 'happy-hour') {
