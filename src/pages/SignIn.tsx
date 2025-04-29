@@ -136,12 +136,6 @@ const SignIn = () => {
                     )}
                   />
                   
-                  <div className="text-sm text-right">
-                    <Link to="/forgot-password" className="text-primary hover:underline">
-                      Forgot password?
-                    </Link>
-                  </div>
-                  
                   <Button 
                     type="submit" 
                     className="w-full" 
