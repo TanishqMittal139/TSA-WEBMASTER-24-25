@@ -5,18 +5,30 @@ import { sideItems } from './sides';
 import { dessertItems } from './desserts';
 import { beverageItems } from './beverages';
 
-// Combine all category items into a single menuItems array
+// Filter function to only include vegetarian or vegan meals
+const isVegetarianOrVegan = (item: MenuItem): boolean => {
+  return item.vegetarian === true || item.vegan === true;
+};
+
+// Filter each category to only include vegetarian or vegan items
+const filteredEntreeItems = entreeItems.filter(isVegetarianOrVegan);
+const filteredSideItems = sideItems.filter(isVegetarianOrVegan);
+const filteredDessertItems = dessertItems.filter(isVegetarianOrVegan);
+const filteredBeverageItems = beverageItems.filter(isVegetarianOrVegan);
+
+// Combine all filtered category items into a single menuItems array
 export const menuItems: MenuItem[] = [
-  ...entreeItems,
-  ...sideItems,
-  ...dessertItems,
-  ...beverageItems
+  ...filteredEntreeItems,
+  ...filteredSideItems,
+  ...filteredDessertItems,
+  ...filteredBeverageItems
 ];
 
-// Also export the individual category arrays
+// Also export the individual filtered category arrays
 export {
-  entreeItems,
-  sideItems,
-  dessertItems,
-  beverageItems
+  filteredEntreeItems as entreeItems,
+  filteredSideItems as sideItems,
+  filteredDessertItems as dessertItems,
+  filteredBeverageItems as beverageItems
 };
+

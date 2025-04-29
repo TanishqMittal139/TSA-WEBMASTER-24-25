@@ -3,6 +3,14 @@ import { MenuItem } from '@/types/menu';
 import { menuItems } from './menu-items';
 import { additionalMenuItems } from './additional-menu-items';
 
+// Filter function to only include vegetarian or vegan meals
+const isVegetarianOrVegan = (item: MenuItem): boolean => {
+  return item.vegetarian === true || item.vegan === true;
+};
+
+// Filter additional menu items to only include vegetarian or vegan items
+const filteredAdditionalMenuItems = additionalMenuItems.filter(isVegetarianOrVegan);
+
 // Set of reliable placeholder images that work well with resizing
 const RELIABLE_IMAGES = [
   "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=800&auto=format&fit=crop",
@@ -13,7 +21,7 @@ const RELIABLE_IMAGES = [
 
 // Get all menu items
 export const getAllMeals = (): MenuItem[] => {
-  const allItems = [...menuItems, ...additionalMenuItems];
+  const allItems = [...menuItems, ...filteredAdditionalMenuItems];
   
   // Ensure all items have valid image URLs
   return allItems.map(item => ({
@@ -53,7 +61,7 @@ const getCategoryFallbackImage = (category: string): string => {
 export const getMealsByCategory = (category: string): MenuItem[] => {
   const items = category === 'all' ? 
     getAllMeals() : 
-    [...menuItems, ...additionalMenuItems].filter(meal => meal.category === category);
+    [...menuItems, ...filteredAdditionalMenuItems].filter(meal => meal.category === category);
   
   // Ensure all items have valid image URLs
   return items.map(item => ({
@@ -64,7 +72,7 @@ export const getMealsByCategory = (category: string): MenuItem[] => {
 
 // Return only 4 popular meals, each assigned a unique fallback image if needed
 export const getPopularMeals = (): MenuItem[] => {
-  const popular: MenuItem[] = [...menuItems, ...additionalMenuItems].slice(0, 4);
+  const popular: MenuItem[] = [...menuItems, ...filteredAdditionalMenuItems].slice(0, 4);
 
   // Use the reliable fallbacks
   return popular.map((meal, i) => ({
@@ -75,7 +83,7 @@ export const getPopularMeals = (): MenuItem[] => {
 
 export const getMenuItemById = (id: string): MenuItem | undefined => {
   console.log("getMenuItemById called for:", id);
-  const allMeals = [...menuItems, ...additionalMenuItems];
+  const allMeals = [...menuItems, ...filteredAdditionalMenuItems];
   const foundItem = allMeals.find(item => item.id === id);
   
   if (foundItem) {
