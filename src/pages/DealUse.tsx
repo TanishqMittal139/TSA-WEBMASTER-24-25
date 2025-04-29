@@ -105,6 +105,12 @@ const DealUse: React.FC = () => {
                 </p>
               )}
               
+              {deal.id === 'dessert-special' && (
+                <p className="text-sm text-muted-foreground mb-4">
+                  Select a dessert to receive 10% off
+                </p>
+              )}
+              
               {renderItemsByCategory()}
             </div>
           </div>

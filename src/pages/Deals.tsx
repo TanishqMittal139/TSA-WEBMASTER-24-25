@@ -37,6 +37,8 @@ const getDealImage = (dealId: string): string => {
     case 'breakfast-bundle':
       const breakfast = getMenuItemById('breakfast-12'); // Protein Power Bowl
       return breakfast ? getValidImageUrl(breakfast) : "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?q=80&w=1470&auto=format&fit=crop";
+    case 'dessert-special':
+      return "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1257&auto=format&fit=crop";
     default:
       return "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&auto=format&fit=crop";
   }
@@ -69,6 +71,19 @@ const deals: DealData[] = [
     appliesTo: 'category',
     categories: ['breakfast'],
     image: getDealImage('breakfast-bundle')
+  },
+  {
+    id: 'dessert-special',
+    title: 'Sweet Treat Deal',
+    description: 'Buy one dessert, get 10% off',
+    discount: '10% OFF',
+    discountType: 'percentage',
+    discountAmount: 10,
+    code: 'SWEET10',
+    validUntil: '2025-12-31',
+    appliesTo: 'category',
+    categories: ['desserts'],
+    image: getDealImage('dessert-special')
   }
 ];
 
