@@ -1,3 +1,4 @@
+
 import React from 'react';
 import Navbar from '../components/ui/navbar';
 import Footer from '../components/ui/footer';
@@ -8,14 +9,24 @@ import { toast } from '@/components/ui/use-toast';
 import BlurImage from '../components/ui/blur-image';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
+import DeliveryMethodSelector from '@/components/cart/DeliveryMethodSelector';
+import LocationSelector from '@/components/cart/LocationSelector';
 
 const Cart: React.FC = () => {
-  const { items, removeItem, updateQuantity, clearCart, itemCount, totalAmount, checkAuthBeforeCheckout } = useCart();
+  const { 
+    items, 
+    removeItem, 
+    updateQuantity, 
+    clearCart, 
+    itemCount, 
+    totalAmount, 
+    checkAuthBeforeCheckout,
+    deliveryFee 
+  } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
   
   const tax = totalAmount * 0.08;
-  const deliveryFee = 3.99;
   const finalTotal = totalAmount + tax + deliveryFee;
   
   const handleProceedToCheckout = () => {
@@ -116,6 +127,12 @@ const Cart: React.FC = () => {
                       </div>
                     ))}
                   </div>
+                </div>
+                
+                {/* Delivery Method Selection */}
+                <div className="mt-6">
+                  <DeliveryMethodSelector />
+                  <LocationSelector />
                 </div>
                 
                 <div className="mt-6">

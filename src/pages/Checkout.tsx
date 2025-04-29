@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { CreditCard, Check, Landmark, AlertCircle, ArrowLeft, Home } from 'lucide-react';
+import { CreditCard, Check, Landmark, AlertCircle, ArrowLeft, Home, Truck, ShoppingBag } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import Navbar from '@/components/ui/navbar';
@@ -16,6 +16,8 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { toast } from '@/components/ui/use-toast';
 import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
+import { getLocationById } from '@/data/locations';
 
 const formSchema = z.object({
   fullName: z.string().min(2, 'Full name must be at least 2 characters'),
@@ -31,10 +33,11 @@ const formSchema = z.object({
 });
 
 const Checkout = () => {
-  const { items, totalAmount, clearCart } = useCart();
+  const { items, totalAmount, clearCart, deliveryMethod, selectedLocationId, deliveryFee } = useCart();
   const { user, profile, isLoading } = useAuth();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState<any>(null);
   
   // Check if cart is empty
   useEffect(() => {
@@ -59,6 +62,16 @@ const Checkout = () => {
       navigate('/sign-in', { state: { from: '/checkout' } });
     }
   }, [user, navigate, isLoading]);
+  
+  // Get location details if carryout is selected
+  useEffect(() => {
+    if (deliveryMethod === 'carryout' && selectedLocationId) {
+      const location = getLocationById(selectedLocationId);
+      setSelectedLocation(location);
+    } else {
+      setSelectedLocation(null);
+    }
+  }, [deliveryMethod, selectedLocationId]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -96,6 +109,16 @@ const Checkout = () => {
       return;
     }
     
+    if (deliveryMethod === 'carryout' && !selectedLocationId) {
+      toast({
+        title: "Location Required",
+        description: "Please select a location for carryout.",
+        variant: "destructive",
+      });
+      navigate('/cart');
+      return;
+    }
+    
     setIsSubmitting(true);
     
     // Simulate payment processing
@@ -114,7 +137,12 @@ const Checkout = () => {
           name: item.name,
           quantity: item.quantity,
           price: item.price
-        }))
+        })),
+        deliveryMethod,
+        location: selectedLocation ? {
+          name: selectedLocation.name,
+          address: selectedLocation.address
+        } : null
       }));
       
       toast({
@@ -129,7 +157,6 @@ const Checkout = () => {
   // Calculate summary values
   const subtotal = totalAmount;
   const tax = subtotal * 0.08; // 8% tax
-  const deliveryFee = 3.99;
   const total = subtotal + tax + deliveryFee;
   
   const formatCardNumber = (value: string) => {
@@ -196,72 +223,53 @@ const Checkout = () => {
               <h1 className="text-2xl font-bold">Checkout</h1>
             </div>
             
+            {/* Delivery Method Badge */}
+            <div className="mb-6 flex items-center">
+              <Badge variant="outline" className="px-3 py-1 text-sm">
+                {deliveryMethod === 'delivery' ? (
+                  <span className="flex items-center">
+                    <Truck className="mr-2 h-4 w-4" />
+                    Delivery
+                  </span>
+                ) : (
+                  <span className="flex items-center">
+                    <ShoppingBag className="mr-2 h-4 w-4" />
+                    Carryout
+                  </span>
+                )}
+              </Badge>
+              
+              {deliveryMethod === 'carryout' && selectedLocation && (
+                <Badge variant="secondary" className="ml-2 px-3 py-1 text-sm">
+                  {selectedLocation.name}
+                </Badge>
+              )}
+            </div>
+            
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {/* Checkout Form */}
               <div className="md:col-span-2">
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                    <div className="bg-card rounded-lg shadow-md p-6 space-y-6">
-                      <div>
-                        <h2 className="text-lg font-medium flex items-center">
-                          <Home className="mr-2 h-5 w-5" />
-                          Delivery Information
-                        </h2>
-                        <Separator className="my-3" />
-                      </div>
-                      
-                      <div className="space-y-4">
-                        <FormField
-                          control={form.control}
-                          name="fullName"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Full Name</FormLabel>
-                              <FormControl>
-                                <Input placeholder="John Doe" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                    {deliveryMethod === 'delivery' && (
+                      <div className="bg-card rounded-lg shadow-md p-6 space-y-6">
+                        <div>
+                          <h2 className="text-lg font-medium flex items-center">
+                            <Home className="mr-2 h-5 w-5" />
+                            Delivery Information
+                          </h2>
+                          <Separator className="my-3" />
+                        </div>
                         
-                        <FormField
-                          control={form.control}
-                          name="email"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Email</FormLabel>
-                              <FormControl>
-                                <Input placeholder="you@example.com" type="email" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <FormField
-                          control={form.control}
-                          name="address"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Address</FormLabel>
-                              <FormControl>
-                                <Input placeholder="123 Main St" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-4">
                           <FormField
                             control={form.control}
-                            name="city"
+                            name="fullName"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>City</FormLabel>
+                                <FormLabel>Full Name</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="New York" {...field} />
+                                  <Input placeholder="John Doe" {...field} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -270,34 +278,107 @@ const Checkout = () => {
                           
                           <FormField
                             control={form.control}
-                            name="state"
+                            name="email"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>State</FormLabel>
+                                <FormLabel>Email</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="NY" {...field} />
+                                  <Input placeholder="you@example.com" type="email" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          
+                          <FormField
+                            control={form.control}
+                            name="address"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Address</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="123 Main St" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          
+                          <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                              control={form.control}
+                              name="city"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>City</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="New York" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            
+                            <FormField
+                              control={form.control}
+                              name="state"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>State</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="NY" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                          
+                          <FormField
+                            control={form.control}
+                            name="zipCode"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Zip Code</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="10001" {...field} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
                             )}
                           />
                         </div>
-                        
-                        <FormField
-                          control={form.control}
-                          name="zipCode"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Zip Code</FormLabel>
-                              <FormControl>
-                                <Input placeholder="10001" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
                       </div>
-                    </div>
+                    )}
+                    
+                    {deliveryMethod === 'carryout' && selectedLocation && (
+                      <div className="bg-card rounded-lg shadow-md p-6 space-y-4">
+                        <div>
+                          <h2 className="text-lg font-medium flex items-center">
+                            <ShoppingBag className="mr-2 h-5 w-5" />
+                            Pickup Location
+                          </h2>
+                          <Separator className="my-3" />
+                        </div>
+                        
+                        <div>
+                          <h3 className="font-medium">{selectedLocation.name}</h3>
+                          <p className="text-muted-foreground">{selectedLocation.address}</p>
+                          <p className="text-muted-foreground mt-2">Phone: {selectedLocation.phone}</p>
+                          <p className="text-muted-foreground mt-1">Hours: {selectedLocation.hours}</p>
+                          
+                          <div className="mt-4">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => navigate('/cart')}
+                            >
+                              Change Location
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                     
                     <div className="bg-card rounded-lg shadow-md p-6 space-y-6">
                       <div>
@@ -479,7 +560,9 @@ const Checkout = () => {
                       <span>${tax.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Delivery Fee</span>
+                      <span className="text-muted-foreground">
+                        {deliveryMethod === 'delivery' ? 'Delivery Fee' : 'Pickup Fee'}
+                      </span>
                       <span>${deliveryFee.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between font-medium text-lg pt-2 border-t">

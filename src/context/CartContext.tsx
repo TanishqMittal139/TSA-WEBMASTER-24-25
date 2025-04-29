@@ -1,6 +1,10 @@
+
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/context/AuthContext';
+import { getLocationById } from '@/data/locations';
+
+export type DeliveryMethod = 'delivery' | 'carryout';
 
 type CartItem = {
   id: string;
@@ -23,6 +27,11 @@ type CartContextType = {
   hasDiscountedItems: boolean;
   totalAmount: number;
   checkAuthBeforeCheckout: () => boolean;
+  deliveryMethod: DeliveryMethod;
+  setDeliveryMethod: (method: DeliveryMethod) => void;
+  selectedLocationId: string | null;
+  setSelectedLocationId: (locationId: string | null) => void;
+  deliveryFee: number;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -30,10 +39,18 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [items, setItems] = useState<CartItem[]>([]);
   const [hasDiscountedItems, setHasDiscountedItems] = useState<boolean>(false);
+  const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethod>('delivery');
+  const [selectedLocationId, setSelectedLocationId] = useState<string | null>(null);
   const { user, session } = useAuth();
+  
+  // Set delivery fee
+  const deliveryFee = deliveryMethod === 'delivery' ? 3.99 : 0;
   
   useEffect(() => {
     const savedCart = localStorage.getItem('tastyHubCart');
+    const savedMethod = localStorage.getItem('tastyHubDeliveryMethod');
+    const savedLocationId = localStorage.getItem('tastyHubSelectedLocation');
+    
     if (savedCart) {
       try {
         const parsedItems = JSON.parse(savedCart);
@@ -44,12 +61,26 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.removeItem('tastyHubCart');
       }
     }
+    
+    if (savedMethod && (savedMethod === 'delivery' || savedMethod === 'carryout')) {
+      setDeliveryMethod(savedMethod as DeliveryMethod);
+    }
+    
+    if (savedLocationId) {
+      setSelectedLocationId(savedLocationId);
+    }
   }, []);
   
   useEffect(() => {
     localStorage.setItem('tastyHubCart', JSON.stringify(items));
+    localStorage.setItem('tastyHubDeliveryMethod', deliveryMethod);
+    if (selectedLocationId) {
+      localStorage.setItem('tastyHubSelectedLocation', selectedLocationId);
+    } else {
+      localStorage.removeItem('tastyHubSelectedLocation');
+    }
     setHasDiscountedItems(items.some(item => item.hasDiscount));
-  }, [items]);
+  }, [items, deliveryMethod, selectedLocationId]);
   
   const addItem = (item: Omit<CartItem, 'quantity'>) => {
     if (item.hasDiscount && hasDiscountedItems) {
@@ -134,6 +165,17 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       return false;
     }
+    
+    if (deliveryMethod === 'carryout' && !selectedLocationId) {
+      toast({
+        title: "Location Required",
+        description: "Please select a location for carryout.",
+        variant: "destructive",
+        duration: 5000,
+      });
+      return false;
+    }
+    
     return true;
   };
   
@@ -154,7 +196,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       itemCount,
       hasDiscountedItems,
       totalAmount,
-      checkAuthBeforeCheckout
+      checkAuthBeforeCheckout,
+      deliveryMethod,
+      setDeliveryMethod,
+      selectedLocationId,
+      setSelectedLocationId,
+      deliveryFee
     }}>
       {children}
     </CartContext.Provider>
