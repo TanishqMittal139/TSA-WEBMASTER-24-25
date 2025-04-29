@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -38,9 +37,6 @@ const getDealImage = (dealId: string): string => {
     case 'breakfast-bundle':
       const breakfast = getMenuItemById('breakfast-12'); // Protein Power Bowl
       return breakfast ? getValidImageUrl(breakfast) : "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?q=80&w=1470&auto=format&fit=crop";
-    case 'lunch-special':
-      const sandwich = getMenuItemById('lunch-11'); // Caprese Panini
-      return sandwich ? getValidImageUrl(sandwich) : "https://images.unsplash.com/photo-1627309302198-09a50ae1b209?q=80&w=1374&auto=format&fit=crop";
     default:
       return "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&auto=format&fit=crop";
   }
@@ -73,21 +69,6 @@ const deals: DealData[] = [
     appliesTo: 'category',
     categories: ['breakfast'],
     image: getDealImage('breakfast-bundle')
-  },
-  {
-    id: 'lunch-special',
-    title: 'Lunch Special',
-    description: 'Buy any sandwich and get a free soup or side salad',
-    discount: 'FREE SIDE',
-    discountType: 'fixed',
-    discountAmount: 5.99,
-    code: 'LUNCH599',
-    validUntil: '2025-12-31',
-    appliesTo: 'category',
-    categories: ['lunch', 'sides'],
-    items: ['lunch-11', 'breakfast-13', 'breakfast-12', 'lunch-12', 'dessert-9', 'drink-10'],
-    image: getDealImage('lunch-special'),
-    isPopular: true
   }
 ];
 

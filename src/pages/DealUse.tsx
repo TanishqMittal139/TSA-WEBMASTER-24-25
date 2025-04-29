@@ -1,14 +1,17 @@
-import React from 'react';
-import { useParams } from 'react-router-dom';
+
+import React, { useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../components/ui/navbar';
 import Footer from '../components/ui/footer';
 import DealHeader from '@/components/deals/DealHeader';
 import DealMenuItems from '@/components/deals/DealMenuItems';
 import DealSummary from '@/components/deals/DealSummary';
 import { useDealLogic } from '@/hooks/use-deal-logic';
+import { toast } from '@/components/ui/use-toast';
 
 const DealUse: React.FC = () => {
   const { dealId } = useParams<{ dealId: string }>();
+  const navigate = useNavigate();
   const {
     deal,
     selectedItems,
@@ -20,6 +23,18 @@ const DealUse: React.FC = () => {
     getValidationMessage,
     isValid
   } = useDealLogic(dealId);
+  
+  useEffect(() => {
+    // Handle the case where lunch-special deal is requested but no longer available
+    if (dealId === 'lunch-special') {
+      toast({
+        title: "Deal Unavailable",
+        description: "The Lunch Special deal is no longer available. Please select another deal.",
+        variant: "destructive"
+      });
+      navigate('/deals');
+    }
+  }, [dealId, navigate]);
   
   if (!deal) {
     return (
@@ -34,38 +49,7 @@ const DealUse: React.FC = () => {
   }
   
   const renderItemsByCategory = () => {
-    if (deal.id === 'lunch-special') {
-      return (
-        <>
-          {categorizedItems.sides.length > 0 && (
-            <DealMenuItems
-              items={categorizedItems.sides}
-              selectedItems={selectedItems}
-              onItemSelect={handleItemSelect}
-              title="Select a Side"
-            />
-          )}
-          
-          {categorizedItems.other.length > 0 && (
-            <DealMenuItems
-              items={categorizedItems.other}
-              selectedItems={selectedItems}
-              onItemSelect={handleItemSelect}
-              title="Select a Lunch Item"
-            />
-          )}
-          
-          {categorizedItems.sandwiches.length > 0 && (
-            <DealMenuItems
-              items={categorizedItems.sandwiches}
-              selectedItems={selectedItems}
-              onItemSelect={handleItemSelect}
-              title="Additional Sandwiches (Regular Price)"
-            />
-          )}
-        </>
-      );
-    } else if (deal.id === 'breakfast-bundle') {
+    if (deal.id === 'breakfast-bundle') {
       return (
         <>
           {categorizedItems.breakfast.length > 0 && (
@@ -109,12 +93,6 @@ const DealUse: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
             <div className="mb-6">
-              {deal.id === 'lunch-special' && (
-                <p className="text-sm text-muted-foreground mb-4">
-                  Select one side and one lunch item to complete the lunch special
-                </p>
-              )}
-              
               {deal.id === 'happy-hour' && (
                 <p className="text-sm text-muted-foreground mb-4">
                   Select ONE beverage for 20% off Monday through Friday
