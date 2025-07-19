@@ -104,6 +104,14 @@ const SignUp = () => {
             </div>
             
             <div className="bg-card rounded-xl shadow-lg p-6 md:p-8">
+              <Alert className="mb-6 border-orange-500 bg-orange-50 dark:bg-orange-950/30">
+                <AlertCircle className="h-4 w-4 text-orange-600" />
+                <AlertTitle className="text-orange-800 dark:text-orange-200">Service Discontinued</AlertTitle>
+                <AlertDescription className="text-orange-700 dark:text-orange-300">
+                  The login feature no longer works as this website is no longer supported. The form below is for demonstration purposes only.
+                </AlertDescription>
+              </Alert>
+              
               {authError && (
                 <Alert variant="destructive" className="mb-6">
                   <AlertCircle className="h-4 w-4" />
